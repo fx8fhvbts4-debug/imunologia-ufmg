@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MHC — Processamento e Apresentação de Antígenos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f3ee;
+  --surface:#fff;
+  --surface2:#f0ede5;
+  --border:rgba(0,0,0,.09);
+  --border2:rgba(0,0,0,.18);
+  --text:#1a1814;
+  --text2:#6b6760;
+  --text3:#9e9b94;
+  --c1:#1a5fa8;--c1l:#e8f0fa;--c1m:#b8d0f0;
+  --c2:#b05c00;--c2l:#fdf0e0;--c2m:#fad7a0;
+  --green:#2a7a3b;--greenl:#e8f5ec;
+  --red:#b92b2b;--redl:#fdeaea;
+  --r:12px;--rsm:8px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* NAV */
+.top-nav{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;padding:0 1.5rem}
+.nav-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:0;height:52px}
+.nav-logo{font-family:'DM Serif Display',serif;font-size:1.05rem;margin-right:auto;white-space:nowrap}
+.nav-logo span{color:var(--text3);font-size:.8rem;font-family:'DM Sans',sans-serif;margin-left:6px}
+.nav-tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{padding:6px 12px;border-radius:20px;font-size:12.5px;cursor:pointer;white-space:nowrap;border:none;background:transparent;color:var(--text2);transition:all .15s;position:relative}
+.nav-tab:hover{background:var(--surface2);color:var(--text)}
+.nav-tab.active{background:var(--text);color:#fff}
+.nav-tab.locked{opacity:.4;cursor:default}
+.nav-tab .lock-icon{font-size:10px;margin-left:3px}
+
+/* PROGRESS */
+.progress-bar{height:3px;background:var(--border);position:sticky;top:52px;z-index:199}
+.progress-fill{height:100%;background:var(--c1);transition:width .4s ease}
+
+/* PAGE */
+.page{display:none;max-width:900px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.page.active{display:block}
+
+/* MODULE HEADER */
+.mod-header{margin-bottom:2rem}
+.mod-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:500;margin-bottom:.75rem}
+.mod-title{font-family:'DM Serif Display',serif;font-size:2rem;font-weight:400;line-height:1.2;margin-bottom:.5rem}
+.mod-desc{font-size:14px;color:var(--text2);line-height:1.6}
+
+/* CONTENT CARD */
+.content-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;margin-bottom:1.25rem}
+.content-card h3{font-size:1rem;font-weight:500;margin-bottom:.75rem;color:var(--text)}
+.content-card p{font-size:14px;line-height:1.75;color:var(--text);margin-bottom:.75rem}
+.content-card p:last-child{margin-bottom:0}
+
+/* GLOSSARY TERMS */
+.term{border-bottom:1.5px dashed var(--c1);color:var(--c1);cursor:pointer;font-weight:500}
+.term-popup{display:none;background:var(--c1l);border:1px solid var(--c1m);border-radius:var(--rsm);padding:8px 12px;font-size:13px;color:var(--text);margin:4px 0;line-height:1.5}
+.term-popup.open{display:block}
+
+/* HIGHLIGHT BOX */
+.highlight{border-left:3px solid var(--c1);background:var(--c1l);border-radius:0 var(--rsm) var(--rsm) 0;padding:.75rem 1rem;font-size:13.5px;line-height:1.65;margin:.75rem 0}
+.highlight.orange{border-color:var(--c2);background:var(--c2l)}
+
+/* COMPARE TABLE */
+.compare-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:.5rem}
+.compare-table th{padding:8px 12px;text-align:left;font-weight:500;font-size:12px}
+.compare-table th:nth-child(2){background:var(--c1l);color:var(--c1)}
+.compare-table th:nth-child(3){background:var(--c2l);color:var(--c2)}
+.compare-table td{padding:8px 12px;border-top:1px solid var(--border)}
+.compare-table td:nth-child(2){background:var(--c1l);color:var(--text)}
+.compare-table td:nth-child(3){background:var(--c2l);color:var(--text)}
+
+/* MHC COMPARE TABLE */
+.mhc-row-expand{font-size:13px;line-height:1.65;color:var(--text2);display:none;padding:.85rem 1rem;background:var(--surface2);border-top:1px solid var(--border)}
+.mhc-row-expand.show{display:block}
+.mhc-row-expand b{color:var(--text)}
+.mhc-exp-cols{display:grid;grid-template-columns:1fr 1fr;gap:.875rem;margin-top:.5rem}
+.mhc-exp-c1{background:var(--c1l);border-radius:var(--rsm);padding:.6rem .8rem;font-size:12.5px;line-height:1.6}
+.mhc-exp-c2{background:var(--c2l);border-radius:var(--rsm);padding:.6rem .8rem;font-size:12.5px;line-height:1.6}
+.mhc-exp-c1 .ct{font-weight:500;color:var(--c1);margin-bottom:.2rem;font-size:12px}
+.mhc-exp-c2 .ct{font-weight:500;color:var(--c2);margin-bottom:.2rem;font-size:12px}
+
+/* STEPPER */
+.stepper{margin:1rem 0}
+.stepper-track{display:flex;gap:0;margin-bottom:1rem;overflow-x:auto;scrollbar-width:none}
+.stepper-track::-webkit-scrollbar{display:none}
+.step-dot{flex:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
+.step-dot::before{content:'';position:absolute;top:14px;left:50%;right:-50%;height:2px;background:var(--border2);z-index:0}
+.step-dot:last-child::before{display:none}
+.step-num{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;background:var(--surface);z-index:1;transition:all .2s;flex-shrink:0}
+.step-dot.active .step-num{background:var(--c1);border-color:var(--c1);color:#fff}
+.step-dot.done .step-num{background:var(--green);border-color:var(--green);color:#fff}
+.step-dot.class2.active .step-num{background:var(--c2);border-color:var(--c2)}
+.step-label{font-size:11px;color:var(--text3);text-align:center;max-width:80px;line-height:1.3}
+.step-dot.active .step-label,.step-dot.done .step-label{color:var(--text2)}
+.step-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;min-height:180px}
+.step-panel-title{font-weight:500;font-size:1rem;margin-bottom:.5rem}
+.step-panel p{font-size:13.5px;line-height:1.7;color:var(--text);margin-bottom:.5rem}
+.step-panel p:last-child{margin-bottom:0}
+.step-panel .mol-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;margin:0 2px}
+.step-panel .mol-tag.c1{background:var(--c1l);color:var(--c1)}
+.step-panel .mol-tag.c2{background:var(--c2l);color:var(--c2)}
+.step-panel .mol-tag.gray{background:var(--surface2);color:var(--text2)}
+.step-nav{display:flex;gap:8px;margin-top:1rem;justify-content:space-between}
+.step-nav button{padding:7px 18px;border-radius:var(--rsm);border:1px solid var(--border2);background:var(--surface);color:var(--text2);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.step-nav button:hover{background:var(--surface2);color:var(--text)}
+.step-nav button.primary{background:var(--c1);border-color:var(--c1);color:#fff}
+.step-nav button.primary:hover{opacity:.9}
+.step-nav button.primary.c2{background:var(--c2);border-color:var(--c2)}
+
+/* QUIZ */
+.quiz-section{margin-top:2rem}
+.quiz-title{font-size:.8rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:1rem}
+.question-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:1rem}
+.question-card.correct{border-color:var(--green);background:var(--greenl)}
+.question-card.wrong{border-color:var(--red);background:var(--redl)}
+.q-text{font-size:14px;font-weight:500;margin-bottom:1rem;line-height:1.5}
+.q-type{font-size:11px;color:var(--text3);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.05em}
+
+/* MULTIPLE CHOICE */
+.mc-options{display:flex;flex-direction:column;gap:6px}
+.mc-opt{padding:9px 14px;border:1px solid var(--border2);border-radius:var(--rsm);font-size:13.5px;cursor:pointer;background:var(--surface);transition:all .15s;text-align:left;font-family:'DM Sans',sans-serif;line-height:1.4}
+.mc-opt:hover:not(:disabled){background:var(--surface2);border-color:var(--border2)}
+.mc-opt.selected{border-color:var(--c1);background:var(--c1l)}
+.mc-opt.correct-ans{border-color:var(--green)!important;background:var(--greenl)!important}
+.mc-opt.wrong-ans{border-color:var(--red)!important;background:var(--redl)!important}
+.mc-opt:disabled{cursor:default}
+
+/* TRUE/FALSE */
+.tf-wrap{display:flex;gap:8px}
+.tf-btn{flex:1;padding:10px;border:1px solid var(--border2);border-radius:var(--rsm);font-size:14px;font-weight:500;cursor:pointer;background:var(--surface);font-family:'DM Sans',sans-serif;transition:all .15s}
+.tf-btn:hover:not(:disabled){background:var(--surface2)}
+.tf-btn.selected{border-color:var(--c1);background:var(--c1l);color:var(--c1)}
+.tf-btn.correct-ans{border-color:var(--green)!important;background:var(--greenl)!important;color:var(--green)!important}
+.tf-btn.wrong-ans{border-color:var(--red)!important;background:var(--redl)!important;color:var(--red)!important}
+.tf-btn:disabled{cursor:default}
+
+/* DRAG DROP */
+.drag-area{min-height:44px;border:1.5px dashed var(--border2);border-radius:var(--rsm);padding:6px;display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;background:var(--surface);transition:background .15s}
+.drag-area.over{background:var(--c1l);border-color:var(--c1)}
+.drag-chip{padding:5px 12px;border-radius:20px;font-size:12.5px;font-weight:500;cursor:grab;background:var(--surface2);border:1px solid var(--border2);user-select:none;transition:opacity .15s}
+.drag-chip:active{cursor:grabbing;opacity:.7}
+.drag-chip.c1{background:var(--c1l);border-color:var(--c1m);color:var(--c1)}
+.drag-chip.c2{background:var(--c2l);border-color:var(--c2m);color:var(--c2)}
+.drag-label{font-size:12px;color:var(--text3);margin-bottom:4px}
+.drag-zone-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.drag-zone-header{font-size:12px;font-weight:500;margin-bottom:4px}
+
+/* ORDER DRAG */
+.order-list{display:flex;flex-direction:column;gap:4px}
+.order-item{padding:8px 12px;border:1px solid var(--border2);border-radius:var(--rsm);font-size:13px;background:var(--surface);cursor:grab;display:flex;align-items:center;gap:8px;user-select:none}
+.order-item:active{cursor:grabbing;opacity:.7}
+.order-item .drag-handle{color:var(--text3);font-size:14px}
+.order-item.dragging{opacity:.4}
+.order-item.drag-over{border-color:var(--c1);background:var(--c1l)}
+
+/* FEEDBACK */
+.feedback{display:none;margin-top:.75rem;padding:8px 12px;border-radius:var(--rsm);font-size:13px;line-height:1.5}
+.feedback.show{display:block}
+.feedback.ok{background:var(--greenl);color:var(--green)}
+.feedback.err{background:var(--redl);color:var(--red)}
+.check-btn{margin-top:.75rem;padding:7px 18px;border-radius:var(--rsm);border:none;background:var(--c1);color:#fff;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .15s}
+.check-btn:hover{opacity:.9}
+.check-btn:disabled{opacity:.5;cursor:default}
+
+/* MODULE COMPLETE */
+.mod-complete{background:var(--greenl);border:1px solid var(--green);border-radius:var(--r);padding:1.25rem;display:flex;align-items:center;gap:12px;margin-top:1.5rem}
+.mod-complete-icon{font-size:28px}
+.mod-complete p{font-size:14px;font-weight:500;color:var(--green)}
+.mod-complete small{font-size:12px;color:var(--green);opacity:.8}
+.next-mod-btn{margin-left:auto;padding:8px 18px;border-radius:var(--rsm);border:none;background:var(--green);color:#fff;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+
+/* FINAL QUIZ */
+.final-header{text-align:center;margin-bottom:2rem}
+.final-header h2{font-family:'DM Serif Display',serif;font-size:1.8rem;font-weight:400}
+.final-header p{color:var(--text2);font-size:14px;margin-top:.5rem}
+.quiz-submit-btn{display:block;width:100%;padding:13px;border-radius:var(--rsm);border:none;background:var(--c1);color:#fff;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:1.5rem;transition:opacity .15s}
+.quiz-submit-btn:hover{opacity:.9}
+
+/* RESULT */
+.result-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:2rem;text-align:center;margin-bottom:1.5rem}
+.result-score{font-size:3.5rem;font-weight:300;line-height:1}
+.result-label{font-size:1rem;color:var(--text2);margin-top:.25rem}
+.result-badge{display:inline-block;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:500;margin-top:1rem}
+.result-badge.great{background:var(--greenl);color:var(--green)}
+.result-badge.good{background:var(--c1l);color:var(--c1)}
+.result-badge.review{background:var(--c2l);color:var(--c2)}
+.result-badge.retry{background:var(--redl);color:var(--red)}
+.retry-btn{padding:9px 24px;border-radius:var(--rsm);border:none;background:var(--text);color:#fff;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:1rem}
+.ans-review{margin-top:1.5rem}
+.ans-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--rsm);padding:1rem;margin-bottom:.75rem}
+.ans-item.ok{border-left:3px solid var(--green)}
+.ans-item.err{border-left:3px solid var(--red)}
+.ans-q{font-size:13.5px;font-weight:500;margin-bottom:.4rem}
+.ans-your{font-size:12.5px;color:var(--text2);margin-bottom:.2rem}
+.ans-correct{font-size:12.5px;color:var(--green);font-weight:500;margin-bottom:.4rem}
+.ans-exp{font-size:12.5px;color:var(--text2);line-height:1.5}
+
+/* FOOTER */
+.page-footer{text-align:center;margin-top:3rem;font-size:11px;color:var(--text3)}
+
+@media(max-width:640px){
+  .drag-zone-row{grid-template-columns:1fr}
+  .nav-logo span{display:none}
+  .mod-title{font-size:1.5rem}
+  .tf-wrap{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-inner">
+    <div class="nav-logo">MHC &amp; Apresentação de Antígenos <span>ICB/UFMG</span></div>
+    <div class="nav-tabs" id="navTabs">
+      <button class="nav-tab active" onclick="goPage(0)">1. Introdução</button>
+      <button class="nav-tab" onclick="goPage(1)">2. Estrutura</button>
+      <button class="nav-tab" onclick="goPage(2)">3. Via MHC I</button>
+      <button class="nav-tab" onclick="goPage(3)">4. Via MHC II</button>
+      <button class="nav-tab" onclick="goPage(4)">📝 Quiz Final</button>
+    </div>
+  </div>
+</nav>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+
+<!-- ═══════════════════════════════════════════════
+     MÓDULO 1 — INTRODUÇÃO
+════════════════════════════════════════════════ -->
+<div class="page active" id="page0">
+<div class="mod-header">
+  <div class="mod-badge" style="background:var(--c1l);color:var(--c1)">Módulo 1 · Introdução</div>
+  <div class="mod-title">Por que precisamos do MHC?</div>
+  <div class="mod-desc">Entenda o problema que o MHC resolve e por que os linfócitos T enxergam o mundo de forma diferente dos linfócitos B.</div>
+</div>
+
+<div class="content-card">
+  <h3>O problema da vigilância imune</h3>
+  <p>O organismo precisa eliminar microrganismos que podem estar em <em>qualquer</em> tecido. Existem, porém, pouquíssimas células T específicas para cada antígeno circulando pelo corpo. Como garantir que elas encontrem os antígenos certos?</p>
+  <p>A solução evolutiva foi criar um sistema especializado: células que <strong>capturam antígenos</strong>, os processam em fragmentos e os exibem na superfície celular de forma padronizada — as <strong>células apresentadoras de antígenos (APCs)</strong>.</p>
+</div>
+
+<div class="content-card">
+  <h3>Como os linfócitos T reconhecem antígenos</h3>
+  <p>Linfócitos B e anticorpos reconhecem antígenos em sua forma nativa — proteínas dobradas, carboidratos, lipídios. Linfócitos T são diferentes: seus receptores (<span class="term" onclick="toggleTerm('tcr')">TCR</span>) reconhecem exclusivamente <strong>peptídeos lineares</strong>, apresentados sobre uma molécula do MHC na superfície de outra célula.</p>
+  <div class="term-popup" id="tcr">TCR (T Cell Receptor): receptor de antígeno dos linfócitos T. Diferente dos anticorpos, o TCR não reconhece antígenos solúveis — ele só enxerga peptídeos encaixados na fenda de uma molécula do MHC na superfície de outra célula.</div>
+
+  <div class="highlight">
+    <strong>Conceito central:</strong> Células T reconhecem o complexo <em>peptídeo + MHC</em>, não o antígeno isolado. Isso significa que a proteína antigênica precisa primeiro ser processada — cortada em fragmentos peptídicos — para ser "vista" pelas células T.
+  </div>
+</div>
+
+<div class="content-card">
+  <h3>O que é o MHC?</h3>
+  <p>O <span class="term" onclick="toggleTerm('mhcdef')">Complexo Principal de Histocompatibilidade (MHC)</span> é uma família de proteínas de superfície cuja função é apresentar peptídeos aos linfócitos T. Em humanos, são chamadas moléculas <strong>HLA</strong>.</p>
+  <div class="term-popup" id="mhcdef">MHC — Major Histocompatibility Complex. Em humanos, os genes MHC estão no cromossomo 6 e formam o sistema HLA (Human Leukocyte Antigens). Em camundongos, o sistema equivalente é chamado H-2. Os genes do MHC são os mais polimórficos do genoma humano.</div>
+
+  <p>Existem dois tipos principais de moléculas do MHC, com funções distintas:</p>
+  <ul style="margin:.5rem 0 .5rem 1.25rem;font-size:14px;line-height:2">
+    <li><strong style="color:var(--c1)">MHC de classe I</strong> — expressa em <em>todas as células nucleadas</em>; apresenta peptídeos para linfócitos <strong>T CD8⁺</strong></li>
+    <li><strong style="color:var(--c2)">MHC de classe II</strong> — expressa apenas em <em>APCs profissionais</em>; apresenta peptídeos para linfócitos <strong>T CD4⁺</strong></li>
+  </ul>
+
+  <div class="highlight orange">
+    <strong>Por que essa distinção importa?</strong> Classe I monitora o que está sendo <em>produzido dentro</em> da célula (vírus, tumores). Classe II monitora o que foi <em>capturado do ambiente extracelular</em> (bactérias, toxinas). Cada classe alerta um tipo diferente de resposta T.
+  </div>
+</div>
+
+<div class="content-card">
+  <h3>Restrição ao MHC</h3>
+  <p>Uma célula T específica reconhece <em>apenas</em> peptídeos apresentados pelas moléculas do MHC do <strong>próprio indivíduo</strong>. Esse fenômeno — demonstrado por Zinkernagel e Doherty em 1974 (Nobel de 1996) — é chamado de <span class="term" onclick="toggleTerm('restrict')">restrição ao MHC</span>.</p>
+  <div class="term-popup" id="restrict">Restrição ao MHC: células T CD8⁺ citotóxicas de um camundongo da linhagem A só matam células-alvo infectadas que expressam o MHC da mesma linhagem A. Não reconhecem células da linhagem B, mesmo que infectadas com o mesmo vírus. Isso demonstrou que o TCR reconhece simultaneamente o peptídeo antigênico E os resíduos polimórficos da molécula do MHC.</div>
+</div>
+
+<!-- QUIZ MÓDULO 1 -->
+<div class="quiz-section">
+  <div class="quiz-title">✦ Fixação — Módulo 1</div>
+
+  <div class="question-card" id="m1q1">
+    <div class="q-type">Verdadeiro ou Falso</div>
+    <div class="q-text">Os linfócitos T, assim como os linfócitos B, são capazes de reconhecer antígenos proteicos em sua conformação nativa (forma tridimensional dobrada).</div>
+    <div class="tf-wrap">
+      <button class="tf-btn" onclick="checkTF(this,'m1q1','F','Os linfócitos T reconhecem apenas <strong>peptídeos lineares</strong> apresentados por moléculas do MHC. A conformação nativa da proteína é destruída durante o processamento. São os linfócitos B e anticorpos que reconhecem determinantes conformacionais.')">Verdadeiro</button>
+      <button class="tf-btn" onclick="checkTF(this,'m1q1','F','Os linfócitos T reconhecem apenas <strong>peptídeos lineares</strong> apresentados por moléculas do MHC. A conformação nativa da proteína é destruída durante o processamento. São os linfócitos B e anticorpos que reconhecem determinantes conformacionais.')">Falso</button>
+    </div>
+    <div class="feedback" id="fb-m1q1"></div>
+  </div>
+
+  <div class="question-card" id="m1q2">
+    <div class="q-type">Múltipla Escolha</div>
+    <div class="q-text">Uma célula tumoral que sintetiza uma proteína mutante citosólica será monitorada por qual tipo de célula T, e através de qual classe de MHC?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="checkMC(this,'m1q2',false,'Incorreto. CD4⁺ reconhece peptídeos via MHC de classe II, que apresenta proteínas capturadas do ambiente extracelular — não proteínas sintetizadas dentro da célula.')">Linfócito T CD4⁺ via MHC de classe II</button>
+      <button class="mc-opt" onclick="checkMC(this,'m1q2',true,'Correto! Proteínas citosólicas (como mutações tumorais) são processadas pela via do proteassoma e apresentadas via MHC de <strong>classe I</strong> — expresso em todas as células nucleadas — para linfócitos T <strong>CD8⁺</strong> citotóxicos.')">Linfócito T CD8⁺ via MHC de classe I</button>
+      <button class="mc-opt" onclick="checkMC(this,'m1q2',false,'Incorreto. Células NK não usam TCR nem reconhecem antígenos via MHC da forma descrita. Elas detectam a <em>ausência</em> de MHC de classe I.')">Célula NK via MHC de classe I</button>
+      <button class="mc-opt" onclick="checkMC(this,'m1q2',false,'Incorreto. Anticorpos são produtos dos linfócitos B e reconhecem antígenos nativos — não peptídeos apresentados por MHC.')">Anticorpo produzido por linfócito B</button>
+    </div>
+    <div class="feedback" id="fb-m1q2"></div>
+  </div>
+
+  <div class="question-card" id="m1q3">
+    <div class="q-type">Múltipla Escolha</div>
+    <div class="q-text">O fenômeno da "restrição ao MHC" significa que:</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="checkMC(this,'m1q3',false,'Incorreto. O MHC apresenta tanto peptídeos próprios quanto exógenos. A tolerância a peptídeos próprios é mantida pela eliminação de células T autorreativas no timo.')">O MHC só apresenta peptídeos exógenos, nunca peptídeos próprios</button>
+      <button class="mc-opt" onclick="checkMC(this,'m1q3',false,'Incorreto. A restrição ao MHC refere-se ao reconhecimento simultâneo do peptídeo E das moléculas do MHC — não ao polimorfismo entre indivíduos.')">O MHC restringe o número de alelos que um indivíduo pode herdar</button>
+      <button class="mc-opt" onclick="checkMC(this,'m1q3',true,'Correto! Uma célula T reconhece o peptídeo antigênico apresentado pelas moléculas do MHC do <em>próprio indivíduo</em>. O TCR contata simultaneamente o peptídeo e os resíduos polimórficos do MHC — por isso não reconhece o mesmo peptídeo em moléculas do MHC de outro indivíduo.')">Uma célula T reconhece peptídeos apenas apresentados pelas moléculas do MHC do próprio organismo</button>
+      <button class="mc-opt" onclick="checkMC(this,'m1q3',false,'Incorreto. Cada molécula do MHC pode se ligar a diversos peptídeos diferentes (especificidade ampla), embora um TCR individual reconheça um único complexo peptídeo-MHC.')">Cada molécula do MHC se liga a um único peptídeo específico</button>
+    </div>
+    <div class="feedback" id="fb-m1q3"></div>
+  </div>
+
+  <div class="mod-complete" id="mc1" style="display:none">
+    <div class="mod-complete-icon">✓</div>
+    <div><p>Módulo 1 concluído!</p><small>Continue para a estrutura molecular do MHC</small></div>
+    <button class="next-mod-btn" onclick="goPage(1)">Próximo módulo →</button>
+  </div>
+</div>
+<div class="page-footer">Depto. de Bioquímica e Imunologia · ICB/UFMG</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MÓDULO 2 — ESTRUTURA
+════════════════════════════════════════════════ -->
+<div class="page" id="page1">
+<div class="mod-header">
+  <div class="mod-badge" style="background:var(--surface2);color:var(--text2)">Módulo 2 · Estrutura</div>
+  <div class="mod-title">Estrutura das Moléculas do MHC</div>
+  <div class="mod-desc">Explore os domínios, cadeias e características estruturais das moléculas de classe I e classe II — e entenda como a fenda de ligação determina a função.</div>
+</div>
+
+<div class="content-card">
+  <h3>Classe I × Classe II — tabela comparativa interativa</h3>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Clique em qualquer linha para expandir a explicação detalhada de cada característica.</p>
+  <div style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+    <table id="mhc-compare-table" style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="background:var(--surface2)">
+          <th style="padding:.65rem 1rem;text-align:left;font-weight:500;font-size:12px;color:var(--text2);width:36%">Característica</th>
+          <th style="padding:.65rem 1rem;text-align:center;font-weight:500;font-size:12px;background:var(--c1l);color:var(--c1)">🔵 Classe I<br><span style="font-weight:400;font-size:11px">HLA-A, -B, -C</span></th>
+          <th style="padding:.65rem 1rem;text-align:center;font-weight:500;font-size:12px;background:var(--c2l);color:var(--c2)">🟠 Classe II<br><span style="font-weight:400;font-size:11px">HLA-DR, -DQ, -DP</span></th>
+        </tr>
+      </thead>
+      <tbody id="mhc-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="content-card">
+  <h3>A fenda de ligação do peptídeo</h3>
+  <p>A fenda (ou sulco) é a estrutura mais importante do MHC. É formada por <strong>duas α-hélices</strong> que formam as paredes, apoiadas sobre uma <strong>base de oito cadeias β</strong>. Os resíduos polimórficos, que variam entre os diferentes alelos, estão concentrados nas paredes e na base da fenda.</p>
+  <p>Uma única molécula do MHC pode se ligar a <strong>muitos peptídeos diferentes</strong> — ela tem especificidade ampla. Em contraste, cada TCR individual reconhece apenas um complexo peptídeo-MHC específico — tem especificidade fina. Essa é uma distinção fundamental.</p>
+  <div class="highlight">
+    A <span class="term" onclick="toggleTerm('anchor')">especificidade de ligação</span> da fenda é determinada pelos <strong>resíduos de ancoragem</strong> do peptídeo — geralmente 1 ou 2 posições fixas que encaixam em bolsões específicos da fenda. Os demais resíduos do peptídeo ficam expostos para reconhecimento pelo TCR.
+  </div>
+  <div class="term-popup" id="anchor">Resíduos de ancoragem: são aminoácidos em posições específicas do peptídeo (geralmente nas extremidades) que se encaixam nos bolsões da fenda do MHC, estabelecendo a maior parte das interações estabilizadoras. Os resíduos nos demais posições ficam expostos para contato com o TCR.</div>
+</div>
+
+<!-- QUIZ MÓDULO 2 -->
+<div class="quiz-section">
+  <div class="quiz-title">✦ Fixação — Módulo 2</div>
+
+  <!-- Drag: classify features -->
+  <div class="question-card" id="m2q1">
+    <div class="q-type">Atividade de Classificação — Arrastar</div>
+    <div class="q-text">Arraste cada característica para a classe de MHC correspondente.</div>
+    <div class="drag-label">Características disponíveis:</div>
+    <div class="drag-area" id="drag-bank-m2" ondragover="allowDrop(event)" ondrop="dropToBank(event,'drag-bank-m2')"></div>
+    <div class="drag-zone-row">
+      <div>
+        <div class="drag-zone-header" style="color:var(--c1)">🔵 Classe I</div>
+        <div class="drag-area" id="drag-zone-c1" ondragover="allowDrop(event)" ondrop="dropTo(event,'drag-zone-c1')"></div>
+      </div>
+      <div>
+        <div class="drag-zone-header" style="color:var(--c2)">🟠 Classe II</div>
+        <div class="drag-area" id="drag-zone-c2" ondragover="allowDrop(event)" ondrop="dropTo(event,'drag-zone-c2')"></div>
+      </div>
+    </div>
+    <button class="check-btn" onclick="checkDragClassify('m2q1')">Verificar</button>
+    <div class="feedback" id="fb-m2q1"></div>
+  </div>
+
+  <div class="question-card" id="m2q2">
+    <div class="q-type">Verdadeiro ou Falso</div>
+    <div class="q-text">A β2-microglobulina, componente estrutural do MHC de classe I, é codificada pelos genes do complexo MHC no cromossomo 6.</div>
+    <div class="tf-wrap">
+      <button class="tf-btn" onclick="checkTF(this,'m2q2','F','A β2-microglobulina é codificada por um gene fora do MHC (em outro cromossomo). Ela é <strong>invariante</strong> — idêntica em todas as moléculas de classe I. Apesar de não ser codificada no MHC, é essencial para a montagem e estabilidade das moléculas de classe I.')">Verdadeiro</button>
+      <button class="tf-btn" onclick="checkTF(this,'m2q2','F','A β2-microglobulina é codificada por um gene fora do MHC (em outro cromossomo). Ela é <strong>invariante</strong> — idêntica em todas as moléculas de classe I. Apesar de não ser codificada no MHC, é essencial para a montagem e estabilidade das moléculas de classe I.')">Falso</button>
+    </div>
+    <div class="feedback" id="fb-m2q2"></div>
+  </div>
+
+  <div class="question-card" id="m2q3">
+    <div class="q-type">Múltipla Escolha</div>
+    <div class="q-text">Por que as moléculas do MHC de classe II são expressas principalmente em APCs profissionais, enquanto as de classe I são expressas em praticamente todas as células nucleadas?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="checkMC(this,'m2q3',false,'Incorreto. A expressão diferencial está relacionada à função e à origem dos peptídeos apresentados, não à estrutura das cadeias.')">Porque as cadeias das moléculas de classe II são quimicamente instáveis em outros tipos celulares</button>
+      <button class="mc-opt" onclick="checkMC(this,'m2q3',true,'Correto! Classe I monitora o conteúdo citosólico de <em>qualquer célula</em> — que pode estar infectada por vírus ou ser tumoral. Classe II monitora o ambiente extracelular capturado por APCs profissionais, que são as células encarregadas de iniciar respostas adaptativas via CD4⁺.')">Porque classe I vigia proteínas de qualquer célula nucleada (vírus, tumores), enquanto classe II é usada pelas APCs para apresentar antígenos extracelulares capturados e iniciar respostas via CD4⁺</button>
+      <button class="mc-opt" onclick="checkMC(this,'m2q3',false,'Incorreto. A distribuição de expressão é constitutiva e regulada geneticamente — não é um mecanismo para evitar autoativação.')">Para evitar que células T CD4⁺ ativem qualquer célula do organismo, limitando a resposta autoimune</button>
+      <button class="mc-opt" onclick="checkMC(this,'m2q3',false,'Incorreto. O IFN-γ pode aumentar a expressão de MHC II em algumas células, mas não explica o padrão de expressão basal constitutivo.')">Porque o IFN-γ bloqueia a expressão de classe II em células não imunes</button>
+    </div>
+    <div class="feedback" id="fb-m2q3"></div>
+  </div>
+
+  <div class="mod-complete" id="mc2" style="display:none">
+    <div class="mod-complete-icon">✓</div>
+    <div><p>Módulo 2 concluído!</p><small>Agora vamos ver como os peptídeos chegam ao MHC de classe I</small></div>
+    <button class="next-mod-btn" onclick="goPage(2)">Próximo módulo →</button>
+  </div>
+</div>
+<div class="page-footer">Depto. de Bioquímica e Imunologia · ICB/UFMG</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MÓDULO 3 — VIA MHC I
+════════════════════════════════════════════════ -->
+<div class="page" id="page2">
+<div class="mod-header">
+  <div class="mod-badge" style="background:var(--c1l);color:var(--c1)">Módulo 3 · Via Citosólica</div>
+  <div class="mod-title">Via de Processamento do MHC de Classe I</div>
+  <div class="mod-desc">Proteínas citosólicas → proteassoma → TAP → retículo endoplasmático → superfície. Entenda cada etapa e os atores moleculares envolvidos.</div>
+</div>
+
+<div class="content-card">
+  <h3>Visão geral da via citosólica</h3>
+  <p>Proteínas do citosol — sejam virais, tumorais ou proteínas celulares normais danificadas — são continuamente degradadas pelo <span class="term" onclick="toggleTerm('prot')">proteassoma</span>. Os peptídeos gerados são transportados para o RE, onde se associam às moléculas do MHC I recém-sintetizadas, e o complexo é levado para a superfície celular.</p>
+  <div class="term-popup" id="prot">Proteassoma: grande complexo multiproteico (~2 MDa) no citoplasma e núcleo. Estrutura cilíndrica com subunidades catalíticas que clivam proteínas ubiquitinadas. Durante a resposta imune, o IFN-γ induz a formação do <em>imunoproteassoma</em>, que substitui três subunidades catalíticas (β1i, β2i, β5i) e gera peptídeos com terminais carboxila hidrofóbicos ou básicos — exatamente os preferidos pelo TAP e pelo MHC I.</div>
+
+  <div class="highlight">
+    <strong>Fonte dos antígenos:</strong> proteínas sintetizadas na própria célula (vírus replicando, oncoproteínas mutadas, proteínas mal dobradas), além de microrganismos que escapam de fagossomas para o citosol.
+  </div>
+</div>
+
+<div class="content-card">
+  <h3>Percurso passo a passo — clique para avançar</h3>
+  <div class="stepper" id="stepper1">
+    <div class="stepper-track" id="track1"></div>
+    <div class="step-panel" id="panel1"></div>
+    <div class="step-nav">
+      <button onclick="stepNav(1,-1)">← Anterior</button>
+      <button class="primary" onclick="stepNav(1,1)">Próximo →</button>
+    </div>
+  </div>
+</div>
+
+<div class="content-card">
+  <h3>Pontos críticos da via de classe I</h3>
+  <p><strong>Por que classe I em todas as células nucleadas?</strong> Qualquer célula pode ser infectada por vírus ou sofrer mutações tumorais. O sistema de classe I permite que células T CD8⁺ patrulhem <em>todas</em> as células do organismo, não apenas as APCs.</p>
+  <p><strong>Estabilidade do complexo:</strong> a molécula de classe I só é estável quando carregada com um peptídeo E associada à β2m. Complexos sem peptídeo são instáveis e degradados no RE — isso garante que só moléculas "carregadas" cheguem à superfície.</p>
+  <p><strong>Evasão viral:</strong> muitos vírus desenvolveram mecanismos para bloquear a via de classe I — inibindo o TAP (herpes simples), promovendo degradação da cadeia α (citomegalovírus), ou retendo o MHC I no RE (adenovírus). Isso evidencia a importância desta via na imunidade antiviral.</p>
+</div>
+
+<!-- QUIZ MÓDULO 3 -->
+<div class="quiz-section">
+  <div class="quiz-title">✦ Fixação — Módulo 3</div>
+
+  <!-- Order drag -->
+  <div class="question-card" id="m3q1">
+    <div class="q-type">Ordenar Etapas — Arrastar</div>
+    <div class="q-text">Coloque as etapas da via do MHC de classe I na ordem correta, arrastando os itens.</div>
+    <div class="order-list" id="order-m3" ondragover="allowDrop(event)"></div>
+    <button class="check-btn" onclick="checkOrder('m3q1','order-m3',[0,1,2,3,4,5])">Verificar ordem</button>
+    <div class="feedback" id="fb-m3q1"></div>
+  </div>
+
+  <div class="question-card" id="m3q2">
+    <div class="q-type">Múltipla Escolha</div>
+    <div class="q-text">O TAP (Transportador Associado ao Processamento de Antígenos) transporta peptídeos de qual compartimento para qual destino, e com qual fonte de energia?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="checkMC(this,'m3q2',false,'Incorreto. Os peptídeos são gerados no citosol/núcleo pelo proteassoma — não no RE.')">Do RE para o citosol, usando gradiente de prótons</button>
+      <button class="mc-opt" onclick="checkMC(this,'m3q2',true,'Correto! O TAP é uma proteína ABC transportadora localizada na membrana do RE. Usa energia de hidrólise de ATP para transportar ativamente peptídeos do citosol para o lúmen do RE, onde as moléculas do MHC I recém-sintetizadas aguardam.')">Do citosol para o lúmen do RE, dependente de ATP</button>
+      <button class="mc-opt" onclick="checkMC(this,'m3q2',false,'Incorreto. O TAP não leva peptídeos para o Golgi — eles vão para o lúmen do RE onde se associam ao MHC I.')">Do citosol para o aparelho de Golgi, dependente de ATP</button>
+      <button class="mc-opt" onclick="checkMC(this,'m3q2',false,'Incorreto. Os endossomas são compartimentos da via de classe II, não da via citosólica de classe I.')">Do endossoma para o citosol, por difusão passiva</button>
+    </div>
+    <div class="feedback" id="fb-m3q2"></div>
+  </div>
+
+  <div class="question-card" id="m3q3">
+    <div class="q-type">Múltipla Escolha</div>
+    <div class="q-text">Qual é a função da tapasina na montagem do complexo peptídeo-MHC I?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="checkMC(this,'m3q3',false,'Incorreto. A clivagem dos peptídeos ocorre no citosol, pelo proteassoma, com ajuste fino pela ERAP no lúmen do RE.')">Clivar peptídeos longos no lúmen do RE para o tamanho adequado</button>
+      <button class="mc-opt" onclick="checkMC(this,'m3q3',false,'Incorreto. A ubiquitinação é um sinal para degradação pelo proteassoma — ocorre no citosol, antes da geração dos peptídeos.')">Ubiquitinar proteínas citosólicas para encaminhamento ao proteassoma</button>
+      <button class="mc-opt" onclick="checkMC(this,'m3q3',true,'Correto! A tapasina age como uma "chaperona de edição de peptídeos": ancora o TAP próximo às moléculas de MHC I recém-sintetizadas e <strong>facilita a troca de peptídeos</strong>, favorecendo que a fenda retenha os peptídeos com maior afinidade de ligação. Isso aumenta a qualidade e estabilidade dos complexos exibidos na superfície.')">Aproximar o TAP das moléculas do MHC I e facilitar a edição de peptídeos, favorecendo os de maior afinidade</button>
+      <button class="mc-opt" onclick="checkMC(this,'m3q3',false,'Incorreto. A associação da β2m com a cadeia α é auxiliada por chaperonas como a calnexina, não pela tapasina diretamente.')">Promover a associação da β2m com a cadeia α no RE</button>
+    </div>
+    <div class="feedback" id="fb-m3q3"></div>
+  </div>
+
+  <div class="mod-complete" id="mc3" style="display:none">
+    <div class="mod-complete-icon">✓</div>
+    <div><p>Módulo 3 concluído!</p><small>Agora a via endossomal do MHC de classe II</small></div>
+    <button class="next-mod-btn" onclick="goPage(3)">Próximo módulo →</button>
+  </div>
+</div>
+<div class="page-footer">Depto. de Bioquímica e Imunologia · ICB/UFMG</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MÓDULO 4 — VIA MHC II
+════════════════════════════════════════════════ -->
+<div class="page" id="page3">
+<div class="mod-header">
+  <div class="mod-badge" style="background:var(--c2l);color:var(--c2)">Módulo 4 · Via Endossomal</div>
+  <div class="mod-title">Via de Processamento do MHC de Classe II</div>
+  <div class="mod-desc">Endocitose → lisossomo → cadeia invariante → CLIP → HLA-DM → superfície. A via que permite às APCs mostrar o que capturam do ambiente extracelular.</div>
+</div>
+
+<div class="content-card">
+  <h3>Visão geral da via endossomal</h3>
+  <p>APCs profissionais (células dendríticas, macrófagos, linfócitos B) endocitam proteínas do ambiente extracelular. Essas proteínas são degradadas nos endossomas e lisossomas, e os peptídeos resultantes se associam às moléculas do MHC II para serem apresentados às células T CD4⁺ auxiliares.</p>
+  <div class="highlight orange">
+    <strong>Problema a resolver:</strong> as moléculas do MHC II são sintetizadas no RE, onde os peptídeos citosólicos também circulam. Como impedir que o MHC II carregue peptídeos "errados" no RE — destinados ao MHC I — e só carregue peptídeos exógenos nos endossomas?
+  </div>
+</div>
+
+<div class="content-card">
+  <h3>Percurso passo a passo — clique para avançar</h3>
+  <div class="stepper" id="stepper2">
+    <div class="stepper-track" id="track2"></div>
+    <div class="step-panel" id="panel2"></div>
+    <div class="step-nav">
+      <button onclick="stepNav(2,-1)">← Anterior</button>
+      <button class="primary c2" onclick="stepNav(2,1)">Próximo →</button>
+    </div>
+  </div>
+</div>
+
+<div class="content-card">
+  <h3>Pontos críticos da via de classe II</h3>
+  <p><strong>O papel da cadeia invariante (Ii):</strong> resolve o problema acima de duas formas: (1) bloqueia fisicamente a fenda de ligação, impedindo associação com peptídeos citosólicos no RE; (2) contém sinais de endereçamento que direcionam o complexo MHC II/Ii para vesículas endossomais.</p>
+  <p><strong>CLIP como guardião:</strong> após a degradação proteolítica da Ii, permanece um fragmento de 24 aminoácidos — o CLIP — ocupando a fenda. O CLIP só é removido pela ação do <span class="term" onclick="toggleTerm('hladm')">HLA-DM</span>, que age como catalisador de troca de peptídeos no compartimento MIIC.</p>
+  <div class="term-popup" id="hladm">HLA-DM: molécula não clássica do MHC, estruturalmente semelhante ao MHC II, mas não expressa na superfície celular. Localizada no MIIC, catalisa a remoção do CLIP e a troca por peptídeos antigênicos com maior afinidade. Em camundongos, o equivalente é o H-2M.</div>
+  <p><strong>Autofagia e via de classe II:</strong> proteínas citosólicas podem ser degradadas em autofagossomas e seus peptídeos também entrar na via endossomal, sendo apresentados via MHC II. Isso permite que APCs apresentem antígenos citosólicos para células T CD4⁺ em certos contextos.</p>
+</div>
+
+<!-- QUIZ MÓDULO 4 -->
+<div class="quiz-section">
+  <div class="quiz-title">✦ Fixação — Módulo 4</div>
+
+  <div class="question-card" id="m4q1">
+    <div class="q-type">Verdadeiro ou Falso</div>
+    <div class="q-text">A cadeia invariante (Ii) impede que moléculas do MHC de classe II se associem a peptídeos citosólicos no retículo endoplasmático, ocupando temporariamente a fenda de ligação do peptídeo.</div>
+    <div class="tf-wrap">
+      <button class="tf-btn" onclick="checkTF(this,'m4q1','T','Correto! Essa é a função central da cadeia invariante. Ela bloqueia a fenda do MHC II no RE, impedindo que peptídeos destinados ao MHC I ali presentes ocupem indevidamente a molécula de classe II. Além disso, direciona o complexo para vesículas endossomais onde ocorrerá o carregamento correto.')">Verdadeiro</button>
+      <button class="tf-btn" onclick="checkTF(this,'m4q1','T','Correto! Essa é a função central da cadeia invariante. Ela bloqueia a fenda do MHC II no RE, impedindo que peptídeos destinados ao MHC I ali presentes ocupem indevidamente a molécula de classe II. Além disso, direciona o complexo para vesículas endossomais onde ocorrerá o carregamento correto.')">Falso</button>
+    </div>
+    <div class="feedback" id="fb-m4q1"></div>
+  </div>
+
+  <div class="question-card" id="m4q2">
+    <div class="q-type">Múltipla Escolha</div>
+    <div class="q-text">O que é o CLIP e por que sua remoção é necessária para a apresentação de antígenos via MHC II?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="checkMC(this,'m4q2',false,'Incorreto. O CLIP não é um peptídeo antigênico — é um fragmento da própria cadeia invariante que permanece após sua digestão proteolítica.')">Um peptídeo antigênico de alta afinidade que precisa ser deslocado pelo antígeno específico</button>
+      <button class="mc-opt" onclick="checkMC(this,'m4q2',true,'Correto! O CLIP (Class II-associated Invariant chain Peptide) é um fragmento de ~24 aminoácidos da cadeia invariante que permanece na fenda após degradação proteolítica da Ii. Ocupa a fenda e precisa ser removido pelo HLA-DM para que peptídeos antigênicos possam se associar ao MHC II.')">Um fragmento remanescente da cadeia invariante que ocupa a fenda do MHC II e precisa ser removido pelo HLA-DM para liberar espaço ao peptídeo antigênico</button>
+      <button class="mc-opt" onclick="checkMC(this,'m4q2',false,'Incorreto. O CLIP não é um receptor — é um fragmento peptídico residual da cadeia invariante que obstrui a fenda de ligação.')">Um receptor de membrana que ancora o MHC II ao endossoma tardio</button>
+      <button class="mc-opt" onclick="checkMC(this,'m4q2',false,'Incorreto. O CLIP não tem função catalítica — é o HLA-DM que catalisa a remoção do CLIP e a troca por peptídeos antigênicos.')">Uma enzima que catalisa a degradação de antígenos proteicos nas vesículas endossomais</button>
+    </div>
+    <div class="feedback" id="fb-m4q2"></div>
+  </div>
+
+  <div class="question-card" id="m4q3">
+    <div class="q-type">Múltipla Escolha</div>
+    <div class="q-text">Uma APC é tratada com cloroquina, um composto que eleva o pH dos lisossomas e endossomas tardios. Qual seria o efeito esperado sobre a apresentação de antígenos?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="checkMC(this,'m4q3',false,'Incorreto. A via de classe I utiliza o proteassoma no citosol — um compartimento não afetado pelo pH lisossomal.')">Bloqueio da apresentação via MHC de classe I, pois o proteassoma requer pH ácido para funcionar</button>
+      <button class="mc-opt" onclick="checkMC(this,'m4q3',true,'Correto! As catepsinas e outras proteases endossomais/lisossomais têm pH ótimo ácido. A cloroquina, ao elevar o pH, inibe a degradação proteolítica das proteínas endocitadas — bloqueando a geração de peptídeos para a via de classe II. A via de classe I (proteassoma) não é afetada.')">Bloqueio seletivo da apresentação via MHC de classe II, pois as proteases endossomais (catepsinas) requerem pH ácido para clivar antígenos proteicos</button>
+      <button class="mc-opt" onclick="checkMC(this,'m4q3',false,'Incorreto. O HLA-DM não requer pH ácido como cofator direto para sua atividade — ele é inibido indiretamente pela alteração do compartimento MIIC.')">Inibição do HLA-DM, que requer pH ácido como cofator para remover o CLIP</button>
+      <button class="mc-opt" onclick="checkMC(this,'m4q3',false,'Incorreto. A cloroquina afeta seletivamente a via endossomal — a via de classe I não depende de compartimentos ácidos.')">Bloqueio de ambas as vias, pois o pH ácido é necessário tanto para o proteassoma quanto para as catepsinas</button>
+    </div>
+    <div class="feedback" id="fb-m4q3"></div>
+  </div>
+
+  <!-- Drag: match molecule to function -->
+  <div class="question-card" id="m4q4">
+    <div class="q-type">Associação — Arrastar</div>
+    <div class="q-text">Associe cada molécula à sua função na via de classe II. Arraste para as zonas corretas.</div>
+    <div class="drag-label">Moléculas:</div>
+    <div class="drag-area" id="drag-bank-m4" ondragover="allowDrop(event)" ondrop="dropToBank(event,'drag-bank-m4')"></div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px" id="m4-zones"></div>
+    <button class="check-btn" onclick="checkDragMatch('m4q4')">Verificar</button>
+    <div class="feedback" id="fb-m4q4"></div>
+  </div>
+
+  <div class="mod-complete" id="mc4" style="display:none">
+    <div class="mod-complete-icon">✓</div>
+    <div><p>Todos os módulos concluídos!</p><small>Faça o quiz final para testar seu conhecimento completo</small></div>
+    <button class="next-mod-btn" onclick="goPage(4)">Quiz Final →</button>
+  </div>
+</div>
+<div class="page-footer">Depto. de Bioquímica e Imunologia · ICB/UFMG</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     QUIZ FINAL
+════════════════════════════════════════════════ -->
+<div class="page" id="page4">
+<div class="final-header">
+  <div class="mod-badge" style="background:var(--surface2);color:var(--text2);margin-bottom:.75rem;display:inline-block">Quiz Final</div>
+  <h2>MHC &amp; Apresentação de Antígenos</h2>
+  <p>10 questões cobrindo todos os módulos · Responda todas e clique em "Ver resultado"</p>
+</div>
+<div id="final-quiz-container"></div>
+<div id="final-result" style="display:none"></div>
+<div class="page-footer">Depto. de Bioquímica e Imunologia · ICB/UFMG</div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────
+let currentPage = 0;
+const modScores = [0,0,0,0]; // questions answered correctly per module
+const modTotal  = [3,3,3,4];
+const modAnswered = [[],[],[],[]];
+
+// ─── NAVIGATION ──────────────────────────────────────
+function goPage(n){
+  document.querySelectorAll('.page').forEach((p,i)=>{
+    p.classList.toggle('active',i===n);
+  });
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  currentPage=n;
+  document.getElementById('progressFill').style.width=((n+1)/5*100)+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── GLOSSARY ─────────────────────────────────────────
+function toggleTerm(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+// ─── STEPPERS ─────────────────────────────────────────
+const steps1=[
+  {label:'Ubiquitinação',title:'1. Ubiquitinação da proteína',content:'Proteínas citosólicas defeituosas, mal dobradas ou de patógenos intracelulares são marcadas para degradação por covalentes cadeias de <span class="mol-tag c1">ubiquitina</span>. A adição de 4+ ubiquitinas é o sinal que encaminha a proteína ao proteassoma. Esse sistema de controle de qualidade proteica é essencial tanto para a homeostase celular quanto para a vigilância imune.'},
+  {label:'Proteassoma',title:'2. Degradação pelo proteassoma',content:'O <span class="mol-tag c1">proteassoma</span> (complexo 26S) desdobra a proteína ubiquitinada, remove as ubiquitinas e a degrada em peptídeos de 8–25 aminoácidos. Durante respostas a vírus e citocinas, o IFN-γ induz a formação do <span class="mol-tag gray">imunoproteassoma</span>, cujas subunidades catalíticas geram preferencialmente peptídeos com terminais carboxila básicos ou hidrofóbicos — características ideais para ligação ao TAP e ao MHC I.'},
+  {label:'ERAP',title:'2b. Ajuste no RE pela ERAP',content:'Alguns peptídeos chegam ao lúmen do RE com comprimento ligeiramente maior do que o ideal (9–10 resíduos). A <span class="mol-tag c1">ERAP</span> (Endoplasmic Reticulum Aminopeptidase) realiza um ajuste fino, removendo resíduos do terminal amina para gerar peptídeos com o tamanho exato para encaixar na fenda do MHC I.'},
+  {label:'TAP',title:'3. Transporte para o RE pelo TAP',content:'O transportador <span class="mol-tag c1">TAP</span> (Transporter Associated with Antigen Processing) é uma proteína ABC dimérica (TAP1+TAP2) inserida na membrana do RE. Usando energia de hidrólise de ATP, bombeia peptídeos do citosol para o lúmen do RE. Prefere peptídeos de 8–16 resíduos com C-terminal hidrofóbico ou básico.'},
+  {label:'Montagem no RE',title:'4. Montagem do complexo no RE',content:'No lúmen do RE, a cadeia α do MHC I é sintetizada e dobrada com o auxílio de chaperonas (<span class="mol-tag gray">calnexina</span>, <span class="mol-tag gray">calreticulina</span>). Em seguida, associa-se à <span class="mol-tag c1">β2-microglobulina</span>. O complexo α-β2m permanece associado ao TAP via <span class="mol-tag c1">tapasina</span>, que facilita a edição de peptídeos — favorecendo a retenção de peptídeos com maior afinidade à fenda.'},
+  {label:'Superfície',title:'5. Expressão na superfície celular',content:'Uma vez carregado com um peptídeo de alta afinidade, o complexo <span class="mol-tag c1">peptídeo–MHC I</span> se desliga da tapasina e passa pelo <span class="mol-tag gray">Golgi</span>, onde sofre modificações adicionais, antes de ser levado à superfície celular por vesículas exocíticas. Na superfície, o complexo pode ser reconhecido pelo TCR de um linfócito <span class="mol-tag c1">T CD8⁺</span>, cujo correceptor CD8 se liga ao domínio α3 da molécula de classe I.'},
+];
+
+const steps2=[
+  {label:'Endocitose',title:'1. Endocitose do antígeno proteico',content:'APCs profissionais (células dendríticas, macrófagos, linfócitos B) capturam antígenos proteicos do ambiente extracelular por <span class="mol-tag c2">fagocitose</span>, <span class="mol-tag c2">macropinocitose</span> ou <span class="mol-tag c2">endocitose mediada por receptor</span> (ex: via receptor Fc, receptor de manose, ou BCR nos linfócitos B). O antígeno fica confinado em vesículas endossomais intracelulares.'},
+  {label:'Degradação',title:'2. Degradação proteolítica nos endossomas',content:'Os endossomas se fundem com lisossomas, criando um ambiente de pH ácido (~4,5–5). Proteases ativas nesse pH — principalmente <span class="mol-tag c2">catepsinas</span> (cisteína e aspartil proteases) — degradam as proteínas endocitadas em peptídeos de 10–30 resíduos. O compartimento especializado enriquecido em MHC II onde ocorre o carregamento chama-se <span class="mol-tag c2">MIIC</span> (MHC Class II Compartment).'},
+  {label:'Cadeia inv.',title:'3. Biossíntese do MHC II com cadeia invariante',content:'No RE, as cadeias α e β do MHC II recém-sintetizadas se associam à <span class="mol-tag c2">cadeia invariante (Ii)</span>. A Ii cumpre duas funções essenciais: (1) seu segmento CLIP ocupa e bloqueia a fenda de ligação, impedindo que o MHC II carregue peptídeos citosólicos no RE; (2) seus sinais de endereçamento direcionam o complexo MHC II-Ii via Golgi para os compartimentos endossomais.'},
+  {label:'CLIP',title:'4. Geração do CLIP',content:'Dentro dos endossomas tardios/MIIC, as proteases (catepsinas) degradam progressivamente a cadeia invariante. A degradação não é completa — permanece um fragmento de ~24 aminoácidos ainda inserido na fenda do MHC II: o <span class="mol-tag c2">CLIP</span> (Class II-associated Invariant chain Peptide). O CLIP mantém a fenda estabilizada mas bloqueada até que o peptídeo antigênico correto esteja disponível.'},
+  {label:'HLA-DM',title:'5. Ação do HLA-DM e troca de peptídeos',content:'O <span class="mol-tag c2">HLA-DM</span> (H-2M em camundongos) é uma molécula não clássica do MHC, localizada exclusivamente no MIIC. Atua como <em>editor de peptídeos</em>: catalisa a remoção do CLIP e promove a troca por peptídeos antigênicos com maior afinidade à fenda. Peptídeos com baixa afinidade são rapidamente substituídos — apenas os mais estáveis permanecem. Isso garante a qualidade dos complexos expressos.'},
+  {label:'Superfície',title:'6. Expressão na superfície celular',content:'Os complexos estáveis <span class="mol-tag c2">peptídeo–MHC II</span> são transportados das vesículas endossomais para a membrana plasmática por fusão vesicular. Uma vez na superfície da APC, o complexo pode ser reconhecido por linfócitos <span class="mol-tag c2">T CD4⁺</span>, cujo correceptor CD4 se liga aos domínios α2/β2 da molécula de classe II, estabilizando o contato e amplificando a sinalização de ativação.'},
+];
+
+let stepState={1:0,2:0};
+function initStepper(id,steps){
+  const track=document.getElementById('track'+id);
+  track.innerHTML=steps.map((s,i)=>`<div class="step-dot${i===0?' active':''}" id="dot${id}-${i}"><div class="step-num">${i+1}</div><div class="step-label">${s.label}</div></div>`).join('');
+  renderStep(id,steps,0);
+}
+function renderStep(id,steps,idx){
+  const panel=document.getElementById('panel'+id);
+  const s=steps[idx];
+  panel.innerHTML=`<div class="step-panel-title">${s.title}</div><p>${s.content}</p>`;
+  steps.forEach((_,i)=>{
+    const dot=document.getElementById('dot'+id+'-'+i);
+    dot.classList.remove('active','done','class2');
+    if(i<idx){dot.classList.add('done');if(id===2)dot.classList.add('class2');}
+    if(i===idx){dot.classList.add('active');if(id===2)dot.classList.add('class2');}
+  });
+  stepState[id]=idx;
+}
+function stepNav(id,dir){
+  const steps=id===1?steps1:steps2;
+  const next=Math.max(0,Math.min(steps.length-1,stepState[id]+dir));
+  renderStep(id,steps,next);
+}
+initStepper(1,steps1);
+initStepper(2,steps2);
+
+// ─── TF CHECK ─────────────────────────────────────────
+function checkTF(btn,qid,correct,explanation){
+  const card=document.getElementById(qid);
+  const btns=card.querySelectorAll('.tf-btn');
+  const fb=document.getElementById('fb-'+qid);
+  const isTrue=btn.textContent.trim()==='Verdadeiro';
+  const answered=btn.dataset.answered;
+  if(answered)return;
+  btns.forEach(b=>b.disabled=true);
+  const isCorrect=(correct==='T')===isTrue;
+  btn.classList.add(isCorrect?'correct-ans':'wrong-ans');
+  if(!isCorrect){btns.forEach(b=>{if((b.textContent.trim()==='Verdadeiro')===(correct==='T'))b.classList.add('correct-ans');});}
+  fb.innerHTML=(isCorrect?'✓ Correto! ':'✗ Incorreto. ')+explanation;
+  fb.className='feedback show '+(isCorrect?'ok':'err');
+  btn.dataset.answered='1';
+  recordAnswer(qid,isCorrect);
+}
+function checkMC(btn,qid,isCorrect,explanation){
+  const card=document.getElementById(qid);
+  if(card.dataset.answered)return;
+  card.dataset.answered='1';
+  card.querySelectorAll('.mc-opt').forEach(b=>b.disabled=true);
+  btn.classList.add(isCorrect?'correct-ans':'wrong-ans');
+  if(!isCorrect){card.querySelectorAll('.mc-opt').forEach(b=>{if(b.onclick.toString().includes('true'))b.classList.add('correct-ans');});}
+  const fb=document.getElementById('fb-'+qid);
+  fb.innerHTML=(isCorrect?'✓ Correto! ':'✗ Incorreto. ')+explanation;
+  fb.className='feedback show '+(isCorrect?'ok':'err');
+  recordAnswer(qid,isCorrect);
+}
+
+// ─── RECORD + COMPLETE ───────────────────────────────
+function recordAnswer(qid,ok){
+  const modMap={'m1q':0,'m2q':1,'m3q':2,'m4q':3};
+  const key=qid.slice(0,3);
+  const mod=modMap[key];
+  if(mod===undefined)return;
+  if(!modAnswered[mod].includes(qid)){
+    modAnswered[mod].push(qid);
+    if(ok)modScores[mod]++;
+  }
+  if(modAnswered[mod].length>=modTotal[mod]){
+    setTimeout(()=>{
+      const mc=document.getElementById('mc'+(mod+1));
+      if(mc)mc.style.display='flex';
+    },600);
+  }
+}
+
+// ─── DRAG CLASSIFY (Module 2) ─────────────────────────
+const dragItems2=[
+  {id:'di-pep8',text:'Peptídeos 8–11 aa',correct:'c1'},
+  {id:'di-pep30',text:'Peptídeos 10–30+ aa',correct:'c2'},
+  {id:'di-b2m',text:'β2-microglobulina',correct:'c1'},
+  {id:'di-cd8',text:'Ativa linfócito T CD8⁺',correct:'c1'},
+  {id:'di-cd4',text:'Ativa linfócito T CD4⁺',correct:'c2'},
+  {id:'di-nuc',text:'Todas as células nucleadas',correct:'c1'},
+  {id:'di-apcs',text:'Apenas APCs profissionais',correct:'c2'},
+  {id:'di-re',text:'Carregado no RE',correct:'c1'},
+  {id:'di-endo',text:'Carregado no MIIC/endossoma',correct:'c2'},
+];
+function initDragClassify(){
+  const bank=document.getElementById('drag-bank-m2');
+  const shuffled=[...dragItems2].sort(()=>Math.random()-.5);
+  shuffled.forEach(item=>{
+    const chip=createChip(item.id,item.text,'');
+    bank.appendChild(chip);
+  });
+}
+function createChip(id,text,cls){
+  const el=document.createElement('div');
+  el.className='drag-chip'+(cls?' '+cls:'');
+  el.id=id;el.textContent=text;
+  el.draggable=true;
+  el.ondragstart=e=>e.dataTransfer.setData('text',el.id);
+  return el;
+}
+function allowDrop(e){e.preventDefault();e.currentTarget.classList.add('over');}
+function dropTo(e,zoneId){
+  e.preventDefault();
+  e.currentTarget.classList.remove('over');
+  const id=e.dataTransfer.getData('text');
+  const el=document.getElementById(id);
+  if(el)e.currentTarget.appendChild(el);
+}
+function dropToBank(e,bankId){
+  e.preventDefault();
+  e.currentTarget.classList.remove('over');
+  const id=e.dataTransfer.getData('text');
+  const el=document.getElementById(id);
+  if(el)document.getElementById(bankId).appendChild(el);
+}
+document.querySelectorAll('.drag-area').forEach(z=>{
+  z.addEventListener('dragleave',e=>e.currentTarget.classList.remove('over'));
+});
+function checkDragClassify(qid){
+  const c1zone=document.getElementById('drag-zone-c1');
+  const c2zone=document.getElementById('drag-zone-c2');
+  let correct=0,total=dragItems2.length;
+  dragItems2.forEach(item=>{
+    const el=document.getElementById(item.id);
+    const inC1=c1zone.contains(el);
+    const inC2=c2zone.contains(el);
+    const ok=(item.correct==='c1'&&inC1)||(item.correct==='c2'&&inC2);
+    if(ok){el.classList.add('c1');el.style.opacity='1';correct++;}
+    else{el.style.outline='2px solid var(--red)';el.style.opacity='.7';}
+  });
+  const fb=document.getElementById('fb-'+qid);
+  const ok=correct===total;
+  fb.innerHTML=ok?`✓ Perfeito! Todos os ${total} itens classificados corretamente.`:`${correct}/${total} corretos. Os itens em destaque estão na coluna errada — as classes I e II apresentam antígenos de origens e para linfócitos T distintos.`;
+  fb.className='feedback show '+(ok?'ok':'err');
+  recordAnswer(qid,ok);
+}
+
+// ─── ORDER DRAG (Module 3) ────────────────────────────
+const orderItems=[
+  {text:'Ubiquitinação da proteína citosólica'},
+  {text:'Degradação pelo proteassoma em peptídeos'},
+  {text:'Transporte do peptídeo para o RE pelo TAP'},
+  {text:'Ajuste do peptídeo pela ERAP no lúmen do RE'},
+  {text:'Montagem do complexo α–β₂m–peptídeo com tapasina'},
+  {text:'Expressão do complexo peptídeo–MHC I na superfície'},
+];
+let dragSrcIdx=null;
+function initOrderDrag(){
+  const list=document.getElementById('order-m3');
+  const shuffled=[...orderItems].sort(()=>Math.random()-.5);
+  shuffled.forEach((item,i)=>{
+    const el=document.createElement('div');
+    el.className='order-item';
+    el.draggable=true;
+    el.dataset.orig=orderItems.indexOf(item);
+    el.innerHTML=`<span class="drag-handle">⠿</span>${item.text}`;
+    el.ondragstart=e=>{dragSrcIdx=i;el.classList.add('dragging');e.dataTransfer.effectAllowed='move';};
+    el.ondragend=()=>{el.classList.remove('dragging');list.querySelectorAll('.order-item').forEach(x=>x.classList.remove('drag-over'));};
+    el.ondragover=e=>{e.preventDefault();el.classList.add('drag-over');};
+    el.ondragleave=()=>el.classList.remove('drag-over');
+    el.ondrop=e=>{
+      e.preventDefault();
+      el.classList.remove('drag-over');
+      const items=[...list.querySelectorAll('.order-item')];
+      const src=items[dragSrcIdx];
+      const target=el;
+      if(src&&target&&src!==target){
+        const srcI=items.indexOf(src);
+        const tarI=items.indexOf(target);
+        if(srcI<tarI)list.insertBefore(src,target.nextSibling);
+        else list.insertBefore(src,target);
+        dragSrcIdx=tarI;
+      }
+    };
+    list.appendChild(el);
+  });
+}
+function checkOrder(qid,listId,correctOrder){
+  const list=document.getElementById(listId);
+  const items=[...list.querySelectorAll('.order-item')];
+  const origOrder=items.map(el=>parseInt(el.dataset.orig));
+  // correct sequence by orig indices ascending
+  const isCorrect=origOrder.every((v,i)=>i===0||origOrder[i-1]<v);
+  const fb=document.getElementById('fb-'+qid);
+  if(isCorrect){
+    fb.innerHTML='✓ Ordem correta! Ubiquitinação → Proteassoma → TAP/ERAP → Montagem no RE (tapasina) → Superfície.';
+    fb.className='feedback show ok';
+  } else {
+    fb.innerHTML='✗ Não está na ordem certa. Lembre-se: a proteína é primeiro ubiquitinada no citosol → degradada pelo proteassoma → peptídeos são transportados pelo TAP para o RE → ajuste pela ERAP → montagem com cadeia α e β₂m (tapasina) → superfície.';
+    fb.className='feedback show err';
+  }
+  recordAnswer(qid,isCorrect);
+}
+
+// ─── DRAG MATCH (Module 4) ────────────────────────────
+const m4matchItems=[
+  {id:'m4-cad',text:'Cadeia invariante (Ii)'},
+  {id:'m4-clip',text:'CLIP'},
+  {id:'m4-hla',text:'HLA-DM'},
+  {id:'m4-cat',text:'Catepsinas'},
+];
+const m4matchZones=[
+  {id:'mz-a',label:'Bloqueia a fenda do MHC II no RE e direciona o complexo para endossomas',correct:'m4-cad'},
+  {id:'mz-b',label:'Fragmento residual que ocupa a fenda após degradação da Ii',correct:'m4-clip'},
+  {id:'mz-c',label:'Catalisa a remoção do CLIP e favorece peptídeos antigênicos de alta afinidade',correct:'m4-hla'},
+  {id:'mz-d',label:'Proteases endossomais que degradam proteínas capturadas em peptídeos',correct:'m4-cat'},
+];
+function initDragMatch(){
+  const bank=document.getElementById('drag-bank-m4');
+  const shuffled=[...m4matchItems].sort(()=>Math.random()-.5);
+  shuffled.forEach(item=>{
+    const chip=createChip(item.id,item.text,'c2');
+    bank.appendChild(chip);
+  });
+  const zonesWrap=document.getElementById('m4-zones');
+  m4matchZones.forEach(z=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px;';
+    const label=document.createElement('div');
+    label.style.cssText='font-size:12.5px;color:var(--text2);flex:1;line-height:1.4;';
+    label.textContent=z.label;
+    const dropZ=document.createElement('div');
+    dropZ.className='drag-area';dropZ.id=z.id;
+    dropZ.style.cssText='min-width:140px;max-width:160px;min-height:36px;';
+    dropZ.ondragover=allowDrop;
+    dropZ.ondragleave=e=>e.currentTarget.classList.remove('over');
+    dropZ.ondrop=e=>dropTo(e,z.id);
+    row.appendChild(label);row.appendChild(dropZ);
+    zonesWrap.appendChild(row);
+  });
+}
+function checkDragMatch(qid){
+  let correct=0;
+  m4matchZones.forEach(z=>{
+    const zone=document.getElementById(z.id);
+    const chip=zone.querySelector('.drag-chip');
+    if(chip&&chip.id===z.correct){correct++;chip.style.outline='2px solid var(--green)';}
+    else if(chip)chip.style.outline='2px solid var(--red)';
+  });
+  const total=m4matchZones.length;
+  const ok=correct===total;
+  const fb=document.getElementById('fb-'+qid);
+  fb.innerHTML=ok?'✓ Perfeito! Todas as associações corretas.':`${correct}/${total} corretas. Revise: a cadeia invariante bloqueia a fenda no RE; CLIP é seu fragmento residual; HLA-DM remove o CLIP; catepsinas degradam proteínas endocitadas.`;
+  fb.className='feedback show '+(ok?'ok':'err');
+  recordAnswer(qid,ok);
+}
+
+// ─── FINAL QUIZ ────────────────────────────────────────
+const finalQuestions=[
+  {
+    type:'mc',
+    q:'Qual é a principal diferença entre o reconhecimento de antígenos por linfócitos T e linfócitos B?',
+    opts:[
+      {t:'Linfócitos T reconhecem peptídeos lineares apresentados por MHC, enquanto linfócitos B reconhecem antígenos em sua forma nativa (conformacional ou linear)',ok:true,exp:'Correto! Linfócitos T são restritos ao MHC e reconhecem peptídeos. Linfócitos B e anticorpos reconhecem epítopos conformacionais ou lineares diretamente no antígeno nativo.'},
+      {t:'Linfócitos T reconhecem antígenos solúveis; linfócitos B precisam do MHC',ok:false,exp:'Incorreto. É o oposto: linfócitos T precisam do MHC para reconhecer antígenos; anticorpos (produtos de linfócitos B) reconhecem antígenos solúveis sem MHC.'},
+      {t:'Ambos reconhecem exclusivamente peptídeos; a diferença está no tipo de MHC',ok:false,exp:'Incorreto. Linfócitos B e anticorpos não reconhecem apenas peptídeos — reconhecem também carboidratos, lipídios e estruturas conformacionais.'},
+      {t:'Linfócitos T só reconhecem antígenos virais; linfócitos B reconhecem qualquer patógeno',ok:false,exp:'Incorreto. Linfócitos T reconhecem peptídeos de qualquer origem — viral, bacteriana, tumoral, autóloga.'},
+    ]
+  },
+  {
+    type:'tf',
+    q:'O MHC de classe I apresenta peptídeos exclusivamente derivados de proteínas sintetizadas dentro da própria célula infectada, nunca de proteínas capturadas do ambiente extracelular.',
+    correct:'F',
+    exp:'Falso. Embora a via canônica de classe I processe proteínas citosólicas, a <strong>apresentação cruzada</strong> (cross-presentation) — realizada principalmente por células dendríticas — permite que antígenos endocitados de células infectadas ou tumorais entrem na via citosólica e sejam apresentados via MHC I para linfócitos T CD8⁺.'
+  },
+  {
+    type:'mc',
+    q:'Por que a molécula de MHC de classe I recém-sintetizada permanece instável até ser carregada com um peptídeo?',
+    opts:[
+      {t:'Porque a β2-microglobulina ainda não se associou à cadeia α no RE',ok:false,exp:'Parcialmente incorreto. A β2m se associa no RE, mas mesmo após isso, o complexo α-β2m sem peptídeo é instável. A ligação de um peptídeo é necessária para a estabilização final do complexo trimérico.'},
+      {t:'Porque a fenda vazia é conformacionalmente instável; o peptídeo é necessário para estabilizar a interação entre α1, α2 e β2m — e o complexo sem peptídeo é retido e degradado no RE',ok:true,exp:'Correto! A ligação do peptídeo estabiliza a estrutura trimérica (cadeia α + β2m + peptídeo). Complexos sem peptídeo são instáveis, retidos no RE pelo complexo de carregamento (tapasina, calnexina, calreticulina) e eventualmente degradados.'},
+      {t:'Porque o TAP precisa primeiro translocar a cadeia α para o lúmen do RE',ok:false,exp:'Incorreto. A cadeia α é sintetizada diretamente no RE (proteína de membrana). Não é transportada pelo TAP — o TAP transporta peptídeos do citosol.'},
+      {t:'Porque o proteassoma só libera peptídeos após a síntese completa do MHC I',ok:false,exp:'Incorreto. O proteassoma e o MHC I operam de forma independente; não há coordenação temporal direta entre a síntese do MHC e a degradação de proteínas pelo proteassoma.'},
+    ]
+  },
+  {
+    type:'mc',
+    q:'Uma bactéria extracelular é fagocitada por um macrófago. Por qual via seus peptídeos serão principalmente apresentados, e para qual linfócito T?',
+    opts:[
+      {t:'Via citosólica (proteassoma/TAP), para linfócito T CD8⁺',ok:false,exp:'Incorreto. Proteínas endocitadas em fagossomas entram na via endossomal. Para entrar na via de classe I, a proteína precisaria escapar para o citosol.'},
+      {t:'Via endossomal (catepsinas/MIIC), para linfócito T CD4⁺',ok:true,exp:'Correto! Antígenos capturados do ambiente extracelular são degradados em vesículas endossomais por catepsinas e apresentados via MHC de classe II para linfócitos T CD4⁺ auxiliares, que vão ativar macrófagos e linfócitos B.'},
+      {t:'Via citosólica, para linfócito T CD4⁺',ok:false,exp:'Incorreto. A via citosólica gera peptídeos para MHC de classe I, que é reconhecido por linfócitos T CD8⁺ — não CD4⁺.'},
+      {t:'Ambas as vias igualmente, pois o macrófago é uma APC profissional',ok:false,exp:'Parcialmente incorreto. O macrófago expressa tanto classe I quanto classe II, mas antígenos fagocitados entram principalmente na via endossomal. Apenas em casos de apresentação cruzada (células dendríticas) os antígenos fagocitados entram em quantidade significativa na via de classe I.'},
+    ]
+  },
+  {
+    type:'tf',
+    q:'A cadeia invariante (Ii) exerce função dupla: bloquear a fenda do MHC II no RE (impedindo carregamento prematuro) E direcionar o complexo MHC II para os compartimentos endossomais.',
+    correct:'T',
+    exp:'Verdadeiro! A cadeia invariante é multifuncional: o segmento CLIP ocupa a fenda, impedindo associação com peptídeos citosólicos no RE. Além disso, ela contém sinais de direcionamento intracelular (dileucina e tirosina) que guiam o complexo para endossomas tardios e o MIIC — onde o carregamento correto ocorre.'
+  },
+  {
+    type:'mc',
+    q:'O que distingue funcionalmente o TAP do HLA-DM no processamento de antígenos?',
+    opts:[
+      {t:'TAP transporta peptídeos do citosol para o RE (via MHC I); HLA-DM catalisa a troca do CLIP por peptídeos antigênicos no MIIC (via MHC II)',ok:true,exp:'Correto! São moléculas de vias diferentes: TAP é um transportador ABC da via de classe I; HLA-DM é uma molécula não clássica do MHC que age como editor de peptídeos na via de classe II, no compartimento MIIC.'},
+      {t:'Ambos transportam peptídeos, mas TAP atua nos endossomas e HLA-DM no RE',ok:false,exp:'Incorreto. TAP está no RE; HLA-DM está no compartimento endossomal MIIC. E HLA-DM não é um transportador — é um catalisador de troca de peptídeos.'},
+      {t:'TAP degrada proteínas ubiquitinadas; HLA-DM transporta peptídeos para a superfície celular',ok:false,exp:'Incorreto. A degradação de proteínas ubiquitinadas é feita pelo proteassoma. O transporte de peptídeos para a superfície é feito por vesículas exocíticas, não pelo HLA-DM.'},
+      {t:'TAP e HLA-DM atuam sequencialmente na mesma via, ambos no RE',ok:false,exp:'Incorreto. TAP e HLA-DM atuam em vias distintas: TAP na via de classe I (RE); HLA-DM na via de classe II (MIIC/endossomas). Eles não interagem diretamente.'},
+    ]
+  },
+  {
+    type:'mc',
+    q:'Por que os resíduos polimórficos das moléculas do MHC estão concentrados na fenda de ligação do peptídeo, e não nos domínios transmembrana?',
+    opts:[
+      {t:'Por acaso evolutivo — mutações acumularam-se apenas nessa região ao longo do tempo',ok:false,exp:'Incorreto. A concentração de polimorfismo na fenda não é acidental — há forte pressão seletiva positiva nessa região, pois a variabilidade da fenda amplia o repertório de peptídeos que uma população pode apresentar.'},
+      {t:'Porque os resíduos polimórficos determinam quais peptídeos se ligam e são reconhecidos pelo TCR — variação na fenda amplia o repertório de antígenos que a população pode responder',ok:true,exp:'Correto! A variabilidade na fenda garante que diferentes alelos se liguem a diferentes peptídeos, aumentando a diversidade de antígenos que uma espécie pode apresentar. É pressão seletiva de patógenos que mantém esse alto polimorfismo.'},
+      {t:'Para permitir que o MHC se ancore na membrana com maior estabilidade em diferentes tipos celulares',ok:false,exp:'Incorreto. A ancoragem transmembrana é conservada entre todos os alelos — não há vantagem em ser polimórfica na região TM.'},
+      {t:'Para garantir que o MHC de diferentes indivíduos seja reconhecido igualmente pelo TCR',ok:false,exp:'Incorreto. O polimorfismo da fenda é justamente responsável pela variação no reconhecimento — o que causa a restrição ao MHC e a rejeição de transplantes entre indivíduos com MHC diferente.'},
+    ]
+  },
+  {
+    type:'tf',
+    q:'O imunoproteassoma, induzido pelo IFN-γ, gera peptídeos com características físico-químicas idênticas ao proteassoma constitutivo, portanto não altera a qualidade dos peptídeos apresentados via MHC I.',
+    correct:'F',
+    exp:'Falso. O imunoproteassoma substitui três subunidades catalíticas (β1→β1i, β2→β2i, β5→β5i), o que muda a especificidade de clivagem: gera preferencialmente peptídeos com resíduos hidrofóbicos ou básicos no C-terminal — exatamente as características que favorecem ligação ao TAP e à fenda do MHC I. Isso otimiza a apresentação antigênica durante respostas imunes ativas.'
+  },
+  {
+    type:'mc',
+    q:'Uma célula dendrítica endocita células infectadas por vírus e consegue ativar linfócitos T CD8⁺ específicos para antígenos virais. Esse fenômeno é chamado de:',
+    opts:[
+      {t:'Apresentação canônica de classe I, pois células dendríticas são infectadas pelo vírus',ok:false,exp:'Incorreto. Nesse caso, a célula dendrítica endocitou a célula infectada (via fagocitose), não foi infectada diretamente pelo vírus. A ativação de CD8⁺ por antígenos endocitados é um mecanismo especial.'},
+      {t:'Apresentação cruzada (cross-presentation), em que antígenos endocitados entram na via citosólica e são apresentados via MHC I para células T CD8⁺',ok:true,exp:'Correto! A apresentação cruzada permite que células dendríticas apresentem antígenos de vírus ou tumores — sem estarem infectadas — via MHC I para ativar CTLs. Isso é fundamental para imunidade antitumoral e antiviral.'},
+      {t:'Apresentação indireta via MHC II, com ativação posterior de CD8⁺ por citocinas',ok:false,exp:'Incorreto. A ativação direta de CD8⁺ exige apresentação via MHC I, não II. A via via citocinas é um fenômeno diferente (ativação de células NK, não CD8⁺ específicos).'},
+      {t:'Tolerância periférica, pois células dendríticas normalmente induzem anenergia em CD8⁺',ok:false,exp:'Incorreto. Células dendríticas ativadas induzem imunidade — não tolerância. Tolerância periférica é induzida por DCs em condições de ausência de inflamação ou via células T regulatórias.'},
+    ]
+  },
+  {
+    type:'mc',
+    q:'Em um experimento, células são tratadas com um inibidor de proteassoma (ex: bortezomibe) antes de serem infectadas por vírus. Qual seria o efeito sobre a apresentação de antígenos virais?',
+    opts:[
+      {t:'Aumento da apresentação via MHC I, pois mais peptídeos ficariam disponíveis no citosol',ok:false,exp:'Incorreto. Inibir o proteassoma bloqueia a geração de peptídeos — não os acumula em forma apresentável. Sem clivagem pelo proteassoma, as proteínas virais não são transformadas em peptídeos adequados para o TAP e o MHC I.'},
+      {t:'Bloqueio seletivo da apresentação via MHC II, pois o proteassoma degrada a cadeia invariante',ok:false,exp:'Incorreto. A cadeia invariante é degradada por catepsinas nos endossomas — não pelo proteassoma. A via de classe II não é afetada pelo bortezomibe da mesma forma.'},
+      {t:'Redução drástica da apresentação via MHC I, pois o proteassoma é a principal fonte de peptídeos para essa via',ok:true,exp:'Correto! O proteassoma é a enzima central da via de classe I. Sua inibição reduz drasticamente a geração de peptídeos antigênicos, bloqueando o fornecimento de peptídeos para o TAP e o carregamento do MHC I. Isso é justamente um mecanismo que alguns tumores usam para escapar da vigilância imune.'},
+      {t:'Nenhum efeito, pois o TAP consegue transportar proteínas virais intactas para o RE',ok:false,exp:'Incorreto. O TAP transporta apenas peptídeos curtos (8–16 resíduos) — não proteínas intactas. A clivagem pelo proteassoma é etapa obrigatória da via de classe I.'},
+    ]
+  },
+];
+
+let finalAnswers=[];
+function buildFinalQuiz(){
+  finalAnswers=finalQuestions.map(()=>null);
+  const c=document.getElementById('final-quiz-container');
+  c.innerHTML='';
+  finalQuestions.forEach((q,qi)=>{
+    const card=document.createElement('div');
+    card.className='question-card';card.id='fq-'+qi;
+    const num=document.createElement('div');
+    num.className='q-type';num.textContent='Questão '+(qi+1)+' de '+finalQuestions.length+' · '+(q.type==='tf'?'Verdadeiro ou Falso':'Múltipla Escolha');
+    const qt=document.createElement('div');
+    qt.className='q-text';qt.textContent=q.q;
+    card.appendChild(num);card.appendChild(qt);
+    if(q.type==='tf'){
+      const wrap=document.createElement('div');wrap.className='tf-wrap';
+      ['Verdadeiro','Falso'].forEach(val=>{
+        const b=document.createElement('button');b.className='tf-btn';b.textContent=val;
+        b.onclick=()=>{
+          if(card.dataset.answered)return;
+          card.dataset.answered='1';
+          const isTrue=val==='Verdadeiro';
+          const ok=(q.correct==='T')===isTrue;
+          finalAnswers[qi]={ok,chosen:val,correct:q.correct==='T'?'Verdadeiro':'Falso',exp:q.exp};
+          wrap.querySelectorAll('.tf-btn').forEach(x=>x.disabled=true);
+          b.classList.add(ok?'correct-ans':'wrong-ans');
+          if(!ok)wrap.querySelectorAll('.tf-btn').forEach(x=>{if(x.textContent===(q.correct==='T'?'Verdadeiro':'Falso'))x.classList.add('correct-ans');});
+        };
+        wrap.appendChild(b);
+      });
+      card.appendChild(wrap);
+    } else {
+      const wrap=document.createElement('div');wrap.className='mc-options';
+      q.opts.forEach((opt,oi)=>{
+        const b=document.createElement('button');b.className='mc-opt';b.textContent=opt.t;
+        b.onclick=()=>{
+          if(card.dataset.answered)return;
+          card.dataset.answered='1';
+          finalAnswers[qi]={ok:opt.ok,chosen:opt.t,correct:q.opts.find(x=>x.ok).t,exp:opt.exp};
+          wrap.querySelectorAll('.mc-opt').forEach(x=>x.disabled=true);
+          b.classList.add(opt.ok?'correct-ans':'wrong-ans');
+          if(!opt.ok)wrap.querySelectorAll('.mc-opt').forEach(x=>{if(x.textContent===q.opts.find(y=>y.ok).t)x.classList.add('correct-ans');});
+        };
+        wrap.appendChild(b);
+      });
+      card.appendChild(wrap);
+    }
+    c.appendChild(card);
+  });
+  const sub=document.createElement('button');
+  sub.className='quiz-submit-btn';
+  sub.textContent='Ver resultado →';
+  sub.onclick=showFinalResult;
+  c.appendChild(sub);
+}
+function showFinalResult(){
+  const answered=finalAnswers.filter(a=>a!==null).length;
+  if(answered<finalQuestions.length){
+    alert('Responda todas as '+finalQuestions.length+' questões antes de ver o resultado!');return;
+  }
+  const score=finalAnswers.filter(a=>a.ok).length;
+  const pct=Math.round(score/finalQuestions.length*100);
+  let badge,msg;
+  if(pct>=90){badge='great';msg='Excelente domínio do conteúdo!';}
+  else if(pct>=70){badge='good';msg='Bom resultado — revise os pontos errados.';}
+  else if(pct>=50){badge='review';msg='Recomendamos revisar os módulos 3 e 4.';}
+  else{badge='retry';msg='Revise o material e tente novamente.';}
+
+  const res=document.getElementById('final-result');
+  let reviewHTML='';
+  finalAnswers.forEach((a,i)=>{
+    const q=finalQuestions[i];
+    reviewHTML+=`<div class="ans-item ${a.ok?'ok':'err'}">
+      <div class="ans-q">Q${i+1}: ${q.q}</div>
+      <div class="ans-your">Sua resposta: ${a.chosen}</div>
+      ${!a.ok?`<div class="ans-correct">Resposta correta: ${a.correct}</div>`:''}
+      <div class="ans-exp">${a.exp}</div>
+    </div>`;
+  });
+
+  res.innerHTML=`
+    <div class="result-card">
+      <div class="result-score">${score}<span style="font-size:1.5rem;color:var(--text2)">/${finalQuestions.length}</span></div>
+      <div class="result-label">${pct}% de aproveitamento</div>
+      <div class="result-badge ${badge}">${msg}</div>
+      <br>
+      <button class="retry-btn" onclick="retryFinal()">Refazer quiz</button>
+    </div>
+    <div class="ans-review">
+      <div class="quiz-title">Revisão detalhada</div>
+      ${reviewHTML}
+    </div>`;
+  res.style.display='block';
+  document.getElementById('final-quiz-container').style.display='none';
+  res.scrollIntoView({behavior:'smooth'});
+}
+function retryFinal(){
+  document.getElementById('final-result').style.display='none';
+  document.getElementById('final-quiz-container').style.display='block';
+  buildFinalQuiz();
+  document.getElementById('final-quiz-container').scrollIntoView({behavior:'smooth'});
+}
+
+// ─── MHC COMPARE TABLE ────────────────────────────────
+const mhcRows = [
+  {
+    feat:'🧬 Composição das cadeias',
+    c1:'Cadeia α + β₂m',c2:'Cadeia α + cadeia β',
+    intro:'As moléculas do MHC são heterodímeros, mas diferem em quais cadeias são codificadas no locus MHC.',
+    dc1:'<b>Cadeia α polimórfica</b> (44–47 kDa) codificada no MHC + <b>β₂-microglobulina</b> (12 kDa) codificada <em>fora</em> do MHC, em outro cromossomo. A β₂m é invariante — idêntica em todas as moléculas de classe I.',
+    dc2:'<b>Cadeia α</b> (32–34 kDa) e <b>cadeia β</b> (29–32 kDa), <em>ambas</em> codificadas no locus MHC e <em>ambas</em> polimórficas. Formam o heterodímero αβ não-covalente.',
+  },
+  {
+    feat:'📍 Expressão celular',
+    c1:'Todas as células nucleadas',c2:'APCs profissionais',
+    intro:'O padrão de expressão reflete a função de cada classe: vigiar o interior da célula (classe I) vs. apresentar antígenos capturados do exterior (classe II).',
+    dc1:'Expresso constitutivamente em <b>todas as células nucleadas</b>. Eritrócitos (sem núcleo) não expressam MHC I. IFN-α/β e IFN-γ aumentam a expressão durante infecções.',
+    dc2:'Restrito a <b>APCs profissionais</b>: células dendríticas, macrófagos, linfócitos B e epitélio tímico. IFN-γ pode induzir expressão em outros tipos celulares.',
+  },
+  {
+    feat:'🔗 Correceptor do linfócito T',
+    c1:'CD8 (liga domínio α3)',c2:'CD4 (liga domínios α2/β2)',
+    intro:'Os correceptores não reconhecem o antígeno — ligam-se a regiões não polimórficas do MHC e amplificam o sinal de ativação do TCR.',
+    dc1:'<b>CD8</b> liga o domínio α3 — região conservada entre todos os alelos. Recruta a quinase Lck e estabiliza o contato TCR–MHC I. Por isso só linfócitos T CD8⁺ reconhecem MHC I.',
+    dc2:'<b>CD4</b> liga a concavidade formada pelos domínios α2 e β2. Também recruta Lck e amplifica a sinalização. Por isso só linfócitos T CD4⁺ reconhecem MHC II.',
+  },
+  {
+    feat:'📏 Tamanho do peptídeo',
+    c1:'8–11 resíduos (fenda fechada)',c2:'10–30+ resíduos (fenda aberta)',
+    intro:'A diferença de tamanho reflete uma diferença estrutural fundamental nas extremidades da fenda de ligação.',
+    dc1:'A fenda do MHC I tem <b>extremidades fechadas</b>: resíduos conservados fazem contato com os terminais N e C do peptídeo, impondo limite máximo de ~11 resíduos.',
+    dc2:'A fenda do MHC II tem <b>extremidades abertas</b>: o peptídeo se projeta para além da fenda em ambas as pontas. Comprimento ideal: 12–16 aa, mas peptídeos de 30+ aa são possíveis.',
+  },
+  {
+    feat:'🏭 Local de carregamento',
+    c1:'Retículo endoplasmático (RE)',c2:'Vesículas endossomais (MIIC)',
+    intro:'O local de carregamento define de onde vêm os antígenos apresentados — cada classe monitora um compartimento distinto.',
+    dc1:'Peptídeos transportados pelo <b>TAP</b> do citosol para o RE, onde se associam ao MHC I recém-sintetizado. A <b>tapasina</b> facilita o carregamento com peptídeos de alta afinidade.',
+    dc2:'O MHC II chega ao RE com a <b>cadeia invariante</b> bloqueando a fenda. Após transporte para o MIIC, a Ii é degradada, deixando o <b>CLIP</b>. O <b>HLA-DM</b> troca o CLIP por peptídeos antigênicos.',
+  },
+  {
+    feat:'🧪 Origem dos antígenos',
+    c1:'Proteínas citosólicas',c2:'Proteínas extracelulares',
+    intro:'Essa é a divisão funcional central do sistema MHC — cada classe monitora um compartimento diferente.',
+    dc1:'Principalmente proteínas <b>sintetizadas na própria célula</b>: proteínas virais, oncoproteínas, proteínas mal dobradas. Também inclui patógenos que escapam para o citosol.',
+    dc2:'Principalmente proteínas <b>capturadas do ambiente extracelular</b> por endocitose: bactérias, toxinas, proteínas solúveis. Também proteínas degradadas por autofagia.',
+  },
+  {
+    feat:'⚡ Linfócito T responsivo',
+    c1:'T CD8⁺ citotóxico (CTL)',c2:'T CD4⁺ auxiliar',
+    intro:'A classe de MHC determina qual subpopulação de linfócito T é ativada — e portanto que tipo de resposta imune é desencadeada.',
+    dc1:'Ativa <b>linfócitos T CD8⁺ citotóxicos</b>, que matam diretamente células infectadas ou tumorais via perforina e granzimas. Essencial para imunidade antiviral e antitumoral.',
+    dc2:'Ativa <b>linfócitos T CD4⁺ auxiliares</b>, que orquestram a resposta: ativam macrófagos (Th1), estimulam linfócitos B (Tfh), recrutam eosinófilos (Th2). São o maestro da imunidade adaptativa.',
+  },
+  {
+    feat:'🔬 Resíduos polimórficos',
+    c1:'Domínios α1 e α2',c2:'Domínios α1 e β1',
+    intro:'O polimorfismo do MHC é o maior de qualquer gene humano — concentrado nas paredes da fenda de ligação.',
+    dc1:'Variabilidade nos domínios <b>α1 e α2</b>, que formam as duas paredes da fenda. O domínio α3 e a β₂m são não polimórficos.',
+    dc2:'Variabilidade nos domínios <b>α1 e β1</b> — especialmente em β1. Em moléculas HLA-DR, a cadeia α é relativamente conservada e a cadeia β carrega a maior variabilidade alélica.',
+  },
+  {
+    feat:'🛡️ Função imunológica',
+    c1:'Vigilância intracelular',c2:'Vigilância extracelular',
+    intro:'As duas classes juntas cobrem praticamente todos os compartimentos onde patógenos podem se esconder.',
+    dc1:'<b>Monitora o proteoma interno</b> de qualquer célula. Se infectada por vírus ou tumoral, seus peptídeos anormais são exibidos via MHC I para CTLs que a eliminarão.',
+    dc2:'<b>Monitora o ambiente extracelular</b>. APCs capturam e mostram o que está fora para linfócitos T CD4⁺, que coordenam a resposta ativando macrófagos e estimulando produção de anticorpos.',
+  },
+];
+(function buildMHCTable(){
+  const tbody=document.getElementById('mhc-tbody');
+  if(!tbody)return;
+  mhcRows.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.style.cssText='border-top:1px solid var(--border);cursor:pointer;transition:background .12s';
+    tr.innerHTML=`<td style="padding:.6rem 1rem;font-size:13px;font-weight:500;color:var(--text2)">${r.feat} <span style="font-size:11px;color:var(--text3);float:right" id="mhc-chev-${i}">›</span></td><td style="padding:.6rem 1rem;text-align:center;font-size:12.5px;color:var(--c1);background:var(--c1l)">${r.c1}</td><td style="padding:.6rem 1rem;text-align:center;font-size:12.5px;color:var(--c2);background:var(--c2l)">${r.c2}</td>`;
+    const expTr=document.createElement('tr');
+    expTr.innerHTML=`<td colspan="3" style="padding:0"><div class="mhc-row-expand" id="mhc-exp-${i}"><div style="margin-bottom:.4rem;color:var(--text);font-size:13px">${r.intro}</div><div class="mhc-exp-cols"><div class="mhc-exp-c1"><div class="ct">🔵 Classe I</div>${r.dc1}</div><div class="mhc-exp-c2"><div class="ct">🟠 Classe II</div>${r.dc2}</div></div></div></td>`;
+    tr.onmouseenter=()=>{if(!tr.dataset.open)tr.style.background='var(--surface2)';};
+    tr.onmouseleave=()=>{if(!tr.dataset.open)tr.style.background='';};
+    tr.onclick=()=>{
+      const panel=document.getElementById('mhc-exp-'+i);
+      const chev=document.getElementById('mhc-chev-'+i);
+      const isOpen=panel.classList.contains('show');
+      document.querySelectorAll('.mhc-row-expand').forEach(p=>p.classList.remove('show'));
+      document.querySelectorAll('[id^="mhc-chev-"]').forEach(c=>{c.textContent='›';c.style.transform='';});
+      document.querySelectorAll('#mhc-tbody tr').forEach(t=>{t.style.background='';delete t.dataset.open;});
+      if(!isOpen){panel.classList.add('show');chev.textContent='›';chev.style.transform='rotate(90deg)';tr.style.background='var(--surface2)';tr.dataset.open='1';}
+    };
+    tbody.appendChild(tr);
+    tbody.appendChild(expTr);
+  });
+})();
+
+// ─── INIT ─────────────────────────────────────────────
+initDragClassify();
+initOrderDrag();
+initDragMatch();
+buildFinalQuiz();
+</script>
+</body>
+</html>
