@@ -26,12 +26,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 /* NAV */
 .top-nav{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;padding:0 1.5rem}
-.nav-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:0;height:52px}
+.nav-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;flex-wrap:wrap;gap:0;min-height:52px;padding:4px 0}
 .nav-logo{font-family:'DM Serif Display',serif;font-size:1.05rem;margin-right:auto;white-space:nowrap}
 .nav-logo span{color:var(--text3);font-size:.8rem;font-family:'DM Sans',sans-serif;margin-left:6px}
-.nav-tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
-.nav-tabs::-webkit-scrollbar{display:none}
-.nav-tab{padding:6px 12px;border-radius:20px;font-size:12.5px;cursor:pointer;white-space:nowrap;border:none;background:transparent;color:var(--text2);transition:all .15s;position:relative}
+.nav-tabs{display:flex;gap:4px;flex-wrap:wrap;padding:6px 0}
+.nav-tab{padding:6px 14px;border-radius:20px;font-size:12.5px;cursor:pointer;white-space:nowrap;border:none;background:transparent;color:var(--text2);transition:all .15s;position:relative}
 .nav-tab:hover{background:var(--surface2);color:var(--text)}
 .nav-tab.active{background:var(--text);color:#fff}
 .nav-tab.locked{opacity:.4;cursor:default}
@@ -360,6 +359,28 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="term-popup" id="anchor">Resíduos de ancoragem: são aminoácidos em posições específicas do peptídeo (geralmente nas extremidades) que se encaixam nos bolsões da fenda do MHC, estabelecendo a maior parte das interações estabilizadoras. Os resíduos nos demais posições ficam expostos para contato com o TCR.</div>
 </div>
 
+<div class="content-card">
+  <h3>Polimorfismo do MHC e importância nas respostas imunes</h3>
+  <p>Os genes do MHC são os mais <strong>polimórficos</strong> de todo o genoma humano. O sistema HLA humano conta com mais de 5.000 alelos identificados, com mais de 2.500 alelos só para o locus HLA-B. Essa diversidade não é aleatória — é mantida por pressão seletiva dos patógenos ao longo da evolução.</p>
+
+  <div class="highlight">
+    <strong>O que significa polimorfismo no MHC?</strong> Diferentes alelos de um mesmo gene do MHC codificam moléculas com sequências de aminoácidos distintas nas paredes da fenda de ligação. Isso faz com que cada alelo se ligue preferencialmente a um conjunto diferente de peptídeos — e portanto cada indivíduo apresenta um repertório diferente de antígenos às suas células T.
+  </div>
+
+  <p>O polimorfismo tem três consequências imunológicas fundamentais:</p>
+
+  <p><strong>1. Proteção populacional contra patógenos.</strong> Se toda a população expressasse exatamente as mesmas moléculas de MHC, um único patógeno que evoluísse para não ser apresentado por aquele MHC poderia dizimar a espécie inteira. A diversidade alélica garante que qualquer patógeno seja apresentado por pelo menos parte dos indivíduos da população — é uma estratégia evolutiva de proteção coletiva.</p>
+
+  <p><strong>2. Resposta imune individual.</strong> A capacidade de um indivíduo responder a um antígeno específico depende diretamente dos seus alelos de MHC. Se nenhum dos seus alelos conseguir apresentar os peptídeos de um determinado patógeno, a resposta de células T contra esse patógeno será ineficiente — mesmo que o indivíduo seja vacinado. Isso explica por que algumas vacinas funcionam melhor em certos grupos populacionais.</p>
+
+  <p><strong>3. Rejeição de transplantes.</strong> Como os alelos do MHC variam entre indivíduos, as células T de um receptor reconhecem o MHC do doador como estranho — um fenômeno chamado <span class="term" onclick="toggleTerm('aloreact')">alorreatividade</span>. Por isso transplantes exigem compatibilidade HLA entre doador e receptor, e uso de imunossupressores.</p>
+  <div class="term-popup" id="aloreact">Alorreatividade: reconhecimento de moléculas do MHC de outro indivíduo como antígenos estranhos. Ocorre porque os resíduos polimórficos do MHC alogênico são reconhecidos diretamente pelo TCR como se fossem complexos peptídeo-MHC próprio com antígeno estranho. É a principal barreira imunológica aos transplantes.</div>
+
+  <div class="highlight orange">
+    <strong>Expressão codominante:</strong> cada indivíduo herda um haplótipo materno e um paterno. Como os genes do MHC são expressos de forma <strong>codominante</strong>, cada célula expressa simultaneamente os alelos de ambos os progenitores — o que aumenta ainda mais o repertório de peptídeos que um único indivíduo consegue apresentar. Um heterozigoto para HLA-A, -B e -C expressa até 6 moléculas diferentes de MHC I em cada célula.
+  </div>
+</div>
+
 <!-- QUIZ MÓDULO 2 -->
 <div class="quiz-section">
   <div class="quiz-title">✦ Fixação — Módulo 2</div>
@@ -485,7 +506,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="mc-options">
       <button class="mc-opt" onclick="checkMC(this,'m3q3',false,'Incorreto. A clivagem dos peptídeos ocorre no citosol, pelo proteassoma, com ajuste fino pela ERAP no lúmen do RE.')">Clivar peptídeos longos no lúmen do RE para o tamanho adequado</button>
       <button class="mc-opt" onclick="checkMC(this,'m3q3',false,'Incorreto. A ubiquitinação é um sinal para degradação pelo proteassoma — ocorre no citosol, antes da geração dos peptídeos.')">Ubiquitinar proteínas citosólicas para encaminhamento ao proteassoma</button>
-      <button class="mc-opt" onclick="checkMC(this,'m3q3',true,'Correto! A tapasina age como uma "chaperona de edição de peptídeos": ancora o TAP próximo às moléculas de MHC I recém-sintetizadas e <strong>facilita a troca de peptídeos</strong>, favorecendo que a fenda retenha os peptídeos com maior afinidade de ligação. Isso aumenta a qualidade e estabilidade dos complexos exibidos na superfície.')">Aproximar o TAP das moléculas do MHC I e facilitar a edição de peptídeos, favorecendo os de maior afinidade</button>
+      <button class="mc-opt" onclick="checkMC(this,'m3q3',true,'Correto! A tapasina age como uma chaperona de edição de peptídeos: ancora o TAP próximo às moléculas de MHC I recém-sintetizadas e facilita a troca de peptídeos, favorecendo que a fenda retenha os peptídeos com maior afinidade de ligação. Isso aumenta a qualidade e estabilidade dos complexos exibidos na superfície.')">Aproximar o TAP das moléculas do MHC I e facilitar a edição de peptídeos, favorecendo os de maior afinidade</button>
       <button class="mc-opt" onclick="checkMC(this,'m3q3',false,'Incorreto. A associação da β2m com a cadeia α é auxiliada por chaperonas como a calnexina, não pela tapasina diretamente.')">Promover a associação da β2m com a cadeia α no RE</button>
     </div>
     <div class="feedback" id="fb-m3q3"></div>
