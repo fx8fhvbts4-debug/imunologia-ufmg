@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ativação dos Linfócitos T</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f3ee;
+  --surface:#fff;
+  --surface2:#f0ede5;
+  --border:rgba(0,0,0,.09);
+  --border2:rgba(0,0,0,.18);
+  --text:#1a1814;
+  --text2:#6b6760;
+  --text3:#9e9b94;
+  --c1:#1a5fa8;--c1l:#e8f0fa;--c1m:#b8d0f0;
+  --c2:#b05c00;--c2l:#fdf0e0;--c2m:#fad7a0;
+  --c3:#2a7a3b;--c3l:#e8f5ec;--c3m:#a8dbb4;
+  --c4:#7b2d8b;--c4l:#f5eafa;--c4m:#d5a8e8;
+  --green:#2a7a3b;--greenl:#e8f5ec;
+  --red:#b92b2b;--redl:#fdeaea;
+  --r:12px;--rsm:8px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* NAV */
+.top-nav{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;padding:0 1.5rem}
+.nav-inner{max-width:920px;margin:0 auto;display:flex;align-items:center;flex-wrap:wrap;gap:0;min-height:52px;padding:4px 0}
+.nav-logo{font-family:'DM Serif Display',serif;font-size:1.05rem;margin-right:auto;white-space:nowrap}
+.nav-logo span{color:var(--text3);font-size:.8rem;font-family:'DM Sans',sans-serif;margin-left:6px}
+.nav-tabs{display:flex;gap:4px;flex-wrap:wrap;padding:6px 0}
+.nav-tab{padding:6px 14px;border-radius:20px;font-size:12.5px;cursor:pointer;white-space:nowrap;border:none;background:transparent;color:var(--text2);transition:all .15s;position:relative}
+.nav-tab:hover:not(.locked){background:var(--surface2);color:var(--text)}
+.nav-tab.active{background:var(--text);color:#fff}
+.nav-tab.locked{opacity:.4;cursor:default}
+.nav-tab .lock-icon{font-size:10px;margin-left:3px}
+
+/* PROGRESS */
+.progress-bar{height:3px;background:var(--border);position:sticky;top:52px;z-index:199}
+.progress-fill{height:100%;background:var(--c1);transition:width .4s ease}
+
+/* PAGE */
+.page{display:none;max-width:920px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.page.active{display:block}
+
+/* MODULE HEADER */
+.mod-header{margin-bottom:2rem}
+.mod-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:500;margin-bottom:.75rem}
+.mod-title{font-family:'DM Serif Display',serif;font-size:2rem;font-weight:400;line-height:1.2;margin-bottom:.5rem}
+.mod-desc{font-size:14px;color:var(--text2);line-height:1.6}
+
+/* CONTENT CARD */
+.content-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;margin-bottom:1.25rem}
+.content-card h3{font-size:1rem;font-weight:500;margin-bottom:.75rem;color:var(--text)}
+.content-card p{font-size:14px;line-height:1.75;color:var(--text);margin-bottom:.75rem}
+.content-card p:last-child{margin-bottom:0}
+.content-card ul{font-size:14px;line-height:1.75;color:var(--text);padding-left:1.25rem;margin-bottom:.75rem}
+.content-card ul:last-child{margin-bottom:0}
+.content-card li{margin-bottom:.3rem}
+
+/* GLOSSARY */
+.term{border-bottom:1.5px dashed var(--c1);color:var(--c1);cursor:pointer;font-weight:500}
+.term-popup{display:none;background:var(--c1l);border:1px solid var(--c1m);border-radius:var(--rsm);padding:8px 12px;font-size:13px;color:var(--text);margin:4px 0;line-height:1.5}
+.term-popup.open{display:block}
+
+/* HIGHLIGHT */
+.highlight{border-left:3px solid var(--c1);background:var(--c1l);border-radius:0 var(--rsm) var(--rsm) 0;padding:.75rem 1rem;font-size:13.5px;line-height:1.65;margin:.75rem 0}
+.highlight.orange{border-color:var(--c2);background:var(--c2l)}
+.highlight.green{border-color:var(--green);background:var(--greenl)}
+.highlight.purple{border-color:var(--c4);background:var(--c4l)}
+
+/* SIGNAL BOX */
+.signal-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin:1rem 0}
+.signal-box{border-radius:var(--r);padding:1rem;text-align:center}
+.signal-box .sig-num{font-family:'DM Serif Display',serif;font-size:2rem;font-weight:400;display:block;line-height:1}
+.signal-box .sig-label{font-size:12px;font-weight:500;display:block;margin:.3rem 0 .5rem}
+.signal-box .sig-detail{font-size:12px;line-height:1.5;opacity:.9}
+.signal-box.s1{background:var(--c1l);color:var(--c1)}
+.signal-box.s2{background:var(--c2l);color:var(--c2)}
+.signal-box.s3{background:var(--c3l);color:var(--green)}
+
+/* STEPPER */
+.stepper{margin:1rem 0}
+.stepper-track{display:flex;gap:0;margin-bottom:1rem;overflow-x:auto;scrollbar-width:none}
+.stepper-track::-webkit-scrollbar{display:none}
+.step-dot{flex:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
+.step-dot::before{content:'';position:absolute;top:14px;left:50%;right:-50%;height:2px;background:var(--border2);z-index:0}
+.step-dot:last-child::before{display:none}
+.step-num{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;background:var(--surface);z-index:1;transition:all .2s;flex-shrink:0}
+.step-dot.active .step-num{background:var(--c1);border-color:var(--c1);color:#fff}
+.step-dot.done .step-num{background:var(--green);border-color:var(--green);color:#fff}
+.step-label{font-size:11px;color:var(--text3);text-align:center;max-width:80px;line-height:1.3}
+.step-dot.active .step-label,.step-dot.done .step-label{color:var(--text2)}
+.step-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;min-height:160px}
+.step-panel-title{font-weight:500;font-size:1rem;margin-bottom:.5rem}
+.step-panel p{font-size:13.5px;line-height:1.7;color:var(--text);margin-bottom:.5rem}
+.step-panel p:last-child{margin-bottom:0}
+.step-panel .mol-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;margin:0 2px}
+.step-panel .mol-tag.c1{background:var(--c1l);color:var(--c1)}
+.step-panel .mol-tag.c2{background:var(--c2l);color:var(--c2)}
+.step-panel .mol-tag.c3{background:var(--c3l);color:var(--green)}
+.step-panel .mol-tag.gray{background:var(--surface2);color:var(--text2)}
+.step-nav{display:flex;gap:8px;margin-top:1rem;justify-content:space-between}
+.step-nav button{padding:7px 18px;border-radius:var(--rsm);border:1px solid var(--border2);background:var(--surface);color:var(--text2);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.step-nav button:hover{background:var(--surface2);color:var(--text)}
+.step-nav button.primary{background:var(--c1);border-color:var(--c1);color:#fff}
+.step-nav button.primary:hover{opacity:.9}
+
+/* COMPARE TABLE */
+.compare-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:.5rem}
+.compare-table th{padding:8px 12px;text-align:left;font-weight:500;font-size:12px}
+.compare-table th:nth-child(2){background:var(--c1l);color:var(--c1)}
+.compare-table th:nth-child(3){background:var(--c2l);color:var(--c2)}
+.compare-table th:nth-child(4){background:var(--c3l);color:var(--green)}
+.compare-table td{padding:8px 12px;border-top:1px solid var(--border)}
+.compare-table td:nth-child(2){background:var(--c1l)}
+.compare-table td:nth-child(3){background:var(--c2l)}
+.compare-table td:nth-child(4){background:var(--c3l)}
+
+/* TH SUBPOP TABLE */
+.th-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:.75rem}
+.th-table th{padding:8px 10px;font-size:11.5px;font-weight:600;text-align:center;border:1px solid var(--border)}
+.th-table th:first-child{text-align:left}
+.th-table td{padding:8px 10px;border:1px solid var(--border);font-size:13px;vertical-align:top;line-height:1.5}
+.th-table td:first-child{font-weight:500;font-size:12px;color:var(--text2)}
+.th-table tr.th1 td:not(:first-child){background:var(--c1l)}
+.th-table tr.th2 td:not(:first-child){background:var(--c2l)}
+.th-table tr.th17 td:not(:first-child){background:var(--c3l)}
+.th-table tr.treg td:not(:first-child){background:var(--c4l)}
+.th-hdr-1{background:var(--c1l)!important;color:var(--c1)!important}
+.th-hdr-2{background:var(--c2l)!important;color:var(--c2)!important}
+.th-hdr-17{background:var(--c3l)!important;color:var(--green)!important}
+.th-hdr-reg{background:var(--c4l)!important;color:var(--c4)!important}
+
+/* EXPAND ROW */
+.expand-row{cursor:pointer;user-select:none}
+.expand-row td:first-child::before{content:'▶ ';font-size:10px;color:var(--text3)}
+.expand-row.open td:first-child::before{content:'▼ '}
+.expand-detail{display:none;background:var(--surface2)!important}
+.expand-detail.show{display:table-row}
+.expand-detail td{font-size:12.5px;line-height:1.6;color:var(--text2);padding:10px 14px!important}
+
+/* QUIZ */
+.quiz-section{margin-top:2rem}
+.quiz-title{font-size:.8rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:1rem}
+.question-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:1rem}
+.question-card.correct{border-color:var(--green);background:var(--greenl)}
+.question-card.wrong{border-color:var(--red);background:var(--redl)}
+.q-text{font-size:14px;font-weight:500;margin-bottom:1rem;line-height:1.5}
+.q-type{font-size:11px;color:var(--text3);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.05em}
+
+/* MULTIPLE CHOICE */
+.mc-options{display:flex;flex-direction:column;gap:6px}
+.mc-opt{padding:9px 14px;border:1px solid var(--border2);border-radius:var(--rsm);font-size:13.5px;cursor:pointer;background:var(--surface);transition:all .15s;text-align:left;font-family:'DM Sans',sans-serif;line-height:1.4}
+.mc-opt:hover:not(:disabled){background:var(--surface2);border-color:var(--border2)}
+.mc-opt.selected{border-color:var(--c1);background:var(--c1l)}
+.mc-opt.correct-ans{border-color:var(--green)!important;background:var(--greenl)!important}
+.mc-opt.wrong-ans{border-color:var(--red)!important;background:var(--redl)!important}
+.mc-opt:disabled{cursor:default}
+
+/* TRUE/FALSE */
+.tf-wrap{display:flex;gap:8px}
+.tf-btn{flex:1;padding:10px;border:1px solid var(--border2);border-radius:var(--rsm);font-size:14px;font-weight:500;cursor:pointer;background:var(--surface);font-family:'DM Sans',sans-serif;transition:all .15s}
+.tf-btn:hover:not(:disabled){background:var(--surface2)}
+.tf-btn.selected{border-color:var(--c1);background:var(--c1l);color:var(--c1)}
+.tf-btn.correct-ans{border-color:var(--green)!important;background:var(--greenl)!important;color:var(--green)!important}
+.tf-btn.wrong-ans{border-color:var(--red)!important;background:var(--redl)!important;color:var(--red)!important}
+.tf-btn:disabled{cursor:default}
+
+/* DRAG DROP */
+.drag-area{min-height:44px;border:1.5px dashed var(--border2);border-radius:var(--rsm);padding:6px;display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;background:var(--surface);transition:background .15s}
+.drag-area.over{background:var(--c1l);border-color:var(--c1)}
+.drag-chip{padding:5px 12px;border-radius:20px;font-size:12.5px;font-weight:500;cursor:grab;background:var(--surface2);border:1px solid var(--border2);user-select:none;transition:opacity .15s}
+.drag-chip:active{cursor:grabbing;opacity:.7}
+.drag-chip.c1{background:var(--c1l);border-color:var(--c1m);color:var(--c1)}
+.drag-chip.c2{background:var(--c2l);border-color:var(--c2m);color:var(--c2)}
+.drag-chip.c3{background:var(--c3l);border-color:var(--c3m);color:var(--green)}
+.drag-chip.c4{background:var(--c4l);border-color:var(--c4m);color:var(--c4)}
+.drag-label{font-size:12px;color:var(--text3);margin-bottom:4px}
+.drag-zone-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.drag-zone-header{font-size:12px;font-weight:500;margin-bottom:4px}
+.drag-bank{display:flex;flex-wrap:wrap;gap:6px;padding:.75rem;background:var(--surface2);border-radius:var(--rsm);margin-bottom:.75rem;min-height:44px}
+
+/* ORDER DRAG */
+.order-list{display:flex;flex-direction:column;gap:4px}
+.order-item{padding:8px 12px;border:1px solid var(--border2);border-radius:var(--rsm);font-size:13px;background:var(--surface);cursor:grab;display:flex;align-items:center;gap:8px;user-select:none}
+.order-item:active{cursor:grabbing;opacity:.7}
+.order-item .drag-handle{color:var(--text3);font-size:14px}
+.order-item.dragging{opacity:.4}
+.order-item.drag-over{border-color:var(--c1);background:var(--c1l)}
+
+/* FEEDBACK */
+.feedback{display:none;margin-top:.75rem;padding:8px 12px;border-radius:var(--rsm);font-size:13px;line-height:1.5}
+.feedback.show{display:block}
+.feedback.ok{background:var(--greenl);color:var(--green)}
+.feedback.err{background:var(--redl);color:var(--red)}
+.check-btn{margin-top:.75rem;padding:7px 18px;border-radius:var(--rsm);border:none;background:var(--c1);color:#fff;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .15s}
+.check-btn:hover{opacity:.9}
+.check-btn:disabled{opacity:.5;cursor:default}
+
+/* MODULE COMPLETE */
+.mod-complete{background:var(--greenl);border:1px solid var(--green);border-radius:var(--r);padding:1.25rem;display:flex;align-items:center;gap:12px;margin-top:1.5rem}
+.mod-complete-icon{font-size:28px}
+.mod-complete p{font-size:14px;font-weight:500;color:var(--green)}
+.mod-complete small{font-size:12px;color:var(--green);opacity:.8}
+.next-mod-btn{margin-left:auto;padding:8px 18px;border-radius:var(--rsm);border:none;background:var(--green);color:#fff;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+
+/* FINAL QUIZ */
+.final-header{text-align:center;margin-bottom:2rem}
+.final-header h2{font-family:'DM Serif Display',serif;font-size:1.8rem;font-weight:400}
+.final-header p{color:var(--text2);font-size:14px;margin-top:.5rem}
+.quiz-submit-btn{display:block;width:100%;padding:13px;border-radius:var(--rsm);border:none;background:var(--c1);color:#fff;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:1.5rem;transition:opacity .15s}
+.quiz-submit-btn:hover{opacity:.9}
+
+/* RESULT */
+.result-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:2rem;text-align:center;margin-bottom:1.5rem}
+.result-score{font-size:3.5rem;font-weight:300;line-height:1}
+.result-label{font-size:1rem;color:var(--text2);margin-top:.25rem}
+.result-badge{display:inline-block;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:500;margin-top:1rem}
+.result-badge.great{background:var(--greenl);color:var(--green)}
+.result-badge.good{background:var(--c1l);color:var(--c1)}
+.result-badge.review{background:var(--c2l);color:var(--c2)}
+.result-badge.retry{background:var(--redl);color:var(--red)}
+.retry-btn{padding:9px 24px;border-radius:var(--rsm);border:none;background:var(--text);color:#fff;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:1rem}
+.ans-review{margin-top:1.5rem}
+.ans-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--rsm);padding:1rem;margin-bottom:.75rem}
+.ans-item.ok{border-left:3px solid var(--green)}
+.ans-item.err{border-left:3px solid var(--red)}
+.ans-q{font-size:13.5px;font-weight:500;margin-bottom:.4rem}
+.ans-your{font-size:12.5px;color:var(--text2);margin-bottom:.2rem}
+.ans-correct{font-size:12.5px;color:var(--green);font-weight:500;margin-bottom:.4rem}
+.ans-exp{font-size:12.5px;color:var(--text2);line-height:1.5}
+
+/* CLINICAL BOX */
+.clinical-box{background:#fff8f0;border:1px solid var(--c2m);border-radius:var(--r);padding:1.25rem;margin:.75rem 0}
+.clinical-box .clin-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--c2);margin-bottom:.5rem}
+.clinical-box p{font-size:13.5px;line-height:1.65;color:var(--text)}
+
+/* FOOTER */
+.page-footer{text-align:center;margin-top:3rem;font-size:11px;color:var(--text3)}
+
+@media(max-width:640px){
+  .drag-zone-row{grid-template-columns:1fr}
+  .nav-logo span{display:none}
+  .mod-title{font-size:1.5rem}
+  .tf-wrap{flex-direction:column}
+  .signal-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-inner">
+    <div class="nav-logo">Ativação dos Linfócitos T <span>ICB/UFMG</span></div>
+    <div class="nav-tabs" id="navTabs">
+      <button class="nav-tab active" onclick="goPage(0)">1. Três Sinais</button>
+      <button class="nav-tab" onclick="goPage(1)">2. Coestimulação</button>
+      <button class="nav-tab" onclick="goPage(2)">3. IL-2 e Expansão</button>
+      <button class="nav-tab" onclick="goPage(3)">4. Destinos da Célula T</button>
+      <button class="nav-tab" onclick="goPage(4)">📝 Quiz Final</button>
+    </div>
+  </div>
+</nav>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+
+
+<!-- ══════════════════════════════════════════
+     MÓDULO 1 — OS TRÊS SINAIS
+══════════════════════════════════════════ -->
+<div class="page active" id="page0">
+<div class="mod-header">
+  <div class="mod-badge" style="background:var(--c1l);color:var(--c1)">Módulo 1 · Visão Geral</div>
+  <div class="mod-title">Por que ativar exige mais de um sinal?</div>
+  <div class="mod-desc">Entenda a lógica dos três sinais necessários para a ativação do linfócito T e o que acontece quando eles estão ausentes.</div>
+</div>
+
+<div class="content-card">
+  <h3>Onde começa a história</h3>
+  <p>Linfócitos T imaturos (<span class="term" onclick="toggleTerm('naive')">células T naive</span>) circulam continuamente pelo sangue e pelos órgãos linfoides secundários — principalmente os linfonodos e o baço. Eles aguardam o encontro com células dendríticas (DCs) que transportam fragmentos de antígenos capturados nos tecidos infectados.</p>
+  <div class="term-popup" id="naive">Células T naive são linfócitos T maduros que ainda não encontraram o antígeno ao qual são específicos. Expressam o TCR mas níveis muito baixos de moléculas efetoras. São células de vida longa em estado de repouso.</div>
+  <p>Quando uma DC madura chega ao linfonodo, apresenta peptídeos antigênicos nas suas moléculas de MHC e busca o linfócito T com o TCR complementar. Esse encontro é o ponto de partida — mas não é suficiente sozinho para ativar a célula T.</p>
+  <div class="highlight">
+    <strong>Ideia central:</strong> a ativação plena de um linfócito T requer <strong>três sinais distintos</strong>. A ausência de qualquer um deles leva a respostas incompletas ou à tolerância. Essa exigência é um mecanismo de segurança que impede respostas imunes inapropriadas contra antígenos próprios.
+  </div>
+</div>
+
+<div class="content-card">
+  <h3>Os três sinais da ativação</h3>
+  <div class="signal-grid">
+    <div class="signal-box s1">
+      <span class="sig-num">1</span>
+      <span class="sig-label">Reconhecimento do antígeno</span>
+      <div class="sig-detail">TCR reconhece o complexo <strong>peptídeo–MHC</strong> apresentado pela APC</div>
+    </div>
+    <div class="signal-box s2">
+      <span class="sig-num">2</span>
+      <span class="sig-label">Coestimulação</span>
+      <div class="sig-detail">CD28 da célula T se liga às moléculas <strong>B7 (CD80/CD86)</strong> da APC ativada</div>
+    </div>
+    <div class="signal-box s3">
+      <span class="sig-num">3</span>
+      <span class="sig-label">Citocinas</span>
+      <div class="sig-detail"><strong>IL-2</strong> (proliferação) e <strong>IL-12</strong> (diferenciação) amplificam e direcionam a resposta</div>
+    </div>
+  </div>
+  <p style="margin-top:.75rem">O Sinal 1 garante a <strong>especificidade</strong> — apenas células T com o TCR correto são ativadas. O Sinal 2 garante que a resposta só ocorra quando há <strong>perigo real</strong> (microorganismos ou dano tecidual que ativam as APCs). O Sinal 3 determina o <strong>tipo</strong> de resposta efetora gerada.</p>
+</div>
+
+<div class="content-card">
+  <h3>Sinal 1 — Reconhecimento do antígeno pelo TCR</h3>
+  <p>O TCR (<span class="term" onclick="toggleTerm('tcr')">Receptor de Célula T</span>) reconhece especificamente um peptídeo exposto na fenda de uma molécula de MHC da APC. Esse reconhecimento estabiliza o contato entre as duas células, formando a <strong>sinapse imunológica</strong>.</p>
+  <div class="term-popup" id="tcr">O TCR é um heterodímero αβ (na maioria das células T) que reconhece o complexo peptídeo-MHC. Ao contrário dos anticorpos, não reconhece antígenos nativos livres — exige que o antígeno seja "apresentado" pelo MHC. O complexo CD3 associado ao TCR conduz o sinal para o interior da célula.</div>
+  <p>O Sinal 1 ativa vias de sinalização intracelulares (via ZAP-70 e PLCγ) que ativam fatores de transcrição como <strong>NFAT, NF-κB e AP-1</strong>. Sozinho, porém, esse sinal leva à <strong>anergia</strong> — um estado de não-responsividade — e não à proliferação.</p>
+</div>
+
+<div class="content-card">
+  <h3>Sinal 2 — Coestimulação: a chave que libera a resposta</h3>
+  <p>As APCs em repouso (que apresentam antígenos próprios no estado basal) expressam <strong>pouco ou nenhum B7</strong>. Já as APCs ativadas por patógenos, através de receptores do tipo Toll (TLRs) e citocinas inflamatórias como IFN-γ, aumentam drasticamente a expressão de <strong>B7-1 (CD80)</strong> e <strong>B7-2 (CD86)</strong>.</p>
+  <p>Quando <span class="term" onclick="toggleTerm('cd28')">CD28</span> da célula T se liga ao B7 da APC, o Sinal 2 é gerado. Ele amplifica e sustenta os sinais do TCR, ativa a via PI3K/Akt (sobrevivência), estimula a produção de IL-2 e impede a apoptose da célula T.</p>
+  <div class="term-popup" id="cd28">CD28 é expresso em mais de 90% das células T CD4⁺ e em ~50% das T CD8⁺. É um homodímero ligado por ponte dissulfeto. Sua ligação ao B7 não gera sinal sozinha, mas amplifica dramaticamente os sinais do TCR — essencial para a sobrevivência e proliferação.</div>
+  <div class="highlight orange">
+    <strong>E se faltar o Sinal 2?</strong> Se a célula T reconhece o antígeno via TCR sem receber coestimulação (como ocorre com APCs teciduais em repouso apresentando autoantígenos), a célula T entra em <strong>anergia clonal</strong> — torna-se incapaz de responder ao antígeno mesmo em contatos futuros — ou sofre apoptose. Esse é um mecanismo crucial de <strong>tolerância periférica</strong>.
+  </div>
+</div>
+
+<div class="content-card">
+  <h3>A jornada da ativação — passo a passo</h3>
+  <div class="stepper" id="s1">
+    <div class="stepper-track">
+      <div class="step-dot active" id="s1d0"><div class="step-num">1</div><div class="step-label">DC captura antígeno</div></div>
+      <div class="step-dot" id="s1d1"><div class="step-num">2</div><div class="step-label">DC migra ao linfonodo</div></div>
+      <div class="step-dot" id="s1d2"><div class="step-num">3</div><div class="step-label">Sinal 1: TCR–MHC</div></div>
+      <div class="step-dot" id="s1d3"><div class="step-num">4</div><div class="step-label">Sinal 2: CD28–B7</div></div>
+      <div class="step-dot" id="s1d4"><div class="step-num">5</div><div class="step-label">Sinal 3: citocinas</div></div>
+      <div class="step-dot" id="s1d5"><div class="step-num">6</div><div class="step-label">Proliferação e diferenciação</div></div>
+    </div>
+    <div class="step-panel" id="s1p">
+      <div class="step-panel-title">Célula dendrítica captura o antígeno</div>
+      <p>Células dendríticas imaturas nos tecidos periféricos capturam proteínas de microrganismos por fagocitose, macropinocitose ou receptores específicos. Processam as proteínas em peptídeos e os carregam em moléculas de MHC.</p>
+      <p>Simultaneamente, os PAMPs (padrões moleculares associados a patógenos) ativam TLRs nas DCs, induzindo sua maturação: aumento da expressão de MHC, B7 e produção de citocinas inflamatórias.</p>
+    </div>
+    <div class="step-nav">
+      <button onclick="stepNav('s1',-1)">← Anterior</button>
+      <button class="primary" onclick="stepNav('s1',1)">Próximo →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz M1 -->
+<div class="quiz-section">
+  <div class="quiz-title">Verifique seu entendimento</div>
+
+  <div class="question-card" id="m1q1">
+    <div class="q-type">Múltipla escolha</div>
+    <div class="q-text">Qual é a consequência imediata do reconhecimento do antígeno pelo TCR <em>na ausência de coestimulação</em>?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="mcSelect('m1q1',this,false,'A ativação normal ocorre, pois o Sinal 1 é suficiente para a proliferação.')">a) Ativação e proliferação normais do linfócito T</button>
+      <button class="mc-opt" onclick="mcSelect('m1q1',this,true,'Correto! Sem o Sinal 2 (coestimulação), a célula T que reconhece o antígeno torna-se anérgica — incapaz de responder — ou sofre apoptose. Esse mecanismo é essencial para a tolerância periférica a antígenos próprios.')">b) Anergia ou apoptose — estado de não-responsividade</button>
+      <button class="mc-opt" onclick="mcSelect('m1q1',this,false,'A diferenciação em Treg requer sinais específicos (TGF-β), não apenas ausência de B7.')">c) Diferenciação imediata em célula T reguladora</button>
+      <button class="mc-opt" onclick="mcSelect('m1q1',this,false,'Sem o Sinal 2, não há secreção significativa de IL-2 nem proliferação — a célula fica incapaz de responder.')">d) Secreção de IL-2 sem proliferação</button>
+    </div>
+    <div class="feedback" id="m1q1-fb"></div>
+  </div>
+
+  <div class="question-card" id="m1q2">
+    <div class="q-type">Verdadeiro ou Falso</div>
+    <div class="q-text">As células T naive normalmente encontram e reconhecem antígenos <em>nos tecidos periféricos</em> onde a infecção ocorre.</div>
+    <div class="tf-wrap">
+      <button class="tf-btn" onclick="tfSelect('m1q2',this,false,'As células T naive reconhecem antígenos principalmente nos órgãos linfoides secundários (linfonodos, baço), onde as DCs migram trazendo os antígenos dos tecidos infectados. As células T <em>efetoras</em> é que atuam nos tecidos periféricos.')">Verdadeiro</button>
+      <button class="tf-btn" onclick="tfSelect('m1q2',this,true,'Correto! As células T naive circulam pelos órgãos linfoides secundários (linfonodos, baço), e é nesses órgãos que encontram as DCs maduras que chegam dos tecidos. São as células T <em>efetoras</em> que migram para os tecidos periféricos após a ativação.')">Falso</button>
+    </div>
+    <div class="feedback" id="m1q2-fb"></div>
+  </div>
+</div>
+
+<div class="mod-complete" id="m1-complete" style="display:none">
+  <div class="mod-complete-icon">✅</div>
+  <div>
+    <p>Módulo 1 concluído!</p>
+    <small>Você compreendeu a lógica dos três sinais de ativação</small>
+  </div>
+  <button class="next-mod-btn" onclick="unlockAndGo(1)">Próximo módulo →</button>
+</div>
+<div class="page-footer">Abbas · Imunologia Celular e Molecular · Cap. 9</div>
+</div><!-- /page0 -->
+
+
+<!-- ══════════════════════════════════════════
+     MÓDULO 2 — COESTIMULAÇÃO
+══════════════════════════════════════════ -->
+<div class="page" id="page1">
+<div class="mod-header">
+  <div class="mod-badge" style="background:var(--c2l);color:var(--c2)">Módulo 2 · Coestimulação</div>
+  <div class="mod-title">Aceleradores e freios da resposta T</div>
+  <div class="mod-desc">Conheça as moléculas que controlam a magnitude e o momento da ativação dos linfócitos T — e como seu desequilíbrio causa doenças ou permite tratar tumores.</div>
+</div>
+
+<div class="content-card">
+  <h3>A família B7: os coestimuladores das APCs</h3>
+  <p>As moléculas coestimuladoras das APCs pertencem à família B7. As mais importantes são <strong>B7-1 (CD80)</strong> e <strong>B7-2 (CD86)</strong> — glicoproteínas de membrana expressas principalmente em células dendríticas, macrófagos e linfócitos B ativados.</p>
+  <p>Sua expressão é <strong>regulada</strong>: APCs em repouso expressam B7 em níveis muito baixos. Após ativação por PAMPs (via TLRs) ou por citocinas inflamatórias (IFN-γ), a expressão de B7 aumenta dramaticamente — garantindo que a coestimulação só ocorra quando existe <strong>perigo real</strong>.</p>
+  <div class="highlight">As moléculas B7 ligam-se a dois receptores nas células T com efeitos opostos: <strong>CD28</strong> (ativa) e <strong>CTLA-4</strong> (inibe). O balanço entre esses dois receptores determina se a célula T responde ou é freada.</div>
+</div>
+
+<div class="content-card">
+  <h3>CD28, CTLA-4 e PD-1: o mesmo ligante, funções opostas</h3>
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Característica</th>
+        <th>CD28</th>
+        <th>CTLA-4</th>
+        <th>PD-1</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Ligante(s)</td>
+        <td>B7-1, B7-2</td>
+        <td>B7-1, B7-2</td>
+        <td>PD-L1, PD-L2</td>
+      </tr>
+      <tr>
+        <td>Expressão</td>
+        <td>Constitutiva em células T naive</td>
+        <td>Induzida 1–2 dias após ativação</td>
+        <td>Induzida em células efetoras e exaustas</td>
+      </tr>
+      <tr>
+        <td>Afinidade pelo B7</td>
+        <td>Menor</td>
+        <td><strong>20–50× maior</strong> que CD28</td>
+        <td>— (ligante diferente)</td>
+      </tr>
+      <tr>
+        <td>Sinalização</td>
+        <td>PI3K/Akt → sobrevivência, IL-2 ↑</td>
+        <td>ITIM → inibe TCR e CD28</td>
+        <td>SHP-2 → inibe TCR</td>
+      </tr>
+      <tr>
+        <td>Função principal</td>
+        <td>⚡ Coestimulação de células T naive</td>
+        <td>🛑 Freio precoce (órgãos linfoides)</td>
+        <td>🛑 Freio tardio (tecidos periféricos)</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top:.75rem;font-size:13px;color:var(--text2)">O CTLA-4, por ter <em>afinidade muito maior</em> pelo B7 do que o CD28, compete e "rouba" o ligante das APCs, reduzindo o sinal coestimulador. Essa competição é o mecanismo central de regulação da resposta T inicial.</p>
+</div>
+
+<div class="content-card">
+  <h3>CD40L–CD40: a célula T "licencia" a APC</h3>
+  <p>Além de receber sinais das APCs, a célula T ativada também envia sinais de volta. Um dos mais importantes é o <span class="term" onclick="toggleTerm('cd40l')">CD40L (CD154)</span> — membro da superfamília do TNF — expresso em células T CD4⁺ horas após o reconhecimento do antígeno.</p>
+  <div class="term-popup" id="cd40l">CD40L (ligante de CD40, CD154) é uma proteína trimérica da superfamília do TNF. Expressa principalmente em células T CD4⁺ ativadas, mas também em plaquetas, mastócitos e células NK. Seu receptor CD40 pertence à superfamília do TNFR e recruta proteínas adaptadoras TRAFs para a sinalização intracelular.</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin:.75rem 0">
+    <div style="background:var(--c1l);border-radius:var(--rsm);padding:.85rem">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--c1);margin-bottom:.5rem">CD40L (CD154)</div>
+      <ul style="font-size:12.5px;line-height:1.7;color:var(--text);padding-left:1rem">
+        <li><strong>Família:</strong> superfamília do TNF (homotrímero)</li>
+        <li><strong>Expressão principal:</strong> células T CD4⁺ ativadas</li>
+        <li><strong>Cinética:</strong> detectável em ~1–2h, pico em 4–8h, declínio em 24–48h após ativação</li>
+        <li><strong>Outras células:</strong> plaquetas ativadas, mastócitos, basófilos, NK</li>
+        <li><strong>Indução:</strong> requer Sinal 1 (TCR) + Sinal 2 (CD28); regulado por NFAT, AP-1, NF-κB</li>
+      </ul>
+    </div>
+    <div style="background:var(--c2l);border-radius:var(--rsm);padding:.85rem">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--c2);margin-bottom:.5rem">CD40 (receptor)</div>
+      <ul style="font-size:12.5px;line-height:1.7;color:var(--text);padding-left:1rem">
+        <li><strong>Família:</strong> superfamília do TNFR</li>
+        <li><strong>Expressão constitutiva:</strong> células B, DCs, macrófagos, células endoteliais, epitélio tímico</li>
+        <li><strong>Sinalização:</strong> recruta TRAFs (TRAF2, TRAF3, TRAF5, TRAF6)</li>
+        <li><strong>Vias ativadas:</strong> NF-κB clássico e alternativo, MAPK/JNK, PI3K</li>
+        <li><strong>Resultado:</strong> sobrevivência, proliferação, diferenciação e aumento de B7</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin-top:1.25rem;margin-bottom:.6rem">Funções da interação CD40L–CD40</h3>
+  <p>A ligação CD40L–CD40 gera efeitos em múltiplas células-alvo, funcionando como um sinal de amplificação bidirecional:</p>
+
+  <div style="margin:.75rem 0">
+    <!-- Células B -->
+    <div style="border:1px solid var(--border);border-radius:var(--rsm);overflow:hidden;margin-bottom:6px">
+      <div style="background:var(--c1l);padding:.6rem 1rem;display:flex;align-items:center;gap:8px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        <span style="font-size:15px">🅱</span>
+        <span style="font-size:13px;font-weight:500;color:var(--c1)">Células B — auxílio T-dependente</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--c1)">▼ detalhes</span>
+      </div>
+      <div style="padding:.75rem 1rem;font-size:13px;line-height:1.7;display:none">
+        <p>A interação CD40L–CD40 é <strong>obrigatória para a resposta humoral T-dependente</strong>. Nas células B, ela induz:</p>
+        <ul style="padding-left:1.1rem;margin-top:.4rem">
+          <li><strong>Troca de isotipo (class switching):</strong> ativa a enzima AID (deaminase de citidinas induzida por ativação), que viabiliza a recombinação do gene das imunoglobulinas → produção de IgG, IgA, IgE em vez de só IgM</li>
+          <li><strong>Formação do centro germinativo:</strong> estrutura nos folículos dos órgãos linfoides onde ocorrem hipermutação somática e seleção de alta afinidade</li>
+          <li><strong>Hipermutação somática:</strong> mutações pontuais no gene V das Ig → aumento da afinidade do anticorpo pelo antígeno</li>
+          <li><strong>Diferenciação em plasmócitos e células B de memória</strong></li>
+        </ul>
+      </div>
+    </div>
+    <!-- DCs -->
+    <div style="border:1px solid var(--border);border-radius:var(--rsm);overflow:hidden;margin-bottom:6px">
+      <div style="background:var(--c2l);padding:.6rem 1rem;display:flex;align-items:center;gap:8px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        <span style="font-size:15px">🌟</span>
+        <span style="font-size:13px;font-weight:500;color:var(--c2)">Células dendríticas — "licenciamento"</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--c2)">▼ detalhes</span>
+      </div>
+      <div style="padding:.75rem 1rem;font-size:13px;line-height:1.7;display:none">
+        <p>A célula T CD4⁺ "licencia" a DC ao ligar CD40L ao CD40. A DC licenciada:</p>
+        <ul style="padding-left:1.1rem;margin-top:.4rem">
+          <li>Aumenta a expressão de <strong>B7 (CD80/CD86)</strong> → amplifica coestimulação para outras células T</li>
+          <li>Produz <strong>IL-12</strong> → direciona diferenciação para Th1 e ativa células NK</li>
+          <li>Aumenta sobrevivência e capacidade apresentadora → resposta mais eficiente</li>
+          <li>Uma DC licenciada consegue ativar células T CD8⁺ naive sem ajuda adicional (<strong>cross-priming</strong>)</li>
+        </ul>
+      </div>
+    </div>
+    <!-- Macrófagos -->
+    <div style="border:1px solid var(--border);border-radius:var(--rsm);overflow:hidden">
+      <div style="background:var(--c3l);padding:.6rem 1rem;display:flex;align-items:center;gap:8px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        <span style="font-size:15px">🦠</span>
+        <span style="font-size:13px;font-weight:500;color:var(--green)">Macrófagos — ativação microbicida</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--green)">▼ detalhes</span>
+      </div>
+      <div style="padding:.75rem 1rem;font-size:13px;line-height:1.7;display:none">
+        <p>Em conjunto com o IFN-γ produzido pelas células Th1, o CD40L–CD40 ativa macrófagos:</p>
+        <ul style="padding-left:1.1rem;margin-top:.4rem">
+          <li>Aumenta a produção de <strong>espécies reativas de oxigênio e nitrogênio (RON/NO)</strong></li>
+          <li>Induz fusão de fagossomos com lisossomos → melhor eliminação de microrganismos intracelulares</li>
+          <li>Estimula produção de <strong>IL-12, IL-6 e TNF</strong> → amplifica inflamação local</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="clinical-box" style="margin-top:.75rem">
+    <div class="clin-title">🧬 Síndrome Hiper-IgM ligada ao X</div>
+    <p>Mutações no gene do <strong>CD40L</strong> (cromossomo X) causam a Síndrome Hiper-IgM tipo 1. Sem CD40L funcional, as células B não realizam troca de isotipo → os pacientes produzem apenas IgM. Clinicamente: infecções bacterianas recorrentes, infecções oportunistas por <em>Pneumocystis jirovecii</em> e <em>Cryptosporidium</em>, ausência de centros germinativos e baixíssimos níveis de IgG, IgA e IgE.</p>
+  </div>
+</div>
+
+<div class="content-card">
+  <h3>Arraste para classificar: molécula × função</h3>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:.75rem">Arraste cada molécula para a categoria correta.</p>
+  <div class="drag-bank" id="dd2-bank">
+    <div class="drag-chip c1" draggable="true" data-id="cd28">CD28</div>
+    <div class="drag-chip c2" draggable="true" data-id="ctla4">CTLA-4</div>
+    <div class="drag-chip c2" draggable="true" data-id="pd1">PD-1</div>
+    <div class="drag-chip c1" draggable="true" data-id="cd40l">CD40L</div>
+  </div>
+  <div class="drag-zone-row">
+    <div>
+      <div class="drag-zone-header" style="color:var(--green)">✅ Ativa / amplifica a resposta T</div>
+      <div class="drag-area" id="dd2-zona-ativa" data-accept="cd28,cd40l"></div>
+    </div>
+    <div>
+      <div class="drag-zone-header" style="color:var(--red)">🛑 Inibe / regula a resposta T</div>
+      <div class="drag-area" id="dd2-zona-inibe" data-accept="ctla4,pd1"></div>
+    </div>
+  </div>
+  <button class="check-btn" onclick="checkDrag2()">Verificar</button>
+  <div class="feedback" id="dd2-fb"></div>
+</div>
+
+<div class="clinical-box">
+  <div class="clin-title">💊 Aplicação clínica — Imunoterapia de tumores</div>
+  <p>Os receptores inibitórios CTLA-4 e PD-1, que normalmente freiam as células T, são explorados pelos tumores para escapar da imunidade. Anticorpos monoclonais que <strong>bloqueiam esses freios</strong> — denominados <em>inibidores de checkpoint</em> — "liberam" as células T para atacar o tumor.</p>
+  <p style="margin-top:.5rem"><strong>Ipilimumabe</strong> (anti-CTLA-4) e <strong>pembrolizumabe / nivolumabe</strong> (anti-PD-1) revolucionaram o tratamento de melanoma, câncer de pulmão e outros tumores. O efeito adverso mais importante é o surgimento de reações autoimunes — exatamente porque os freios fisiológicos foram removidos.</p>
+</div>
+
+<!-- Quiz M2 -->
+<div class="quiz-section">
+  <div class="quiz-title">Verifique seu entendimento</div>
+
+  <div class="question-card" id="m2q1">
+    <div class="q-type">Múltipla escolha</div>
+    <div class="q-text">Por que o CTLA-4 consegue inibir a coestimulação efetivamente, mesmo sendo expresso em menor quantidade que o CD28 na superfície das células T?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="mcSelect('m2q1',this,false,'O CTLA-4 não bloqueia o TCR diretamente.')">a) Porque bloqueia diretamente o TCR impedindo o reconhecimento do antígeno</button>
+      <button class="mc-opt" onclick="mcSelect('m2q1',this,true,'Correto! O CTLA-4 tem afinidade 20–50 vezes maior pelo B7 do que o CD28. Mesmo em menor quantidade, ele "rouba" o ligante das APCs e ativa vias inibitórias intracelulares (ITIMs), impedindo a coestimulação pelo CD28.')">b) Porque tem afinidade muito maior pelo B7 (20–50×) do que o CD28, competindo efetivamente pelo ligante</button>
+      <button class="mc-opt" onclick="mcSelect('m2q1',this,false,'O CTLA-4 não degrada B7 — ele se liga a B7 com alta afinidade e bloqueia o acesso do CD28.')">c) Porque degrada as moléculas B7 da superfície da APC por endocitose</button>
+      <button class="mc-opt" onclick="mcSelect('m2q1',this,false,'O CTLA-4 não interfere na sinalização do PD-1.')">d) Porque estimula a via do PD-1 que sequestra sinais coestimuladores</button>
+    </div>
+    <div class="feedback" id="m2q1-fb"></div>
+  </div>
+
+  <div class="question-card" id="m2q2">
+    <div class="q-type">Verdadeiro ou Falso</div>
+    <div class="q-text">As moléculas B7 (CD80 e CD86) são expressas constitutivamente em altos níveis em todas as APCs, independentemente de infecção ou sinais de perigo.</div>
+    <div class="tf-wrap">
+      <button class="tf-btn" onclick="tfSelect('m2q2',this,false,'APCs em repouso expressam pouco ou nenhum B7. A expressão alta de B7 é induzida pela ativação das APCs por PAMPs (via TLRs) e citocinas inflamatórias — exatamente para garantir que a coestimulação ocorra apenas na presença de perigo real.')">Verdadeiro</button>
+      <button class="tf-btn" onclick="tfSelect('m2q2',this,true,'Correto! A expressão de B7 é regulada e aumenta drasticamente após ativação das APCs por patógenos e citocinas inflamatórias. APCs em repouso expressam B7 em níveis muito baixos — isso impede a ativação de células T autorreativas por APCs que apresentam antígenos próprios.')">Falso</button>
+    </div>
+    <div class="feedback" id="m2q2-fb"></div>
+  </div>
+</div>
+
+<div class="mod-complete" id="m2-complete" style="display:none">
+  <div class="mod-complete-icon">✅</div>
+  <div>
+    <p>Módulo 2 concluído!</p>
+    <small>Você domina os aceleradores e freios da ativação T</small>
+  </div>
+  <button class="next-mod-btn" onclick="unlockAndGo(2)">Próximo módulo →</button>
+</div>
+<div class="page-footer">Abbas · Imunologia Celular e Molecular · Cap. 9</div>
+</div><!-- /page1 -->
+
+
+<!-- ══════════════════════════════════════════
+     MÓDULO 3 — IL-2 E EXPANSÃO CLONAL
+══════════════════════════════════════════ -->
+<div class="page" id="page2">
+<div class="mod-header">
+  <div class="mod-badge" style="background:var(--c3l);color:var(--green)">Módulo 3 · Resposta Funcional</div>
+  <div class="mod-title">IL-2 e a expansão clonal</div>
+  <div class="mod-desc">Descubra como as alterações nas moléculas de superfície sinalizam a ativação e como a IL-2 coordena a proliferação massiva das células T específicas.</div>
+</div>
+
+<div class="content-card">
+  <h3>A célula T muda de cara após a ativação</h3>
+  <p>Nas horas e dias seguintes ao reconhecimento do antígeno e à coestimulação, a célula T altera dramaticamente o perfil de moléculas na sua superfície. Essas mudanças <strong>retêm a célula no linfonodo</strong>, <strong>amplificam a resposta</strong> e, mais tarde, <strong>regulam seu encerramento</strong>.</p>
+  <div class="stepper" id="s3">
+    <div class="stepper-track">
+      <div class="step-dot active" id="s3d0"><div class="step-num">1</div><div class="step-label">Célula naive</div></div>
+      <div class="step-dot" id="s3d1"><div class="step-num">2</div><div class="step-label">CD69 ↑ (h1–2)</div></div>
+      <div class="step-dot" id="s3d2"><div class="step-num">3</div><div class="step-label">IL-2 + CD25 ↑ (h2–12)</div></div>
+      <div class="step-dot" id="s3d3"><div class="step-num">4</div><div class="step-label">CD40L ↑ (h24–48)</div></div>
+      <div class="step-dot" id="s3d4"><div class="step-num">5</div><div class="step-label">CTLA-4 ↑ (d1–2)</div></div>
+      <div class="step-dot" id="s3d5"><div class="step-num">6</div><div class="step-label">Divisão (d3–5)</div></div>
+    </div>
+    <div class="step-panel" id="s3p">
+      <div class="step-panel-title">Estado basal — célula T naive</div>
+      <p>A célula T naive expressa o TCR e o CD28, mas tem baixos níveis de CD25 (cadeia α do receptor de IL-2), não expressa CD40L nem CTLA-4.</p>
+      <p>Em repouso, circula entre o sangue e os órgãos linfoides secundários via receptores de retorno aos linfonodos <span class="mol-tag c1">CCR7</span> e <span class="mol-tag c1">L-selectina (CD62L)</span>.</p>
+    </div>
+    <div class="step-nav">
+      <button onclick="stepNav('s3',-1)">← Anterior</button>
+      <button class="primary" onclick="stepNav('s3',1)">Próximo →</button>
+    </div>
+  </div>
+</div>
+
+<div class="content-card">
+  <h3>IL-2: a citocina que impulsiona a proliferação</h3>
+  <p>A <span class="term" onclick="toggleTerm('il2')">interleucina-2 (IL-2)</span> é uma glicoproteína de 14–17 kDa produzida principalmente por células T CD4⁺ ativadas a partir de 1–2 horas após o reconhecimento do antígeno. Sua produção atinge o pico em 8–12 horas e declina rapidamente.</p>
+  <div class="term-popup" id="il2">A IL-2 foi originalmente chamada de "fator de crescimento de células T" (TCGF). É uma citocina autócrina e parácrina: age nas mesmas células que a produziram e nas células T vizinhas na sinapse imunológica.</div>
+  <p>A ação da IL-2 é mediada pelo seu receptor <strong>IL-2R</strong>, composto por três cadeias:</p>
+  <ul>
+    <li><strong>Cadeia α (CD25 / IL-2Rα):</strong> específica do IL-2R; expressa em baixos níveis nas células naive, dramaticamente aumentada após ativação. Confere alta afinidade ao receptor.</li>
+    <li><strong>Cadeia β (CD122):</strong> compartilhada com o receptor de IL-15; presente em células T em repouso e NK.</li>
+    <li><strong>Cadeia γ comum (γc / CD132):</strong> compartilhada com receptores de IL-4, IL-7, IL-9, IL-15 e IL-21.</li>
+  </ul>
+  <div class="highlight green">
+    <strong>O mecanismo de amplificação:</strong> a ativação induz a expressão de CD25 → formação do complexo IL-2Rαβγ de alta afinidade → resposta eficiente mesmo a baixas concentrações de IL-2 → proliferação massiva. É um <strong>loop de retroalimentação positiva</strong>: a célula T produz IL-2 e simultaneamente aumenta seu próprio receptor para IL-2.
+  </div>
+</div>
+
+<div class="content-card">
+  <h3>Expansão clonal — de um para milhares</h3>
+  <p>A combinação de Sinal 1 + Sinal 2 + IL-2 desencadeia ciclos rápidos de divisão celular. Um único linfócito T específico para um antígeno pode gerar <strong>centenas a milhares de clones idênticos</strong> em poucos dias — todos com o mesmo TCR e a mesma especificidade.</p>
+  <p>Essa <strong>expansão clonal</strong> é essencial para ter linfócitos efetores em número suficiente para combater a infecção. Antes da ativação, apenas 1 em cada 10⁵–10⁶ células T é específica para um dado antígeno. Após a expansão, esse clone pode representar uma fração substancial dos linfócitos circulantes.</p>
+  <div class="highlight">
+    <strong>Após a resolução da infecção:</strong> mais de 90% das células T efetoras expandidas morrem por apoptose — processo de <em>contração clonal</em>. Uma pequena fração (5–10%) sobrevive como <strong>células T de memória</strong> de longa duração.
+  </div>
+</div>
+
+<!-- Quiz M3 -->
+<div class="quiz-section">
+  <div class="quiz-title">Verifique seu entendimento</div>
+
+  <div class="question-card" id="m3q1">
+    <div class="q-type">Múltipla escolha</div>
+    <div class="q-text">Qual cadeia do receptor de IL-2 é induzida pela ativação do linfócito T e confere alta afinidade ao receptor, sendo um marcador clássico de ativação?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="mcSelect('m3q1',this,false,'A cadeia β (CD122) está presente em células T em repouso e células NK, com afinidade moderada para IL-2.')">a) Cadeia β (CD122)</button>
+      <button class="mc-opt" onclick="mcSelect('m3q1',this,false,'A cadeia γ comum é constitutiva e compartilhada por múltiplos receptores de citocinas.')">b) Cadeia γ comum (CD132)</button>
+      <button class="mc-opt" onclick="mcSelect('m3q1',this,true,'Correto! A cadeia α (CD25 / IL-2Rα) é específica do IL-2R e fortemente induzida pela ativação. Sua adição ao complexo βγc aumenta a afinidade do receptor de ~10⁻⁹ M para ~10⁻¹¹ M, permitindo resposta eficiente a baixas concentrações de IL-2.')">c) Cadeia α (CD25 / IL-2Rα)</button>
+      <button class="mc-opt" onclick="mcSelect('m3q1',this,false,'Não existe cadeia δ no receptor de IL-2.')">d) Cadeia δ (específica de IL-2)</button>
+    </div>
+    <div class="feedback" id="m3q1-fb"></div>
+  </div>
+
+  <div class="question-card" id="m3q2">
+    <div class="q-type">Verdadeiro ou Falso</div>
+    <div class="q-text">A IL-2 age exclusivamente de forma <em>parácrina</em>, sendo secretada pelas células T ativadas e agindo apenas em células T vizinhas diferentes.</div>
+    <div class="tf-wrap">
+      <button class="tf-btn" onclick="tfSelect('m3q2',this,false,'A IL-2 age tanto de forma autocrina (na própria célula que a secretou, via IL-2R na membrana da sinapse imunológica) quanto parácrina (em células T vizinhas). As células T ativadas produzem IL-2 e expressam IL-2R, respondendo ao seu próprio produto — um mecanismo de amplificação autossustentado.')">Verdadeiro</button>
+      <button class="tf-btn" onclick="tfSelect('m3q2',this,true,'Correto! A IL-2 age de forma autocrina — nas mesmas células T que a produziram — e parácrina — em células T vizinhas na sinapse imunológica. As células T ativadas produzem IL-2 e, simultaneamente, upregulam CD25, respondendo eficientemente ao seu próprio produto.')">Falso</button>
+    </div>
+    <div class="feedback" id="m3q2-fb"></div>
+  </div>
+</div>
+
+<div class="mod-complete" id="m3-complete" style="display:none">
+  <div class="mod-complete-icon">✅</div>
+  <div>
+    <p>Módulo 3 concluído!</p>
+    <small>Você entendeu o papel da IL-2 e a expansão clonal</small>
+  </div>
+  <button class="next-mod-btn" onclick="unlockAndGo(3)">Próximo módulo →</button>
+</div>
+<div class="page-footer">Abbas · Imunologia Celular e Molecular · Cap. 9</div>
+</div><!-- /page2 -->
+
+
+<!-- ══════════════════════════════════════════
+     MÓDULO 4 — DESTINOS DA CÉLULA T
+══════════════════════════════════════════ -->
+<div class="page" id="page3">
+<div class="mod-header">
+  <div class="mod-badge" style="background:var(--c4l);color:var(--c4)">Módulo 4 · Diferenciação</div>
+  <div class="mod-title">Destinos da célula T ativada</div>
+  <div class="mod-desc">Após a ativação, as células T se diferenciam em subpopulações especializadas com funções distintas. Conheça os fatores que determinam cada destino.</div>
+</div>
+
+<div class="content-card">
+  <h3>Subpopulações de células T CD4⁺ auxiliares</h3>
+  <p>As células T CD4⁺ ativadas podem diferenciar-se em diferentes subpopulações efetoras, dependendo do <strong>ambiente de citocinas</strong> presente no momento da ativação. Cada subpopulação expressa um <strong>fator de transcrição chave</strong> característico, produz um conjunto próprio de citocinas e exerce funções efetoras distintas.</p>
+  <p style="font-size:13px;color:var(--text2)">Clique em cada linha para expandir os detalhes.</p>
+
+  <table class="th-table" style="margin-top:.5rem">
+    <thead>
+      <tr>
+        <th></th>
+        <th class="th-hdr-1">Th1</th>
+        <th class="th-hdr-2">Th2</th>
+        <th class="th-hdr-17">Th17</th>
+        <th class="th-hdr-reg">Treg</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="expand-row" onclick="toggleRow('row-indutor')">
+        <td>Citocinas indutoras</td>
+        <td class="th1-c">IL-12 + IFN-γ</td>
+        <td class="th2-c">IL-4</td>
+        <td class="th17-c">IL-6 + TGF-β</td>
+        <td class="treg-c">TGF-β + IL-2</td>
+      </tr>
+      <tr class="expand-detail th1 th2 th17 treg" id="row-indutor">
+        <td colspan="5">
+          <strong>Th1:</strong> IL-12 (produzida por DCs e macrófagos ativados) é a citocina indutora principal; IFN-γ amplifica via feedback positivo.<br>
+          <strong>Th2:</strong> IL-4 é necessária e suficiente; produzida inicialmente por mastócitos, basófilos e as próprias células T.<br>
+          <strong>Th17:</strong> TGF-β (sozinho) promove Treg; mas TGF-β + IL-6 (ambiente inflamatório) desvia para Th17. IL-23 estabiliza e expande o fenótipo.<br>
+          <strong>Treg:</strong> TGF-β + IL-2 promovem a expressão de FoxP3 e a diferenciação em células T reguladoras (iTreg periféricas).
+        </td>
+      </tr>
+      <tr class="expand-row th1 th2 th17 treg" onclick="toggleRow('row-tf')">
+        <td>Fator de transcrição</td>
+        <td><strong>T-bet</strong></td>
+        <td><strong>GATA-3</strong></td>
+        <td><strong>RORγt</strong></td>
+        <td><strong>FoxP3</strong></td>
+      </tr>
+      <tr class="expand-detail" id="row-tf">
+        <td colspan="5">
+          Os fatores de transcrição são essenciais para o comprometimento com cada linhagem: sua expressão é necessária e suficiente para definir a identidade de cada subpopulação. Camundongos knockout para <em>T-bet</em> não geram Th1; knockout para <em>GATA-3</em> bloqueiam o desenvolvimento de Th2. <em>FoxP3</em> é o marcador definitivo de células T reguladoras — sua mutação causa a síndrome IPEX (autoimunidade grave).
+        </td>
+      </tr>
+      <tr class="expand-row th1 th2 th17 treg" onclick="toggleRow('row-citocinas')">
+        <td>Citocinas produzidas</td>
+        <td>IFN-γ, TNF, IL-2</td>
+        <td>IL-4, IL-5, IL-13</td>
+        <td>IL-17A, IL-17F, IL-22</td>
+        <td>IL-10, TGF-β</td>
+      </tr>
+      <tr class="expand-detail" id="row-citocinas">
+        <td colspan="5">
+          <strong>Th1 → IFN-γ:</strong> ativa macrófagos para destruir patógenos intracelulares fagocitados; promove resposta Th1 (feedback+) e inibe Th2.<br>
+          <strong>Th2 → IL-4/IL-5/IL-13:</strong> IL-4 estimula troca de isotipo para IgE e IgG1; IL-5 ativa eosinófilos; IL-13 estimula produção de muco e peristaltismo.<br>
+          <strong>Th17 → IL-17:</strong> recruta neutrófilos ao sítio de infecção; IL-22 estimula células epiteliais a produzir peptídeos antimicrobianos.<br>
+          <strong>Treg → IL-10/TGF-β:</strong> suprimem a ativação de APCs e outros linfócitos; mantêm tolerância a autoantígenos e antígenos ambientais.
+        </td>
+      </tr>
+      <tr class="expand-row th1 th2 th17 treg" onclick="toggleRow('row-funcao')">
+        <td>Função efetora</td>
+        <td>Ativa macrófagos; imunidade a intracelulares</td>
+        <td>Ativa eosinófilos/mastócitos; antiparasitária</td>
+        <td>Recruta neutrófilos; defesa fúngica/bacteriana</td>
+        <td>Suprime respostas; tolerância</td>
+      </tr>
+      <tr class="expand-detail" id="row-funcao">
+        <td colspan="5">
+          <strong>Th1:</strong> essencial na defesa contra <em>Mycobacterium tuberculosis</em>, <em>Listeria</em> e outros patógenos intracelulares. IFN-γ ativa o "burst oxidativo" dos macrófagos e aumenta a expressão de MHC II.<br>
+          <strong>Th2:</strong> proteção contra helmintos (vermes parasitas). Mas também é o perfil dominante nas alergias — IgE + mastócitos = hipersensibilidade tipo I.<br>
+          <strong>Th17:</strong> defesa crucial contra <em>Candida</em> e bactérias extracelulares nas superfícies mucosas. Disfunção leva a candidíase mucocutânea crônica. Também implicado na patogênese da psoríase e artrite reumatoide.<br>
+          <strong>Treg:</strong> expressam CD25 constitutivamente e suprimem células T autorreativas. FoxP3⁺ Tregs são essenciais para prevenir autoimunidade.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="content-card">
+  <h3>Células T CD8⁺ citotóxicas (CTLs)</h3>
+  <p>Os linfócitos T CD8⁺ ativados diferenciam-se em <strong>CTLs (Cytotoxic T Lymphocytes)</strong> — as "células assassinas" do sistema imune adaptativo. Reconhecem células que apresentam peptídeos virais ou tumorais via <strong>MHC de classe I</strong> (expresso em todas as células nucleadas) e as destroem.</p>
+  <p>Os mecanismos de morte incluem:</p>
+  <ul>
+    <li><strong>Perforina + granzimas:</strong> perforina cria poros na membrana da célula-alvo; granzimas entram e ativam caspases → apoptose.</li>
+    <li><strong>Fas–FasL:</strong> FasL na superfície do CTL liga-se ao Fas (CD95) da célula-alvo → apoptose por via extrínseca.</li>
+    <li><strong>Citocinas:</strong> secreção de IFN-γ e TNF que têm efeitos antivirais e pró-apoptóticos.</li>
+  </ul>
+  <div class="highlight">A morte da célula-alvo pelos CTLs é <strong>direcionada e não-bystander</strong>: o CTL forma uma sinapse imunológica com a célula-alvo, libera grânulos citotóxicos de forma polarizada (apenas em direção à célula-alvo) e depois se desconecta — intacto — para matar outras células.</div>
+</div>
+
+<div class="content-card">
+  <h3>Células T de memória — a proteção duradoura</h3>
+  <p>Após a resolução da infecção e a contração clonal, uma pequena fração de células T ativadas sobrevive como <strong>células T de memória de longa duração</strong>. Elas respondem muito mais rápido e vigorosamente a um segundo encontro com o mesmo antígeno.</p>
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Característica</th>
+        <th>Memória Central (Tcm)</th>
+        <th>Memória Efetora (Tem)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Localização</td><td>Órgãos linfoides (circulantes)</td><td>Tecidos periféricos</td></tr>
+      <tr><td>Marcadores</td><td>CCR7⁺, CD62L⁺, CD44⁺</td><td>CCR7⁻, CD62L⁻, CD44⁺</td></tr>
+      <tr><td>Função imediata</td><td>Proliferação rápida ao reestímulo</td><td>Atividade efetora imediata</td></tr>
+      <tr><td>Longevidade</td><td>Muito longa (anos/décadas)</td><td>Moderada</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="content-card">
+  <h3>Declínio da resposta e contração clonal</h3>
+  <p>Após a eliminação do antígeno, a maioria das células T efetoras é privada dos sinais de sobrevivência (antígeno, coestimulação e citocinas) e morre por <strong>apoptose</strong>. Estima-se que <strong>mais de 90%</strong> das células efetoras expandidas morram durante essa fase de contração.</p>
+  <p>O CTLA-4 e o PD-1, que aumentam progressivamente durante a resposta, contribuem para o retorno ao estado de homeostase. Esse processo é fundamental para evitar <strong>imunopatologia crônica</strong> — dano tecidual causado por uma resposta imune excessivamente prolongada.</p>
+</div>
+
+<!-- Quiz M4 -->
+<div class="quiz-section">
+  <div class="quiz-title">Verifique seu entendimento</div>
+
+  <div class="question-card" id="m4q1">
+    <div class="q-type">Múltipla escolha</div>
+    <div class="q-text">Um paciente apresenta candidíase mucocutânea crônica grave e infecções recorrentes por bactérias extracelulares nas mucosas, com produção deficiente de IL-17. Qual subpopulação de células T CD4⁺ está provavelmente deficiente?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="mcSelect('m4q1',this,false,'Células Th1 produzem IFN-γ e são importantes para patógenos intracelulares, não para Candida nas mucosas.')">a) Th1</button>
+      <button class="mc-opt" onclick="mcSelect('m4q1',this,false,'Células Th2 produzem IL-4/IL-5/IL-13 e são importantes na defesa contra helmintos e nas alergias.')">b) Th2</button>
+      <button class="mc-opt" onclick="mcSelect('m4q1',this,true,'Correto! Células Th17 produzem IL-17, essencial para recrutar neutrófilos e para a defesa das superfícies mucosas contra fungos (especialmente Candida) e bactérias extracelulares. Deficiências em IL-17 ou em sua sinalização causam candidíase mucocutânea crônica.')">c) Th17</button>
+      <button class="mc-opt" onclick="mcSelect('m4q1',this,false,'Tregs produzem IL-10 e TGF-β e suprimem respostas — sua deficiência causaria autoimunidade, não susceptibilidade aumentada a Candida.')">d) Treg</button>
+    </div>
+    <div class="feedback" id="m4q1-fb"></div>
+  </div>
+
+  <div class="question-card" id="m4q2">
+    <div class="q-type">Verdadeiro ou Falso</div>
+    <div class="q-text">As células T de memória central (Tcm) residem permanentemente nos tecidos periféricos (intestino, pulmão, pele) e exercem funções efetoras imediatas ao recontato com o antígeno.</div>
+    <div class="tf-wrap">
+      <button class="tf-btn" onclick="tfSelect('m4q2',this,false,'Essa descrição corresponde às células T de <em>memória efetora</em> (Tem), que residem nos tecidos periféricos e têm capacidade efetora imediata. As células T de <em>memória central</em> (Tcm) são circulantes, expressam CCR7 e CD62L, residem em órgãos linfoides e proliferam rapidamente ao reestímulo — mas não têm função efetora imediata.')">Verdadeiro</button>
+      <button class="tf-btn" onclick="tfSelect('m4q2',this,true,'Correto! As células T de memória central (Tcm) são circulantes, expressam CCR7⁺ e CD62L⁺, e residem principalmente em órgãos linfoides secundários. São as células T de memória <em>efetora</em> (Tem) que ficam nos tecidos periféricos com atividade efetora imediata.')">Falso</button>
+    </div>
+    <div class="feedback" id="m4q2-fb"></div>
+  </div>
+</div>
+
+<div class="mod-complete" id="m4-complete" style="display:none">
+  <div class="mod-complete-icon">✅</div>
+  <div>
+    <p>Módulo 4 concluído!</p>
+    <small>Você conhece os destinos e funções das células T ativadas</small>
+  </div>
+  <button class="next-mod-btn" onclick="unlockAndGo(4)">📝 Ir para o Quiz Final →</button>
+</div>
+<div class="page-footer">Abbas · Imunologia Celular e Molecular · Cap. 9</div>
+</div><!-- /page3 -->
+
+
+<!-- ══════════════════════════════════════════
+     QUIZ FINAL
+══════════════════════════════════════════ -->
+<div class="page" id="page4">
+<div class="final-header">
+  <h2>Quiz Final — Ativação dos Linfócitos T</h2>
+  <p>12 questões cobrindo todos os módulos · Responda todas antes de enviar</p>
+</div>
+
+<!-- Q1 -->
+<div class="question-card" id="fq1">
+  <div class="q-type">Módulo 1 · Múltipla escolha</div>
+  <div class="q-text">1. Uma célula T naive reconhece um peptídeo apresentado por uma APC em repouso (com baixa expressão de B7). O resultado mais provável é:</div>
+  <div class="mc-options">
+    <button class="mc-opt" data-q="fq1" data-correct="false">a) Ativação normal, proliferação e diferenciação em célula efetora</button>
+    <button class="mc-opt" data-q="fq1" data-correct="true">b) Anergia ou apoptose — tolerância periférica ao antígeno reconhecido</button>
+    <button class="mc-opt" data-q="fq1" data-correct="false">c) Diferenciação imediata em célula T de memória sem proliferação</button>
+    <button class="mc-opt" data-q="fq1" data-correct="false">d) Produção de IFN-γ sem necessidade de coestimulação</button>
+  </div>
+  <div class="feedback" id="fq1-fb"></div>
+</div>
+
+<!-- Q2 -->
+<div class="question-card" id="fq2">
+  <div class="q-type">Módulo 1 · Verdadeiro ou Falso</div>
+  <div class="q-text">2. As células T naive normalmente reconhecem antígenos nos tecidos periféricos onde a infecção está ocorrendo.</div>
+  <div class="tf-wrap">
+    <button class="tf-btn" data-q="fq2" data-correct="false">Verdadeiro</button>
+    <button class="tf-btn" data-q="fq2" data-correct="true">Falso</button>
+  </div>
+  <div class="feedback" id="fq2-fb"></div>
+</div>
+
+<!-- Q3 -->
+<div class="question-card" id="fq3">
+  <div class="q-type">Módulo 1 · Múltipla escolha</div>
+  <div class="q-text">3. O "Sinal 3" na ativação dos linfócitos T é fornecido por:</div>
+  <div class="mc-options">
+    <button class="mc-opt" data-q="fq3" data-correct="false">a) Ligação do TCR ao complexo MHC-peptídeo</button>
+    <button class="mc-opt" data-q="fq3" data-correct="false">b) Interação entre CD28 e as moléculas B7 nas APCs</button>
+    <button class="mc-opt" data-q="fq3" data-correct="true">c) Citocinas como IL-2 e IL-12, que promovem proliferação e direcionam a diferenciação</button>
+    <button class="mc-opt" data-q="fq3" data-correct="false">d) Expressão de CTLA-4 que termina a resposta imune</button>
+  </div>
+  <div class="feedback" id="fq3-fb"></div>
+</div>
+
+<!-- Q4 -->
+<div class="question-card" id="fq4">
+  <div class="q-type">Módulo 2 · Múltipla escolha</div>
+  <div class="q-text">4. As moléculas B7 (CD80 e CD86) são expressas em altos níveis pelas APCs:</div>
+  <div class="mc-options">
+    <button class="mc-opt" data-q="fq4" data-correct="false">a) Constitutivamente, em todos os tipos de APCs, independentemente de infecção</button>
+    <button class="mc-opt" data-q="fq4" data-correct="false">b) Apenas no timo, durante a seleção positiva dos timócitos</button>
+    <button class="mc-opt" data-q="fq4" data-correct="true">c) Após ativação das APCs por PAMPs (via TLRs) e citocinas inflamatórias da imunidade inata</button>
+    <button class="mc-opt" data-q="fq4" data-correct="false">d) Apenas em linfócitos B nos folículos linfoides secundários</button>
+  </div>
+  <div class="feedback" id="fq4-fb"></div>
+</div>
+
+<!-- Q5 -->
+<div class="question-card" id="fq5">
+  <div class="q-type">Módulo 2 · Verdadeiro ou Falso</div>
+  <div class="q-text">5. O CTLA-4 tem menor afinidade pelo B7 do que o CD28, por isso precisa ser expresso em maior quantidade para inibir a coestimulação.</div>
+  <div class="tf-wrap">
+    <button class="tf-btn" data-q="fq5" data-correct="false">Verdadeiro</button>
+    <button class="tf-btn" data-q="fq5" data-correct="true">Falso</button>
+  </div>
+  <div class="feedback" id="fq5-fb"></div>
+</div>
+
+<!-- Q6 -->
+<div class="question-card" id="fq6">
+  <div class="q-type">Módulo 2 · Múltipla escolha</div>
+  <div class="q-text">6. O uso terapêutico de anticorpos anti-PD-1 (como pembrolizumabe) no tratamento de tumores baseia-se em:</div>
+  <div class="mc-options">
+    <button class="mc-opt" data-q="fq6" data-correct="false">a) Bloquear a ativação de células T para evitar reações autoimunes ao tumor</button>
+    <button class="mc-opt" data-q="fq6" data-correct="true">b) Remover o freio inibitório sobre as células T, permitindo resposta antitumoral mais eficaz</button>
+    <button class="mc-opt" data-q="fq6" data-correct="false">c) Estimular a expressão de B7 nas células tumorais para coestimular células T</button>
+    <button class="mc-opt" data-q="fq6" data-correct="false">d) Bloquear a produção de IL-2 para evitar proliferação excessiva de células T</button>
+  </div>
+  <div class="feedback" id="fq6-fb"></div>
+</div>
+
+<!-- Q7 -->
+<div class="question-card" id="fq7">
+  <div class="q-type">Módulo 3 · Múltipla escolha</div>
+  <div class="q-text">7. Por que a IL-2 é descrita como tendo ação autocrina durante a ativação do linfócito T?</div>
+  <div class="mc-options">
+    <button class="mc-opt" data-q="fq7" data-correct="false">a) É produzida pelas APCs e age sobre as células T vizinhas</button>
+    <button class="mc-opt" data-q="fq7" data-correct="true">b) É produzida pelas células T ativadas e age sobre as mesmas células que a secretaram, amplificando a própria resposta</button>
+    <button class="mc-opt" data-q="fq7" data-correct="false">c) É produzida por células B e estimula a proliferação de células T a distância</button>
+    <button class="mc-opt" data-q="fq7" data-correct="false">d) Circula pelo sangue para ativar células T em outros linfonodos</button>
+  </div>
+  <div class="feedback" id="fq7-fb"></div>
+</div>
+
+<!-- Q8 -->
+<div class="question-card" id="fq8">
+  <div class="q-type">Módulo 3 · Verdadeiro ou Falso</div>
+  <div class="q-text">8. O CD25 (cadeia α do receptor de IL-2) é expresso constitutivamente em altos níveis em todas as células T naive em repouso.</div>
+  <div class="tf-wrap">
+    <button class="tf-btn" data-q="fq8" data-correct="false">Verdadeiro</button>
+    <button class="tf-btn" data-q="fq8" data-correct="true">Falso</button>
+  </div>
+  <div class="feedback" id="fq8-fb"></div>
+</div>
+
+<!-- Q9 -->
+<div class="question-card" id="fq9">
+  <div class="q-type">Módulo 3 · Múltipla escolha</div>
+  <div class="q-text">9. A expansão clonal resulta em:</div>
+  <div class="mc-options">
+    <button class="mc-opt" data-q="fq9" data-correct="false">a) Um pool diversificado de células T com diferentes especificidades para ampliar a resposta</button>
+    <button class="mc-opt" data-q="fq9" data-correct="true">b) Um grande número de células T com TCR idêntico, todas específicas para o antígeno que desencadeou a ativação</button>
+    <button class="mc-opt" data-q="fq9" data-correct="false">c) Conversão de células T em células B para produção de anticorpos específicos</button>
+    <button class="mc-opt" data-q="fq9" data-correct="false">d) Migração de células T naive da medula óssea para os linfonodos</button>
+  </div>
+  <div class="feedback" id="fq9-fb"></div>
+</div>
+
+<!-- Q10 -->
+<div class="question-card" id="fq10">
+  <div class="q-type">Módulo 4 · Múltipla escolha</div>
+  <div class="q-text">10. Qual fator de transcrição é o marcador definitivo das células T reguladoras (Treg) e é essencial para sua função supressora?</div>
+  <div class="mc-options">
+    <button class="mc-opt" data-q="fq10" data-correct="false">a) T-bet</button>
+    <button class="mc-opt" data-q="fq10" data-correct="false">b) GATA-3</button>
+    <button class="mc-opt" data-q="fq10" data-correct="false">c) RORγt</button>
+    <button class="mc-opt" data-q="fq10" data-correct="true">d) FoxP3</button>
+  </div>
+  <div class="feedback" id="fq10-fb"></div>
+</div>
+
+<!-- Q11 -->
+<div class="question-card" id="fq11">
+  <div class="q-type">Módulo 4 · Múltipla escolha</div>
+  <div class="q-text">11. Sobre as células T CD8⁺ citotóxicas (CTLs), qual afirmação está correta?</div>
+  <div class="mc-options">
+    <button class="mc-opt" data-q="fq11" data-correct="false">a) Reconhecem antígenos apresentados por MHC de classe II e matam macrófagos infectados</button>
+    <button class="mc-opt" data-q="fq11" data-correct="true">b) Reconhecem antígenos via MHC de classe I e matam células infectadas por vírus e células tumorais por perforina/granzimas e via Fas-FasL</button>
+    <button class="mc-opt" data-q="fq11" data-correct="false">c) Produzem anticorpos diretamente após diferenciação em plasmócitos T</button>
+    <button class="mc-opt" data-q="fq11" data-correct="false">d) Atuam exclusivamente nos órgãos linfoides secundários sem migrar para tecidos periféricos</button>
+  </div>
+  <div class="feedback" id="fq11-fb"></div>
+</div>
+
+<!-- Q12 -->
+<div class="question-card" id="fq12">
+  <div class="q-type">Módulo 4 · Verdadeiro ou Falso</div>
+  <div class="q-text">12. Após a resolução da infecção, mais de 90% das células T efetoras expandidas morrem por apoptose, e uma pequena fração sobrevive como células T de memória de longa duração.</div>
+  <div class="tf-wrap">
+    <button class="tf-btn" data-q="fq12" data-correct="true">Verdadeiro</button>
+    <button class="tf-btn" data-q="fq12" data-correct="false">Falso</button>
+  </div>
+  <div class="feedback" id="fq12-fb"></div>
+</div>
+
+<button class="quiz-submit-btn" onclick="submitFinal()">Enviar respostas e ver resultado</button>
+
+<!-- RESULTADO -->
+<div id="final-result" style="display:none;margin-top:2rem">
+  <div class="result-card">
+    <div class="result-score" id="final-score"></div>
+    <div class="result-label" id="final-label"></div>
+    <div class="result-badge" id="final-badge"></div>
+  </div>
+  <button class="retry-btn" onclick="retryFinal()">↩ Refazer o quiz</button>
+  <div class="ans-review" id="ans-review"></div>
+</div>
+<div class="page-footer">Abbas · Imunologia Celular e Molecular · Cap. 9 · ICB/UFMG</div>
+</div><!-- /page4 -->
+
+
+<script>
+// ══════ NAVIGATION ══════
+const totalPages = 5;
+let unlockedPages = [true, true, true, true, true];
+let moduleScores = [0,0,0,0];
+
+function goPage(n){
+  if(!unlockedPages[n]) return;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page'+n).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>{
+    t.classList.toggle('active', i===n);
+  });
+  const pct = ((n+1)/totalPages)*100;
+  document.getElementById('progressFill').style.width = pct+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function unlockAndGo(n){
+  goPage(n);
+}
+
+// ══════ TERM POPUP ══════
+function toggleTerm(id){
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+// ══════ STEPPER DATA ══════
+const stepData = {
+  s1: [
+    {title:'Célula dendrítica captura o antígeno', body:'Células dendríticas imaturas nos tecidos periféricos capturam proteínas de microrganismos por fagocitose. PAMPs ativam TLRs nas DCs, induzindo sua maturação — aumento da expressão de <span class="mol-tag c1">MHC</span>, <span class="mol-tag c2">B7</span> e produção de <span class="mol-tag c3">IL-12</span>.'},
+    {title:'DC madura migra para o linfonodo', body:'Após a maturação, as DCs perdem os receptores de captura e ganham receptores de migração (<span class="mol-tag c1">CCR7</span>), migrando pela linfa até as zonas de células T dos linfonodos regionais, onde apresentarão os antígenos.'},
+    {title:'Sinal 1 — TCR reconhece o complexo MHC-peptídeo', body:'No linfonodo, a DC apresenta peptídeos em moléculas de <span class="mol-tag c1">MHC II</span> (para células T CD4⁺) ou <span class="mol-tag c2">MHC I</span> (para células T CD8⁺). O TCR da célula T específica reconhece o complexo, formando a sinapse imunológica e iniciando a sinalização via ZAP-70. <strong>Sozinho, esse sinal leva à anergia.</strong>'},
+    {title:'Sinal 2 — CD28 liga-se ao B7', body:'Simultaneamente, o <span class="mol-tag c1">CD28</span> da célula T se liga ao <span class="mol-tag c2">B7-1/B7-2</span> expresso na DC madura. Essa coestimulação ativa a via PI3K/Akt, aumenta a transcrição de IL-2 e de fatores antiapoptóticos (Bcl-2), e é essencial para a sobrevivência e proliferação da célula T.'},
+    {title:'Sinal 3 — Citocinas direcionam a diferenciação', body:'A DC secreta <span class="mol-tag c3">IL-12</span> (→ Th1), enquanto outros ambientes favorecem <span class="mol-tag c2">IL-4</span> (→ Th2) ou <span class="mol-tag gray">IL-6 + TGF-β</span> (→ Th17). A própria célula T ativada produz <span class="mol-tag c1">IL-2</span>, que age autocrinamente para impulsionar a proliferação.'},
+    {title:'Proliferação e diferenciação em células efetoras e de memória', body:'A célula T divide-se rapidamente (expansão clonal), gerando centenas de clones idênticos. Eles se diferenciam em <span class="mol-tag c1">células efetoras</span> (Th1, Th2, Th17, CTL) que migram para os tecidos, e em <span class="mol-tag c3">células de memória</span> que persistem por anos.'},
+  ],
+  s3: [
+    {title:'Célula T naive — estado basal', body:'A célula T naive expressa TCR e CD28, mas tem baixos níveis de CD25 (IL-2Rα). Circula entre sangue e linfonodos via <span class="mol-tag c1">CCR7</span> e <span class="mol-tag c1">CD62L</span>. Está pronta para reconhecer o antígeno, mas não tem capacidade efetora.'},
+    {title:'CD69 ↑ — horas 1 a 2 (retenção no linfonodo)', body:'<span class="mol-tag c1">CD69</span> é um dos primeiros marcadores induzidos. Sua expressão reduz a de <span class="mol-tag gray">S1PR1</span> (receptor de esfingosina-1-fosfato), retendo a célula T no linfonodo o tempo suficiente para completar a ativação antes de sair para a periferia.'},
+    {title:'IL-2 e CD25 ↑ — horas 2 a 12 (amplificação)', body:'A ativação induz a secreção de <span class="mol-tag c3">IL-2</span> e a expressão de <span class="mol-tag c1">CD25 (IL-2Rα)</span>. A combinação de IL-2 produzida localmente com a expressão aumentada de CD25 forma o complexo IL-2Rαβγ de <strong>alta afinidade</strong> — mecanismo chave de amplificação autócrina.'},
+    {title:'CD40L ↑ — horas 24 a 48 (licenciamento das APCs)', body:'<span class="mol-tag c2">CD40L (CD154)</span> é expresso e se liga ao CD40 das DCs e macrófagos. Isso "licencia" as APCs: elas aumentam B7, secretam mais IL-12 e tornam-se estimuladores mais potentes — um mecanismo de <em>feedback</em> positivo que amplifica toda a resposta imune.'},
+    {title:'CTLA-4 ↑ — dias 1 a 2 (freio da resposta)', body:'<span class="mol-tag gray">CTLA-4</span> surge na superfície com afinidade muito maior pelo B7 do que o CD28. Começa a competir pelo ligante nas APCs, reduzindo progressivamente a coestimulação. Esse é um dos mecanismos de <strong>regulação da magnitude da resposta</strong>.'},
+    {title:'Divisão celular — dias 3 a 5 (expansão clonal)', body:'Com todos os sinais de ativação integrados, a célula T entra em divisão rápida. Um único linfócito pode gerar <strong>centenas de clones idênticos</strong> em dias. Após a resolução da infecção, >90% dessas células morrerão por apoptose (contração clonal), e 5–10% sobreviverão como células de memória.'},
+  ]
+};
+const stepIdx = {s1:0, s3:0};
+
+function stepNav(id, dir){
+  const data = stepData[id];
+  stepIdx[id] = Math.max(0, Math.min(data.length-1, stepIdx[id]+dir));
+  const i = stepIdx[id];
+  // update dots
+  document.querySelectorAll(`#${id} .step-dot`).forEach((d,j)=>{
+    d.classList.remove('active','done');
+    if(j===i) d.classList.add('active');
+    else if(j<i) d.classList.add('done');
+  });
+  // update panel
+  const p = document.getElementById(`${id}p`);
+  p.innerHTML = `<div class="step-panel-title">${data[i].title}</div><p>${data[i].body}</p>`;
+}
+
+// ══════ MODULE QUIZ ══════
+function mcSelect(qid, btn, correct, exp){
+  const card = document.getElementById(qid);
+  if(card.classList.contains('correct')||card.classList.contains('wrong')) return;
+  card.querySelectorAll('.mc-opt').forEach(b=>b.disabled=true);
+  btn.classList.add(correct?'correct-ans':'wrong-ans');
+  if(!correct) card.querySelectorAll('.mc-opt').forEach(b=>{
+    const onc = b.getAttribute('onclick')||'';
+    if(onc.includes(',true,')) b.classList.add('correct-ans');
+  });
+  const fb = document.getElementById(qid+'-fb');
+  fb.textContent = exp;
+  fb.className = 'feedback show '+(correct?'ok':'err');
+  card.classList.add(correct?'correct':'wrong');
+  checkModuleComplete(qid);
+}
+
+function tfSelect(qid, btn, correct, exp){
+  const card = document.getElementById(qid);
+  if(card.classList.contains('correct')||card.classList.contains('wrong')) return;
+  card.querySelectorAll('.tf-btn').forEach(b=>b.disabled=true);
+  btn.classList.add(correct?'correct-ans':'wrong-ans');
+  const fb = document.getElementById(qid+'-fb');
+  fb.innerHTML = exp;
+  fb.className = 'feedback show '+(correct?'ok':'err');
+  card.classList.add(correct?'correct':'wrong');
+  checkModuleComplete(qid);
+}
+
+function checkModuleComplete(qid){
+  const modMap = {m1q1:0,m1q2:0, m2q1:1,m2q2:1, m3q1:2,m3q2:2, m4q1:3,m4q2:3};
+  const m = modMap[qid];
+  if(m===undefined) return;
+  const prefix = 'm'+(m+1)+'q';
+  const allDone = ['1','2'].every(n=>{
+    const c = document.getElementById(prefix+n);
+    return c && (c.classList.contains('correct')||c.classList.contains('wrong'));
+  });
+  if(allDone){
+    document.getElementById('m'+(m+1)+'-complete').style.display='flex';
+  }
+}
+
+// ══════ DRAG DROP M2 ══════
+let draggedChip2 = null;
+function initDrag2(){
+  document.querySelectorAll('#dd2-bank .drag-chip, #dd2-zona-ativa .drag-chip, #dd2-zona-inibe .drag-chip').forEach(chip=>{
+    chip.addEventListener('dragstart', e=>{draggedChip2=chip; setTimeout(()=>chip.style.opacity='.4',0);});
+    chip.addEventListener('dragend', e=>{chip.style.opacity='1'; draggedChip2=null;});
+  });
+  ['dd2-bank','dd2-zona-ativa','dd2-zona-inibe'].forEach(zid=>{
+    const zone = document.getElementById(zid);
+    zone.addEventListener('dragover', e=>{e.preventDefault(); zone.classList.add('over');});
+    zone.addEventListener('dragleave', ()=>zone.classList.remove('over'));
+    zone.addEventListener('drop', e=>{
+      e.preventDefault(); zone.classList.remove('over');
+      if(draggedChip2) zone.appendChild(draggedChip2);
+    });
+  });
+}
+initDrag2();
+
+function checkDrag2(){
+  const ativa = [...document.getElementById('dd2-zona-ativa').querySelectorAll('.drag-chip')].map(c=>c.dataset.id);
+  const inibe = [...document.getElementById('dd2-zona-inibe').querySelectorAll('.drag-chip')].map(c=>c.dataset.id);
+  const ativaOk = ativa.includes('cd28') && ativa.includes('cd40l') && ativa.length===2;
+  const inibeOk = inibe.includes('ctla4') && inibe.includes('pd1') && inibe.length===2;
+  const fb = document.getElementById('dd2-fb');
+  if(ativaOk&&inibeOk){
+    fb.textContent='✅ Correto! CD28 (coestimulador) e CD40L (licencia APCs) ativam/amplificam a resposta. CTLA-4 e PD-1 são receptores inibitórios que freiam a ativação das células T.';
+    fb.className='feedback show ok';
+  } else {
+    fb.textContent='Revise: CD28 e CD40L amplificam a resposta; CTLA-4 e PD-1 a inibem.';
+    fb.className='feedback show err';
+  }
+}
+
+// ══════ TH TABLE EXPAND ══════
+function toggleRow(id){
+  const el = document.getElementById(id);
+  el.classList.toggle('show');
+  const trigger = document.querySelector(`[onclick="toggleRow('${id}')"]`);
+  if(trigger) trigger.classList.toggle('open');
+}
+
+// ══════ FINAL QUIZ ══════
+const finalAnswers = {
+  fq1:{correct:'b',exp:'Sem o Sinal 2 (coestimulação), a célula T que reconhece o antígeno torna-se anérgica ou sofre apoptose — tolerância periférica essencial para evitar autoimunidade.'},
+  fq2:{correct:'Falso',exp:'Células T naive reconhecem antígenos nos órgãos linfoides secundários (linfonodos, baço), onde DCs maduras chegam transportando antígenos dos tecidos. Células T efetoras é que migram para os tecidos.'},
+  fq3:{correct:'c',exp:'O Sinal 3 é fornecido por citocinas (como IL-2 para proliferação e IL-12 para diferenciação em Th1) que amplificam e direcionam o tipo de resposta efetora gerada.'},
+  fq4:{correct:'c',exp:'APCs em repouso expressam pouco B7. A ativação por PAMPs (TLRs) e citocinas inflamatórias induz a expressão de B7 — garantindo que a coestimulação só ocorra com perigo real.'},
+  fq5:{correct:'Falso',exp:'O CTLA-4 tem afinidade 20–50× MAIOR que o CD28 pelo B7. Por isso, mesmo sendo expresso em menor quantidade, consegue competir efetivamente e inibir a coestimulação.'},
+  fq6:{correct:'b',exp:'Anti-PD-1 bloqueia o receptor inibitório PD-1 nas células T, removendo o "freio" que os tumores exploram para escapar da imunidade. Isso libera as células T para atacar o tumor — mas pode causar autoimunidade.'},
+  fq7:{correct:'b',exp:'A IL-2 tem ação autocrina: as células T ativadas a produzem e simultaneamente expressam IL-2Rα (CD25), respondendo ao seu próprio produto — um loop de amplificação autossustentado.'},
+  fq8:{correct:'Falso',exp:'CD25 é expresso em baixos níveis em células T naive e dramaticamente upregulado após ativação. Exceção: células T reguladoras (Treg) expressam CD25 constitutivamente em altos níveis.'},
+  fq9:{correct:'b',exp:'A expansão clonal gera um grande número de células T com TCR idêntico — todas específicas para o mesmo antígeno. Isso aumenta a frequência do clone específico de 1:10⁵ para frações substanciais dos linfócitos.'},
+  fq10:{correct:'d',exp:'FoxP3 é o fator de transcrição chave das células T reguladoras. Sua mutação causa a síndrome IPEX — autoimunidade sistêmica grave, comprovando seu papel essencial na tolerância imunológica.'},
+  fq11:{correct:'b',exp:'CTLs reconhecem antígenos via MHC classe I (expresso em todas as células nucleadas) e eliminam células infectadas por vírus e tumorais por perforina/granzimas (apoptose) e via Fas-FasL.'},
+  fq12:{correct:'Verdadeiro',exp:'A contração clonal (apoptose de >90% das células efetoras) é essencial para retornar à homeostase após a resolução da infecção. Os 5–10% que sobrevivem tornam-se células de memória de longa duração.'},
+};
+
+let finalSelected = {};
+document.querySelectorAll('.mc-opt[data-q], .tf-btn[data-q]').forEach(btn=>{
+  btn.addEventListener('click', function(){
+    const q = this.dataset.q;
+    if(finalSelected[q]==='locked') return;
+    document.querySelectorAll(`[data-q="${q}"]`).forEach(b=>b.classList.remove('selected'));
+    this.classList.add('selected');
+    const isCorrect = this.dataset.correct==='true';
+    finalSelected[q] = this.textContent.trim().charAt(0).toLowerCase();
+    // for tf, store 'verdadeiro'/'falso'
+    if(this.classList.contains('tf-btn')){
+      finalSelected[q] = this.textContent.trim();
+    }
+  });
+});
+
+function submitFinal(){
+  const needed = Object.keys(finalAnswers);
+  const missing = needed.filter(k=>!finalSelected[k]);
+  if(missing.length>0){alert('Responda todas as questões antes de enviar.'); return;}
+
+  let correct=0;
+  const reviewHTML=[];
+  needed.forEach(qid=>{
+    const ans = finalAnswers[qid];
+    const sel = finalSelected[qid];
+    const isTF = sel==='Verdadeiro'||sel==='Falso';
+    let isOk;
+    if(isTF){ isOk = sel===ans.correct; }
+    else { isOk = sel===ans.correct; }
+    if(isOk) correct++;
+
+    document.getElementById(qid).classList.add(isOk?'correct':'wrong');
+    document.querySelectorAll(`[data-q="${qid}"]`).forEach(b=>{
+      b.disabled=true;
+      finalSelected[qid]='locked';
+      const bVal = b.classList.contains('tf-btn') ? b.textContent.trim() : b.textContent.trim().charAt(0).toLowerCase();
+      if(b.classList.contains('selected')){
+        b.classList.remove('selected');
+        b.classList.add(isOk?'correct-ans':'wrong-ans');
+      }
+      if(!isTF && bVal===ans.correct) b.classList.add('correct-ans');
+      if(isTF && bVal===ans.correct) b.classList.add('correct-ans');
+    });
+
+    reviewHTML.push(`<div class="ans-item ${isOk?'ok':'err'}">
+      <div class="ans-q">${document.getElementById(qid).querySelector('.q-text').textContent}</div>
+      ${!isOk?`<div class="ans-your">Sua resposta: ${sel}</div><div class="ans-correct">Resposta correta: ${ans.correct}</div>`:''}
+      <div class="ans-exp">${ans.exp}</div>
+    </div>`);
+  });
+
+  const pct = Math.round((correct/needed.length)*100);
+  document.getElementById('final-score').textContent = `${correct}/${needed.length}`;
+  document.getElementById('final-label').textContent = `${pct}% de acerto`;
+  const badge = document.getElementById('final-badge');
+  if(pct>=90){badge.textContent='🏆 Excelente!';badge.className='result-badge great';}
+  else if(pct>=70){badge.textContent='✅ Bom domínio';badge.className='result-badge good';}
+  else if(pct>=50){badge.textContent='📚 Revise alguns pontos';badge.className='result-badge review';}
+  else{badge.textContent='🔄 Estude novamente';badge.className='result-badge retry';}
+
+  document.getElementById('final-result').style.display='block';
+  document.getElementById('ans-review').innerHTML = reviewHTML.join('');
+  document.getElementById('final-result').scrollIntoView({behavior:'smooth'});
+}
+
+function retryFinal(){
+  finalSelected={};
+  document.querySelectorAll('[data-q]').forEach(b=>{
+    b.disabled=false;
+    b.classList.remove('selected','correct-ans','wrong-ans');
+  });
+  document.querySelectorAll('.question-card[id^="fq"]').forEach(c=>c.classList.remove('correct','wrong'));
+  document.getElementById('final-result').style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
