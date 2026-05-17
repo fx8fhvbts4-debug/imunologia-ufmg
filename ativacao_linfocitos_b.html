@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ativação dos Linfócitos B</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f3ee;--surface:#fff;--surface2:#f0ede5;
+  --border:rgba(0,0,0,.09);--border2:rgba(0,0,0,.18);
+  --text:#1a1814;--text2:#6b6760;--text3:#9e9b94;
+  --c1:#1a5fa8;--c1l:#e8f0fa;--c1m:#b8d0f0;
+  --c2:#b05c00;--c2l:#fdf0e0;--c2m:#fad7a0;
+  --c3:#2a7a3b;--c3l:#e8f5ec;--c3m:#a8dbb4;
+  --c4:#7b2d8b;--c4l:#f5eafa;--c4m:#d5a8e8;
+  --green:#2a7a3b;--greenl:#e8f5ec;
+  --red:#b92b2b;--redl:#fdeaea;
+  --r:12px;--rsm:8px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app-layout{display:flex;min-height:100vh}
+.sidebar{width:210px;min-width:210px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;padding:1.25rem 1rem;flex-shrink:0}
+.sidebar-logo{font-family:'DM Serif Display',serif;font-size:.95rem;margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border);line-height:1.3}
+.sidebar-logo span{display:block;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--text3);margin-top:3px}
+.sidebar-progress{height:3px;background:var(--border);border-radius:3px;margin-bottom:1rem;overflow:hidden}
+.sidebar-progress .progress-fill{height:100%;background:var(--c1);transition:width .4s ease}
+.nav-tab{display:block;width:100%;padding:8px 12px;border-radius:var(--rsm);font-size:13px;cursor:pointer;text-align:left;border:none;background:transparent;color:var(--text2);transition:all .15s;font-family:'DM Sans',sans-serif;margin-bottom:2px;line-height:1.35}
+.nav-tab:hover:not(.locked){background:var(--surface2);color:var(--text)}
+.nav-tab.active{background:var(--text);color:#fff}
+.nav-tab.locked{opacity:.4;cursor:default}
+.main-content{flex:1;min-width:0}
+.page{display:none;max-width:720px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.page.active{display:block}
+.mod-header{margin-bottom:2rem}
+.mod-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:500;margin-bottom:.75rem}
+.mod-title{font-family:'DM Serif Display',serif;font-size:2rem;font-weight:400;line-height:1.2;margin-bottom:.5rem}
+.mod-desc{font-size:14px;color:var(--text2);line-height:1.6}
+.content-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;margin-bottom:1.25rem}
+.content-card h3{font-size:1rem;font-weight:500;margin-bottom:.75rem}
+.content-card p{font-size:14px;line-height:1.75;color:var(--text);margin-bottom:.75rem}
+.content-card p:last-child{margin-bottom:0}
+.content-card ul{font-size:14px;line-height:1.75;padding-left:1.25rem;margin-bottom:.75rem}
+.content-card li{margin-bottom:.3rem}
+.term{border-bottom:1.5px dashed var(--c1);color:var(--c1);cursor:pointer;font-weight:500}
+.term-popup{display:none;background:var(--c1l);border:1px solid var(--c1m);border-radius:var(--rsm);padding:8px 12px;font-size:13px;margin:4px 0;line-height:1.5}
+.term-popup.open{display:block}
+.highlight{border-left:3px solid var(--c1);background:var(--c1l);border-radius:0 var(--rsm) var(--rsm) 0;padding:.75rem 1rem;font-size:13.5px;line-height:1.65;margin:.75rem 0}
+.highlight.orange{border-color:var(--c2);background:var(--c2l)}
+.highlight.green{border-color:var(--green);background:var(--greenl)}
+.highlight.purple{border-color:var(--c4);background:var(--c4l)}
+.signal-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin:1rem 0}
+.signal-box{border-radius:var(--r);padding:1rem;text-align:center}
+.signal-box .sig-num{font-family:'DM Serif Display',serif;font-size:2rem;display:block;line-height:1}
+.signal-box .sig-label{font-size:12px;font-weight:500;display:block;margin:.3rem 0 .5rem}
+.signal-box .sig-detail{font-size:12px;line-height:1.5;opacity:.9}
+.signal-box.s1{background:var(--c1l);color:var(--c1)}
+.signal-box.s2{background:var(--c2l);color:var(--c2)}
+.signal-box.s3{background:var(--c3l);color:var(--green)}
+.stepper{margin:1rem 0}
+.stepper-track{display:flex;gap:0;margin-bottom:1rem;overflow-x:auto;scrollbar-width:none}
+.stepper-track::-webkit-scrollbar{display:none}
+.step-dot{flex:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
+.step-dot::before{content:'';position:absolute;top:14px;left:50%;right:-50%;height:2px;background:var(--border2);z-index:0}
+.step-dot:last-child::before{display:none}
+.step-num{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;background:var(--surface);z-index:1;transition:all .2s;flex-shrink:0}
+.step-dot.active .step-num{background:var(--c1);border-color:var(--c1);color:#fff}
+.step-dot.done .step-num{background:var(--green);border-color:var(--green);color:#fff}
+.step-label{font-size:11px;color:var(--text3);text-align:center;max-width:80px;line-height:1.3}
+.step-dot.active .step-label,.step-dot.done .step-label{color:var(--text2)}
+.step-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;min-height:160px}
+.step-panel-title{font-weight:500;font-size:1rem;margin-bottom:.5rem}
+.step-panel p{font-size:13.5px;line-height:1.7;margin-bottom:.5rem}
+.step-panel p:last-child{margin-bottom:0}
+.mol-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;margin:0 2px}
+.mol-tag.c1{background:var(--c1l);color:var(--c1)}
+.mol-tag.c2{background:var(--c2l);color:var(--c2)}
+.mol-tag.c3{background:var(--c3l);color:var(--green)}
+.mol-tag.c4{background:var(--c4l);color:var(--c4)}
+.mol-tag.gray{background:var(--surface2);color:var(--text2)}
+.step-nav{display:flex;gap:8px;margin-top:1rem;justify-content:space-between}
+.step-nav button{padding:7px 18px;border-radius:var(--rsm);border:1px solid var(--border2);background:var(--surface);color:var(--text2);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.step-nav button:hover{background:var(--surface2)}
+.step-nav button.primary{background:var(--c1);border-color:var(--c1);color:#fff}
+.step-nav button.primary:hover{opacity:.9}
+.compare-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:.5rem}
+.compare-table th{padding:8px 12px;text-align:left;font-weight:500;font-size:12px;background:var(--surface2)}
+.compare-table th.h1{background:var(--c1l);color:var(--c1)}
+.compare-table th.h2{background:var(--c2l);color:var(--c2)}
+.compare-table th.h3{background:var(--c4l);color:var(--c4)}
+.compare-table td{padding:8px 12px;border-top:1px solid var(--border)}
+.compare-table td.d1{background:var(--c1l)}
+.compare-table td.d2{background:var(--c2l)}
+.compare-table td.d3{background:var(--c4l)}
+.expand-row{cursor:pointer;user-select:none}
+.expand-row td:first-child::before{content:'▶ ';font-size:10px;color:var(--text3)}
+.expand-row.open td:first-child::before{content:'▼ '}
+.expand-detail{display:none;background:var(--surface2)!important}
+.expand-detail.show{display:table-row}
+.expand-detail td{font-size:12.5px;line-height:1.6;color:var(--text2);padding:10px 14px!important}
+.quiz-section{margin-top:2rem}
+.quiz-title{font-size:.8rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:1rem}
+.question-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:1rem}
+.question-card.correct{border-color:var(--green);background:var(--greenl)}
+.question-card.wrong{border-color:var(--red);background:var(--redl)}
+.q-text{font-size:14px;font-weight:500;margin-bottom:1rem;line-height:1.5}
+.q-type{font-size:11px;color:var(--text3);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.05em}
+.mc-options{display:flex;flex-direction:column;gap:6px}
+.mc-opt{padding:9px 14px;border:1px solid var(--border2);border-radius:var(--rsm);font-size:13.5px;cursor:pointer;background:var(--surface);transition:all .15s;text-align:left;font-family:'DM Sans',sans-serif;line-height:1.4}
+.mc-opt:hover:not(:disabled){background:var(--surface2)}
+.mc-opt.selected{border-color:var(--c1);background:var(--c1l)}
+.mc-opt.correct-ans{border-color:var(--green)!important;background:var(--greenl)!important}
+.mc-opt.wrong-ans{border-color:var(--red)!important;background:var(--redl)!important}
+.mc-opt:disabled{cursor:default}
+.tf-wrap{display:flex;gap:8px}
+.tf-btn{flex:1;padding:10px;border:1px solid var(--border2);border-radius:var(--rsm);font-size:14px;font-weight:500;cursor:pointer;background:var(--surface);font-family:'DM Sans',sans-serif;transition:all .15s}
+.tf-btn:hover:not(:disabled){background:var(--surface2)}
+.tf-btn.selected{border-color:var(--c1);background:var(--c1l);color:var(--c1)}
+.tf-btn.correct-ans{border-color:var(--green)!important;background:var(--greenl)!important;color:var(--green)!important}
+.tf-btn.wrong-ans{border-color:var(--red)!important;background:var(--redl)!important;color:var(--red)!important}
+.tf-btn:disabled{cursor:default}
+.drag-bank{display:flex;flex-wrap:wrap;gap:6px;padding:.75rem;background:var(--surface2);border-radius:var(--rsm);margin-bottom:.75rem;min-height:44px}
+.drag-chip{padding:5px 12px;border-radius:20px;font-size:12.5px;font-weight:500;cursor:grab;background:var(--surface2);border:1px solid var(--border2);user-select:none;transition:opacity .15s}
+.drag-chip:active{cursor:grabbing;opacity:.7}
+.drag-chip.c1{background:var(--c1l);border-color:var(--c1m);color:var(--c1)}
+.drag-chip.c2{background:var(--c2l);border-color:var(--c2m);color:var(--c2)}
+.drag-chip.c3{background:var(--c3l);border-color:var(--c3m);color:var(--green)}
+.drag-chip.c4{background:var(--c4l);border-color:var(--c4m);color:var(--c4)}
+.drag-area{min-height:44px;border:1.5px dashed var(--border2);border-radius:var(--rsm);padding:6px;display:flex;flex-wrap:wrap;gap:4px;background:var(--surface);transition:background .15s}
+.drag-area.over{background:var(--c1l);border-color:var(--c1)}
+.drag-label{font-size:12px;color:var(--text3);margin-bottom:4px;font-weight:500}
+.drag-zone-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.order-list{display:flex;flex-direction:column;gap:4px}
+.order-item{padding:8px 12px;border:1px solid var(--border2);border-radius:var(--rsm);font-size:13px;background:var(--surface);cursor:grab;display:flex;align-items:center;gap:8px;user-select:none}
+.order-item:active{cursor:grabbing;opacity:.7}
+.order-item .drag-handle{color:var(--text3);font-size:14px}
+.order-item.drag-over{border-color:var(--c1);background:var(--c1l)}
+.feedback{display:none;margin-top:.75rem;padding:8px 12px;border-radius:var(--rsm);font-size:13px;line-height:1.5}
+.feedback.show{display:block}
+.feedback.ok{background:var(--greenl);color:var(--green)}
+.feedback.err{background:var(--redl);color:var(--red)}
+.check-btn{margin-top:.75rem;padding:7px 18px;border-radius:var(--rsm);border:none;background:var(--c1);color:#fff;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .15s}
+.check-btn:hover{opacity:.9}
+.mod-complete{background:var(--greenl);border:1px solid var(--green);border-radius:var(--r);padding:1.25rem;display:flex;align-items:center;gap:12px;margin-top:1.5rem}
+.mod-complete-icon{font-size:28px}
+.mod-complete p{font-size:14px;font-weight:500;color:var(--green)}
+.mod-complete small{font-size:12px;color:var(--green);opacity:.8}
+.next-mod-btn{margin-left:auto;padding:8px 18px;border-radius:var(--rsm);border:none;background:var(--green);color:#fff;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.final-header{text-align:center;margin-bottom:2rem}
+.final-header h2{font-family:'DM Serif Display',serif;font-size:1.8rem;font-weight:400}
+.final-header p{color:var(--text2);font-size:14px;margin-top:.5rem}
+.quiz-submit-btn{display:block;width:100%;padding:13px;border-radius:var(--rsm);border:none;background:var(--c1);color:#fff;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:1.5rem;transition:opacity .15s}
+.quiz-submit-btn:hover{opacity:.9}
+.result-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:2rem;text-align:center;margin-bottom:1.5rem}
+.result-score{font-size:3.5rem;font-weight:300;line-height:1}
+.result-label{font-size:1rem;color:var(--text2);margin-top:.25rem}
+.result-badge{display:inline-block;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:500;margin-top:1rem}
+.result-badge.great{background:var(--greenl);color:var(--green)}
+.result-badge.good{background:var(--c1l);color:var(--c1)}
+.result-badge.review{background:var(--c2l);color:var(--c2)}
+.result-badge.retry{background:var(--redl);color:var(--red)}
+.retry-btn{padding:9px 24px;border-radius:var(--rsm);border:none;background:var(--text);color:#fff;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:1rem}
+.ans-review{margin-top:1.5rem}
+.ans-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--rsm);padding:1rem;margin-bottom:.75rem}
+.ans-item.ok{border-left:3px solid var(--green)}
+.ans-item.err{border-left:3px solid var(--red)}
+.ans-q{font-size:13.5px;font-weight:500;margin-bottom:.4rem}
+.ans-your{font-size:12.5px;color:var(--text2);margin-bottom:.2rem}
+.ans-correct{font-size:12.5px;color:var(--green);font-weight:500;margin-bottom:.4rem}
+.ans-exp{font-size:12.5px;color:var(--text2);line-height:1.5}
+.clinical-box{background:#fff8f0;border:1px solid var(--c2m);border-radius:var(--r);padding:1.25rem;margin:.75rem 0}
+.clinical-box .clin-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--c2);margin-bottom:.5rem}
+.clinical-box p{font-size:13.5px;line-height:1.65}
+.isotipo-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:.75rem}
+.isotipo-table th{padding:8px 10px;font-size:11.5px;font-weight:600;text-align:left;border:1px solid var(--border);background:var(--surface2)}
+.isotipo-table td{padding:8px 10px;border:1px solid var(--border);font-size:13px;line-height:1.5}
+.page-footer{text-align:center;margin-top:3rem;font-size:11px;color:var(--text3)}
+@media(max-width:640px){
+  .app-layout{flex-direction:column}
+  .sidebar{width:100%;height:auto;position:relative;padding:.75rem 1rem}
+  .sidebar-logo{margin-bottom:.5rem;padding-bottom:.5rem}
+  #navTabs{display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  #navTabs::-webkit-scrollbar{display:none}
+  .nav-tab{white-space:nowrap;flex-shrink:0;width:auto;margin-bottom:0;padding:6px 12px;font-size:12px;border-radius:20px}
+  .drag-zone-row{grid-template-columns:1fr}
+  .mod-title{font-size:1.5rem}
+  .tf-wrap{flex-direction:column}
+  .signal-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+<aside class="sidebar">
+  <div class="sidebar-logo">Ativação dos Linfócitos B <span>ICB/UFMG</span></div>
+  <div class="sidebar-progress"><div class="progress-fill" id="progressFill" style="width:16.6%"></div></div>
+  <div id="navTabs">
+    <button class="nav-tab active" onclick="goPage(0)">1. Resposta Humoral</button>
+    <button class="nav-tab" onclick="goPage(1)">2. BCR e Ativação</button>
+    <button class="nav-tab" onclick="goPage(2)">3. Resposta T-dep.</button>
+    <button class="nav-tab" onclick="goPage(3)">4. Centro Germinativo</button>
+    <button class="nav-tab" onclick="goPage(4)">5. T-independente</button>
+    <button class="nav-tab" onclick="goPage(5)">📝 Quiz Final</button>
+  </div>
+</aside>
+<main class="main-content">
+
+<!-- ════════ MÓDULO 1 ════════ -->
+<div class="page active" id="page0">
+<div class="mod-header">
+  <div class="mod-badge" style="background:var(--c1l);color:var(--c1)">Módulo 1 · Visão Geral</div>
+  <div class="mod-title">A Resposta Imune Humoral</div>
+  <div class="mod-desc">Entenda como os linfócitos B produzem anticorpos e por que isso é essencial para a defesa contra patógenos extracelulares.</div>
+</div>
+<div class="content-card">
+  <h3>O que é a imunidade humoral?</h3>
+  <p>A imunidade humoral é o braço da resposta imune adaptativa mediado por <span class="term" onclick="toggleTerm('anticorpo')">anticorpos</span>, proteínas secretadas pelos <span class="term" onclick="toggleTerm('plasmocito')">plasmócitos</span> — a forma efetora dos linfócitos B. É a principal defesa contra microrganismos extracelulares e toxinas.</p>
+  <div class="term-popup" id="anticorpo">Anticorpos (imunoglobulinas, Ig) são glicoproteínas produzidas por plasmócitos. Cada anticorpo tem dois sítios de ligação ao antígeno idênticos e uma região constante (Fc) que determina sua classe (IgM, IgG, IgA, IgE, IgD) e função efetora.</div>
+  <div class="term-popup" id="plasmocito">Plasmócitos são células B completamente diferenciadas, especializadas na secreção de grandes quantidades de anticorpos. Possuem retículo endoplasmático rugoso muito desenvolvido e praticamente não expressam BCR de membrana.</div>
+  <p>A ativação do linfócito B leva a proliferação e diferenciação que geram duas populações: plasmócitos secretores de anticorpos e <span class="term" onclick="toggleTerm('bmem')">células B de memória</span> de vida longa.</p>
+  <div class="term-popup" id="bmem">Células B de memória são células B de vida longa geradas após a resposta primária. Respondem de forma mais rápida e robusta na reexposição ao antígeno, gerando anticorpos de maior afinidade — a base da memória imunológica e da proteção vacinal.</div>
+</div>
+<div class="content-card">
+  <h3>Subpopulações de células B</h3>
+  <table class="compare-table">
+    <thead>
+      <tr><th>Característica</th><th class="h1">B Foliculares</th><th class="h2">B Zona Marginal</th><th class="h3">B-1</th></tr>
+    </thead>
+    <tbody>
+      <tr class="expand-row" onclick="toggleExpand(this)">
+        <td>Localização</td><td class="d1">Folículos linfoides (baço, linfonodos)</td><td class="d2">Zona marginal do baço</td><td class="d3">Peritônio, mucosas</td>
+      </tr>
+      <tr class="expand-detail"><td colspan="4">Células B foliculares recirculam entre sangue e órgãos linfoides secundários, guiadas pela quimiocina CXCL13. As células da zona marginal são estrategicamente posicionadas para capturar antígenos que chegam pela circulação esplênica.</td></tr>
+      <tr class="expand-row" onclick="toggleExpand(this)">
+        <td>Antígeno respondido</td><td class="d1">Proteínas (T-dependentes)</td><td class="d2">Polissacarídeos (T-independentes)</td><td class="d3">Antígenos TI tipo 2</td>
+      </tr>
+      <tr class="expand-detail"><td colspan="4">A distinção entre antígenos T-dependentes e T-independentes é fundamental: os primeiros exigem cooperação de células T CD4+ para gerar respostas completas com memória e alta afinidade.</td></tr>
+      <tr class="expand-row" onclick="toggleExpand(this)">
+        <td>Produto principal</td><td class="d1">IgG, IgA, IgE (após troca)</td><td class="d2">Principalmente IgM</td><td class="d3">IgM "natural"</td>
+      </tr>
+      <tr class="expand-detail"><td colspan="4">A troca de isotipo ocorre principalmente no centro germinativo de respostas T-dependentes, permitindo que a célula B produza diferentes classes de anticorpos com a mesma especificidade, mas diferentes funções efetoras.</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12px;color:var(--text3);margin-top:.5rem">▶ Clique nas linhas para expandir os detalhes</p>
+</div>
+<div class="content-card">
+  <h3>Resposta primária × secundária</h3>
+  <table class="compare-table">
+    <thead><tr><th>Característica</th><th class="h1">Resposta Primária</th><th class="h2">Resposta Secundária</th></tr></thead>
+    <tbody>
+      <tr><td>Tempo para o pico</td><td class="d1">7–10 dias</td><td class="d2">3–5 dias</td></tr>
+      <tr><td>Magnitude</td><td class="d1">Menor</td><td class="d2">Muito maior</td></tr>
+      <tr><td>Isotipo dominante</td><td class="d1">IgM (depois IgG)</td><td class="d2">IgG, IgA ou IgE</td></tr>
+      <tr><td>Afinidade</td><td class="d1">Mais baixa e variável</td><td class="d2">Mais alta (maturação de afinidade)</td></tr>
+      <tr><td>Células envolvidas</td><td class="d1">Células B naive</td><td class="d2">Células B de memória</td></tr>
+      <tr><td>Duração dos plasmócitos</td><td class="d1">Vida curta (extrafolicular)</td><td class="d2">Vida longa (medula óssea)</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="quiz-section">
+  <div class="quiz-title">Atividade do módulo</div>
+  <div class="question-card" id="q1m1">
+    <div class="q-type">Múltipla escolha</div>
+    <div class="q-text">Qual subpopulação de células B é a principal responsável por respostas a antígenos proteicos T-dependentes e é capaz de gerar células B de memória com alta afinidade?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="selectOpt(this,'q1m1','a')">a) Células B-1</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m1','b')">b) Células B da zona marginal</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m1','c')">c) Células B foliculares</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m1','d')">d) Plasmócitos da medula óssea</button>
+    </div>
+    <button class="check-btn" onclick="checkMC('q1m1','c','As células B foliculares são a subpopulação que responde a antígenos proteicos em cooperação com células T CD4+, gerando reações de centro germinativo, maturação de afinidade e células de memória.')">Verificar</button>
+    <div class="feedback" id="q1m1-fb"></div>
+  </div>
+  <div class="question-card" id="q2m1">
+    <div class="q-type">Verdadeiro ou Falso</div>
+    <div class="q-text">Na resposta imune secundária, o isotipo dominante é a IgM, pois as células B de memória nunca sofrem troca de isotipo.</div>
+    <div class="tf-wrap">
+      <button class="tf-btn" onclick="selectTF(this,'q2m1','V')">Verdadeiro</button>
+      <button class="tf-btn" onclick="selectTF(this,'q2m1','F')">Falso</button>
+    </div>
+    <button class="check-btn" onclick="checkTF('q2m1','F','FALSO. As células B de memória geradas em respostas T-dependentes já sofreram troca de isotipo durante a reação do centro germinativo. A resposta secundária é dominada por IgG, IgA ou IgE — anticorpos de alta afinidade e funções efetoras especializadas.')">Verificar</button>
+    <div class="feedback" id="q2m1-fb"></div>
+  </div>
+</div>
+<div class="mod-complete" id="complete0" style="display:none">
+  <div class="mod-complete-icon">✅</div>
+  <div><p>Módulo 1 concluído!</p><small>Você entendeu a visão geral da resposta humoral.</small></div>
+  <button class="next-mod-btn" onclick="goPage(1)">Próximo módulo →</button>
+</div>
+<div class="page-footer">ICB/UFMG · Material de apoio ao ensino · Baseado em Abbas, Lichtman &amp; Pillai</div>
+</div>
+
+<!-- ════════ MÓDULO 2 ════════ -->
+<div class="page" id="page1">
+<div class="mod-header">
+  <div class="mod-badge" style="background:var(--c2l);color:var(--c2)">Módulo 2 · Sinalização</div>
+  <div class="mod-title">O BCR e a Ativação pelo Antígeno</div>
+  <div class="mod-desc">Como o receptor de célula B reconhece o antígeno, transduz sinais e prepara a célula para a resposta imune.</div>
+</div>
+<div class="content-card">
+  <h3>O complexo receptor de célula B (BCR)</h3>
+  <p>O <span class="term" onclick="toggleTerm('bcr')">BCR</span> é formado pela imunoglobulina de membrana (tipicamente IgM ou IgD em células naive) associada ao heterodímero <span class="term" onclick="toggleTerm('igab')">Igα/Igβ</span> (CD79a/CD79b). A mIg reconhece o antígeno nativo; o dímero Igα/Igβ transduz o sinal para o interior da célula por suas ITAMs.</p>
+  <div class="term-popup" id="bcr">BCR = B Cell Receptor. Complexo proteico que reconhece antígenos nativos (não processados), diferindo do TCR, que reconhece peptídeos apresentados por MHC. Cada célula B expressa BCRs com uma única especificidade antigênica.</div>
+  <div class="term-popup" id="igab">Igα (CD79a) e Igβ (CD79b) possuem ITAMs (Immunoreceptor Tyrosine-based Activation Motifs) no domínio citoplasmático. Quando o BCR liga antígeno, quinases como Lyn e Syk fosforilam os ITAMs, iniciando a cascata de sinalização intracelular.</div>
+  <p>Além do complexo central, o co-receptor <span class="term" onclick="toggleTerm('cr2')">CR2–CD19–CD81</span> amplifica fortemente o sinal. Antígenos opsonizados com complemento (C3d) ligam-se simultaneamente à mIg e ao CR2, podendo amplificar a sinalização em até 1.000×.</p>
+  <div class="term-popup" id="cr2">CR2 (CD21) liga C3d, fragmento depositado sobre patógenos pelo sistema complemento. Quando o antígeno com C3d é capturado pelo BCR, CR2 co-liga CD19 ao complexo, amplificando a sinalização via PI3-quinase.</div>
+</div>
+<div class="content-card">
+  <h3>Os sinais necessários para ativar a célula B</h3>
+  <div class="signal-grid">
+    <div class="signal-box s1">
+      <span class="sig-num">1</span>
+      <span class="sig-label">Sinal do BCR</span>
+      <div class="sig-detail">Ligação cruzada do BCR pelo antígeno → ativação de Lyn/Syk → cascata (PLC-γ, PI3K, Ras) → NF-κB, NFAT, AP-1</div>
+    </div>
+    <div class="signal-box s2">
+      <span class="sig-num">2</span>
+      <span class="sig-label">Co-receptor CR2 ou TLR</span>
+      <div class="sig-detail">CR2 amplifica o sinal via C3d do complemento; TLRs reconhecem PAMPs microbianos e ativam NF-κB de forma complementar ao BCR</div>
+    </div>
+    <div class="signal-box s3">
+      <span class="sig-num">3</span>
+      <span class="sig-label">Ajuda das células T</span>
+      <div class="sig-detail">CD40L (nas células T ativadas) + CD40 (nas células B) → sinal obrigatório para respostas plenas a antígenos proteicos</div>
+    </div>
+  </div>
+  <div class="highlight">
+    <strong>Ponto-chave:</strong> o sinal 1 (BCR) é obrigatório, mas insuficiente isoladamente. Sem sinais 2 e/ou 3, a célula B pode entrar em anergia ou apoptose — mecanismo de proteção contra autoimunidade.
+  </div>
+</div>
+<div class="content-card">
+  <h3>Respostas funcionais após ativação do BCR</h3>
+  <ul>
+    <li><strong>Apresentação de antígeno:</strong> a Ig de membrana endocita o antígeno, processado e apresentado como peptídeo–MHCII para células T CD4+</li>
+    <li><strong>Expressão aumentada de B7 (CD80/CD86):</strong> moléculas coestimuladoras necessárias para ativar células T</li>
+    <li><strong>Expressão de CCR7:</strong> direciona a célula B para a zona de células T do órgão linfoide, possibilitando o encontro T–B</li>
+    <li><strong>Upregulation de receptores de citocinas:</strong> permite responsividade a IL-2, IL-4, IL-21 produzidas pelas células T auxiliares</li>
+    <li><strong>Sobrevivência e ciclo celular:</strong> expressão de Bcl-2, Bcl-xL e ciclinas</li>
+  </ul>
+</div>
+<div class="content-card">
+  <h3>Atividade: componentes do BCR</h3>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:.75rem">Arraste cada componente para a sua função correta:</p>
+  <div class="drag-bank" id="bank-bcr">
+    <div class="drag-chip c1" draggable="true" data-id="igm" ondragstart="dragStart(event)">IgM / IgD</div>
+    <div class="drag-chip c2" draggable="true" data-id="igab" ondragstart="dragStart(event)">Igα/Igβ</div>
+    <div class="drag-chip c3" draggable="true" data-id="cr2" ondragstart="dragStart(event)">CR2 (CD21)</div>
+    <div class="drag-chip c4" draggable="true" data-id="cd19" ondragstart="dragStart(event)">CD19</div>
+  </div>
+  <div class="drag-zone-row">
+    <div>
+      <div class="drag-label">🎯 Reconhece o antígeno</div>
+      <div class="drag-area" data-accept="igm" ondragover="dragOver(event)" ondrop="dropChip(event)" ondragleave="dragLeave(event)"></div>
+    </div>
+    <div>
+      <div class="drag-label">⚡ Transduz o sinal via ITAM</div>
+      <div class="drag-area" data-accept="igab" ondragover="dragOver(event)" ondrop="dropChip(event)" ondragleave="dragLeave(event)"></div>
+    </div>
+    <div>
+      <div class="drag-label">🧲 Liga C3d do complemento</div>
+      <div class="drag-area" data-accept="cr2" ondragover="dragOver(event)" ondrop="dropChip(event)" ondragleave="dragLeave(event)"></div>
+    </div>
+    <div>
+      <div class="drag-label">📣 Amplifica sinal via PI3K</div>
+      <div class="drag-area" data-accept="cd19" ondragover="dragOver(event)" ondrop="dropChip(event)" ondragleave="dragLeave(event)"></div>
+    </div>
+  </div>
+  <button class="check-btn" onclick="checkDrag('bank-bcr')">Verificar</button>
+  <div class="feedback" id="bank-bcr-fb"></div>
+</div>
+<div class="quiz-section">
+  <div class="quiz-title">Atividade do módulo</div>
+  <div class="question-card" id="q1m2">
+    <div class="q-type">Múltipla escolha</div>
+    <div class="q-text">Um paciente com deficiência hereditária de CR2 (CD21) teria dificuldade principalmente com qual aspecto da resposta humoral?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="selectOpt(this,'q1m2','a')">a) Reconhecimento inicial do antígeno pelo BCR</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m2','b')">b) Amplificação da sinalização do BCR por antígenos opsonizados com C3d</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m2','c')">c) Produção de anticorpos IgM pelas células B-1</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m2','d')">d) Apresentação de antígeno para células T CD8+</button>
+    </div>
+    <button class="check-btn" onclick="checkMC('q1m2','b','CR2 (CD21), ao ligar C3d, co-agrega o complexo CR2–CD19–CD81 ao BCR, amplificando a sinalização em até 1.000×. Sua ausência comprometeria especialmente as respostas a antígenos opsonizados pelo complemento.')">Verificar</button>
+    <div class="feedback" id="q1m2-fb"></div>
+  </div>
+  <div class="question-card" id="q2m2">
+    <div class="q-type">Verdadeiro ou Falso</div>
+    <div class="q-text">Os TLRs nas células B podem fornecer sinais de ativação independentemente do BCR, reconhecendo padrões moleculares associados a patógenos (PAMPs).</div>
+    <div class="tf-wrap">
+      <button class="tf-btn" onclick="selectTF(this,'q2m2','V')">Verdadeiro</button>
+      <button class="tf-btn" onclick="selectTF(this,'q2m2','F')">Falso</button>
+    </div>
+    <button class="check-btn" onclick="checkTF('q2m2','V','VERDADEIRO. As células B expressam TLRs (como TLR4 e TLR9) que reconhecem PAMPs microbianos (LPS, CpG DNA). A ativação simultânea do BCR e dos TLRs potencializa a resposta, contribuindo especialmente para respostas T-independentes a microrganismos.')">Verificar</button>
+    <div class="feedback" id="q2m2-fb"></div>
+  </div>
+</div>
+<div class="mod-complete" id="complete1" style="display:none">
+  <div class="mod-complete-icon">✅</div>
+  <div><p>Módulo 2 concluído!</p><small>Você domina o BCR e os sinais de ativação da célula B.</small></div>
+  <button class="next-mod-btn" onclick="goPage(2)">Próximo módulo →</button>
+</div>
+<div class="page-footer">ICB/UFMG · Material de apoio ao ensino · Baseado em Abbas, Lichtman &amp; Pillai</div>
+</div>
+
+<!-- ════════ MÓDULO 3 ════════ -->
+<div class="page" id="page2">
+<div class="mod-header">
+  <div class="mod-badge" style="background:var(--c3l);color:var(--green)">Módulo 3 · Interação T–B</div>
+  <div class="mod-title">A Resposta T-Dependente</div>
+  <div class="mod-desc">Entenda como a cooperação entre linfócitos B e T CD4+ gera respostas humorais potentes, duradouras e de alta qualidade.</div>
+</div>
+<div class="content-card">
+  <h3>Por que antígenos proteicos precisam de células T?</h3>
+  <p>Antígenos proteicos contêm <strong>epítopos B</strong> (reconhecidos pela Ig de membrana) e <strong>epítopos T</strong> (peptídeos que, após processamento, são apresentados por MHCII às células T CD4+). Essa dupla funcionalidade permite a cooperação T–B.</p>
+</div>
+<div class="content-card">
+  <h3>Sequência de eventos: resposta T-dependente</h3>
+  <div class="stepper" id="stepper-td">
+    <div class="stepper-track" id="track-td">
+      <div class="step-dot active" data-i="0"><div class="step-num">1</div><div class="step-label">Ativação inicial</div></div>
+      <div class="step-dot" data-i="1"><div class="step-num">2</div><div class="step-label">Migração T–B</div></div>
+      <div class="step-dot" data-i="2"><div class="step-num">3</div><div class="step-label">Interação T–B</div></div>
+      <div class="step-dot" data-i="3"><div class="step-num">4</div><div class="step-label">Foco extrafolicular</div></div>
+      <div class="step-dot" data-i="4"><div class="step-num">5</div><div class="step-label">Centro germinativo</div></div>
+    </div>
+    <div class="step-panel" id="panel-td">
+      <div class="step-panel-title" id="panel-td-title"></div>
+      <p id="panel-td-body"></p>
+    </div>
+    <div class="step-nav">
+      <button onclick="stepNav('td',-1)">← Anterior</button>
+      <button class="primary" onclick="stepNav('td',1)">Próximo →</button>
+    </div>
+  </div>
+</div>
+<div class="content-card">
+  <h3>O papel central do eixo CD40–CD40L</h3>
+  <ul>
+    <li><strong>CD40L</strong> (CD154) é expresso na superfície das células T auxiliares ativadas</li>
+    <li><strong>CD40</strong> é constitutivamente expresso nas células B</li>
+    <li>A ligação CD40–CD40L ativa NF-κB na célula B → sobrevivência, proliferação, troca de isotipo e diferenciação em plasmócitos</li>
+  </ul>
+  <div class="clinical-box">
+    <div class="clin-title">📋 Relevância clínica — Síndrome de Hiper-IgM</div>
+    <p>Mutações no gene <em>CD40LG</em> (que codifica CD40L) causam a Síndrome de Hiper-IgM ligada ao X. Esses pacientes têm IgM elevada mas não produzem IgG, IgA ou IgE — pois não há sinalização via CD40 para a troca de isotipo. São altamente susceptíveis a infecções oportunistas, especialmente por <em>Pneumocystis jirovecii</em>.</p>
+  </div>
+</div>
+<div class="quiz-section">
+  <div class="quiz-title">Atividade do módulo</div>
+  <div class="question-card" id="q1m3">
+    <div class="q-type">Múltipla escolha</div>
+    <div class="q-text">Na resposta T-dependente, qual é a consequência direta da apresentação de antígeno pela célula B para a célula T CD4+?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="selectOpt(this,'q1m3','a')">a) A célula T reconhece o epítopo B e produz anticorpos diretamente</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m3','b')">b) A célula T auxiliar ativada expressa CD40L e secreta citocinas que potencializam a ativação da célula B</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m3','c')">c) A célula T inibe a resposta para evitar autoimunidade</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m3','d')">d) Há transferência de informação genética entre as células</button>
+    </div>
+    <button class="check-btn" onclick="checkMC('q1m3','b','A célula B processa o antígeno capturado via BCR e apresenta peptídeos em MHCII para células T CD4+ específicas. Isso ativa a célula T, que passa a expressar CD40L (sinal obrigatório) e secreta citocinas como IL-4 e IL-21, amplificando a proliferação e diferenciação da célula B.')">Verificar</button>
+    <div class="feedback" id="q1m3-fb"></div>
+  </div>
+  <div class="question-card" id="q2m3">
+    <div class="q-type">Múltipla escolha</div>
+    <div class="q-text">Qual padrão de imunoglobulinas seria esperado no soro de um paciente com mutação no gene CD40LG?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="selectOpt(this,'q2m3','a')">a) Níveis elevados de todas as classes de Ig</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q2m3','b')">b) Ausência de IgM e níveis normais de IgG</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q2m3','c')">c) IgM normal ou elevada; IgG, IgA e IgE ausentes ou muito baixas</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q2m3','d')">d) Ausência de todas as classes de imunoglobulina</button>
+    </div>
+    <button class="check-btn" onclick="checkMC('q2m3','c','Sem CD40L funcional, não há sinalização CD40–CD40L necessária para troca de isotipo e formação do centro germinativo. As células B produzem IgM (que não requer CD40L obrigatoriamente), mas não trocam para IgG, IgA ou IgE — caracterizando a Síndrome de Hiper-IgM tipo 1.')">Verificar</button>
+    <div class="feedback" id="q2m3-fb"></div>
+  </div>
+</div>
+<div class="mod-complete" id="complete2" style="display:none">
+  <div class="mod-complete-icon">✅</div>
+  <div><p>Módulo 3 concluído!</p><small>Você compreende a cooperação T–B e o eixo CD40–CD40L.</small></div>
+  <button class="next-mod-btn" onclick="goPage(3)">Próximo módulo →</button>
+</div>
+<div class="page-footer">ICB/UFMG · Material de apoio ao ensino · Baseado em Abbas, Lichtman &amp; Pillai</div>
+</div>
+
+<!-- ════════ MÓDULO 4 ════════ -->
+<div class="page" id="page3">
+<div class="mod-header">
+  <div class="mod-badge" style="background:var(--c4l);color:var(--c4)">Módulo 4 · Maturação</div>
+  <div class="mod-title">Centro Germinativo e Maturação</div>
+  <div class="mod-desc">O centro germinativo é o "laboratório evolutivo" onde células B aumentam sua afinidade, trocam de isotipo e se tornam plasmócitos ou células de memória.</div>
+</div>
+<div class="content-card">
+  <h3>A reação do centro germinativo</h3>
+  <p>Após ativação inicial, células B que recebem ajuda de <span class="term" onclick="toggleTerm('tfh')">células T auxiliares foliculares (Tfh)</span> migram para os folículos e formam os <strong>centros germinativos (CGs)</strong>. O CG possui duas zonas funcionais:</p>
+  <div class="term-popup" id="tfh">Células Tfh são CD4+ especializadas em ajudar células B nos centros germinativos. Expressam CXCR5, PD-1, ICOS e o fator transcricional BCL-6. Produzem IL-21 e IL-4, essenciais para sobrevivência e diferenciação das células B no CG.</div>
+  <ul>
+    <li><strong>Zona escura:</strong> centroblastos em proliferação intensa, onde ocorre a hipermutação somática (HMS)</li>
+    <li><strong>Zona clara:</strong> centrócitos que competem pela ligação a antígenos retidos nas células dendríticas foliculares (CDFs) e recebem sinais de sobrevivência das Tfh</li>
+  </ul>
+  <div class="highlight purple">
+    <strong>Ciclos de seleção:</strong> após HMS na zona escura, centrócitos movem-se para a zona clara para serem selecionados. Os de alta afinidade sobrevivem (e podem retornar à zona escura para mais rodadas); os de baixa afinidade morrem por apoptose. Esse ciclo refina progressivamente a resposta.
+  </div>
+</div>
+<div class="content-card">
+  <h3>Os três processos centrais do CG</h3>
+  <div class="signal-grid">
+    <div class="signal-box s1">
+      <span class="sig-num" style="font-size:1.6rem">🧬</span>
+      <span class="sig-label">Hipermutação Somática</span>
+      <div class="sig-detail">A enzima AID introduz mutações pontuais nos genes V da Ig na zona escura, gerando diversidade de afinidade na progênie da célula B</div>
+    </div>
+    <div class="signal-box s2">
+      <span class="sig-num" style="font-size:1.6rem">🎯</span>
+      <span class="sig-label">Maturação de Afinidade</span>
+      <div class="sig-detail">Na zona clara, apenas células com BCR de alta afinidade recebem sinais de sobrevivência das CDFs e das Tfh. Baixa afinidade = apoptose</div>
+    </div>
+    <div class="signal-box s3">
+      <span class="sig-num" style="font-size:1.6rem">🔄</span>
+      <span class="sig-label">Troca de Isotipo</span>
+      <div class="sig-detail">AID catalisa recombinação de troca de classe, permitindo produção de IgG, IgA ou IgE com a mesma especificidade antigênica</div>
+    </div>
+  </div>
+  <div class="highlight orange">
+    <strong>AID é central para ambos os processos:</strong> hipermutação somática e troca de isotipo dependem de AID (codificada por <em>AICDA</em>). Deficiências em AID causam Síndrome de Hiper-IgM tipo 2 — células B existem, mas sem maturação de afinidade nem troca de isotipo.
+  </div>
+</div>
+<div class="content-card">
+  <h3>Troca de isotipo: citocina → classe de anticorpo</h3>
+  <table class="isotipo-table">
+    <thead><tr><th>Citocina</th><th>Produzida por</th><th>Isotipo induzido</th><th>Função principal</th></tr></thead>
+    <tbody>
+      <tr><td>IL-4</td><td>Células Th2, mastócitos</td><td><strong>IgE</strong></td><td>Defesa anti-helminto, alergia tipo I</td></tr>
+      <tr><td>IFN-γ</td><td>Células Th1, NK</td><td><strong>IgG2a/c</strong> (humanos: IgG1)</td><td>Opsonização, ADCC, ativação do complemento</td></tr>
+      <tr><td>TGF-β + IL-10</td><td>Ambiente mucoso, Treg</td><td><strong>IgA</strong></td><td>Imunidade de mucosa, neutralização luminal</td></tr>
+      <tr><td>IL-4 + IL-13</td><td>Células Th2</td><td><strong>IgG1</strong> (humanos: IgG4)</td><td>Opsonização, neutralização</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="content-card">
+  <h3>Destinos finais da célula B ativada</h3>
+  <table class="compare-table">
+    <thead><tr><th>Característica</th><th class="h1">Plasmócito de vida longa</th><th class="h2">Célula B de memória</th></tr></thead>
+    <tbody>
+      <tr><td>Fator transcricional chave</td><td class="d1">Blimp-1 (PRDM1)</td><td class="d2">BCL-6, Pax5</td></tr>
+      <tr><td>Localização</td><td class="d1">Medula óssea</td><td class="d2">Órgãos linfoides, sangue</td></tr>
+      <tr><td>Expressão de BCR</td><td class="d1">Ausente ou mínima</td><td class="d2">Alta</td></tr>
+      <tr><td>Função</td><td class="d1">Secreção contínua de Ig</td><td class="d2">Resposta rápida na reexposição</td></tr>
+      <tr><td>Duração</td><td class="d1">Décadas</td><td class="d2">Longa (anos–décadas)</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="content-card">
+  <h3>Atividade: ordene os eventos do centro germinativo</h3>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:.75rem">Arraste os itens para reordená-los na sequência correta:</p>
+  <div class="order-list" id="order-cg">
+    <div class="order-item" draggable="true" data-order="3" ondragstart="orderDragStart(event)" ondragover="orderDragOver(event)" ondrop="orderDrop(event)" ondragleave="orderDragLeave(event)">
+      <span class="drag-handle">⠿</span> Seleção de centrócitos com alta afinidade pelas CDFs (zona clara)
+    </div>
+    <div class="order-item" draggable="true" data-order="1" ondragstart="orderDragStart(event)" ondragover="orderDragOver(event)" ondrop="orderDrop(event)" ondragleave="orderDragLeave(event)">
+      <span class="drag-handle">⠿</span> Entrada de células B ativadas no folículo e formação do centro germinativo
+    </div>
+    <div class="order-item" draggable="true" data-order="4" ondragstart="orderDragStart(event)" ondragover="orderDragOver(event)" ondrop="orderDrop(event)" ondragleave="orderDragLeave(event)">
+      <span class="drag-handle">⠿</span> Diferenciação em plasmócito de vida longa ou célula B de memória
+    </div>
+    <div class="order-item" draggable="true" data-order="2" ondragstart="orderDragStart(event)" ondragover="orderDragOver(event)" ondrop="orderDrop(event)" ondragleave="orderDragLeave(event)">
+      <span class="drag-handle">⠿</span> Hipermutação somática dos genes V pela enzima AID (zona escura)
+    </div>
+  </div>
+  <button class="check-btn" onclick="checkOrder('order-cg')">Verificar ordem</button>
+  <div class="feedback" id="order-cg-fb"></div>
+</div>
+<div class="quiz-section">
+  <div class="quiz-title">Atividade do módulo</div>
+  <div class="question-card" id="q1m4">
+    <div class="q-type">Múltipla escolha</div>
+    <div class="q-text">Camundongos com deleção do gene <em>Aicda</em> (que codifica AID) produzem IgM normalmente, mas não geram IgG nem anticorpos de alta afinidade. Qual é a explicação?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="selectOpt(this,'q1m4','a')">a) AID é necessária apenas para a ativação inicial do BCR</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m4','b')">b) Sem AID, não há hipermutação somática nem troca de isotipo, impedindo maturação de afinidade e produção de isotipos além de IgM</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m4','c')">c) AID promove a apoptose de células B no centro germinativo</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m4','d')">d) AID é responsável pela apresentação de antígeno para células T CD4+</button>
+    </div>
+    <button class="check-btn" onclick="checkMC('q1m4','b','AID catalisa tanto a hipermutação somática quanto a recombinação de troca de classe. Sem AID, células B se ativam e produzem IgM (que não requer AID), mas não realizam nenhum dos dois processos do centro germinativo — resultando apenas em anticorpos de baixa afinidade da classe IgM.')">Verificar</button>
+    <div class="feedback" id="q1m4-fb"></div>
+  </div>
+  <div class="question-card" id="q2m4">
+    <div class="q-type">Múltipla escolha</div>
+    <div class="q-text">Qual citocina produzida principalmente por células Th2 induz a troca de isotipo para IgE?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="selectOpt(this,'q2m4','a')">a) IFN-γ</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q2m4','b')">b) TGF-β</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q2m4','c')">c) IL-4</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q2m4','d')">d) IL-17</button>
+    </div>
+    <button class="check-btn" onclick="checkMC('q2m4','c','IL-4, produzida por células Th2, mastócitos e basófilos, é a principal citocina que induz troca de isotipo para IgE — central na defesa contra helmintos e nas reações alérgicas. IFN-γ → IgG2a; TGF-β + IL-10 → IgA; IL-17 não induz troca de isotipo diretamente.')">Verificar</button>
+    <div class="feedback" id="q2m4-fb"></div>
+  </div>
+</div>
+<div class="mod-complete" id="complete3" style="display:none">
+  <div class="mod-complete-icon">✅</div>
+  <div><p>Módulo 4 concluído!</p><small>Você domina o centro germinativo e a maturação da resposta humoral.</small></div>
+  <button class="next-mod-btn" onclick="goPage(4)">Próximo módulo →</button>
+</div>
+<div class="page-footer">ICB/UFMG · Material de apoio ao ensino · Baseado em Abbas, Lichtman &amp; Pillai</div>
+</div>
+
+<!-- ════════ MÓDULO 5 ════════ -->
+<div class="page" id="page4">
+<div class="mod-header">
+  <div class="mod-badge" style="background:var(--c2l);color:var(--c2)">Módulo 5 · T-Independente</div>
+  <div class="mod-title">Respostas a Antígenos T-Independentes</div>
+  <div class="mod-desc">Nem toda resposta humoral precisa de células T. Entenda como células B respondem a polissacarídeos e outros antígenos sem cooperação T.</div>
+</div>
+<div class="content-card">
+  <h3>Por que alguns antígenos precisam de células T — e outros não?</h3>
+  <p>A distinção fundamental está na <strong>natureza química do antígeno</strong> e na sua capacidade de gerar epítopos processáveis para apresentação às células T CD4+.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin:1rem 0">
+    <div class="signal-box s1" style="text-align:left">
+      <span class="sig-label" style="font-size:11px;text-transform:uppercase;letter-spacing:.05em">T-Dependente (TD)</span>
+      <div style="font-weight:600;font-size:.95rem;margin:.3rem 0 .5rem">Antígenos Proteicos</div>
+      <div class="sig-detail" style="font-size:12.5px">Proteínas possuem <strong>epítopos B</strong> (estrutura nativa reconhecida pela Ig de membrana) <em>e</em> <strong>epítopos T</strong> (peptídeos gerados pelo processamento intracelular e apresentados em MHCII). A célula B internaliza a proteína via BCR, processa-a e apresenta peptídeos às células T CD4+ foliculares (Tfh) — que fornecem os sinais 2 e 3 indispensáveis para uma resposta plena.</div>
+    </div>
+    <div class="signal-box s3" style="text-align:left">
+      <span class="sig-label" style="font-size:11px;text-transform:uppercase;letter-spacing:.05em">T-Independente (TI)</span>
+      <div style="font-weight:600;font-size:.95rem;margin:.3rem 0 .5rem">Antígenos Não-Proteicos</div>
+      <div class="sig-detail" style="font-size:12.5px">Polissacarídeos, lipídios e outros antígenos não-proteicos possuem <strong>apenas epítopos B</strong>. Por não serem processados em peptídeos, não são apresentados em MHCII — portanto, <strong>não ativam células T CD4+</strong>. A célula B é ativada pela ligação cruzada intensa e repetitiva do BCR, sem ajuda de Tfh. A resposta é rápida, mas limitada.</div>
+    </div>
+  </div>
+  <div class="highlight purple">
+    <strong>Consequência funcional:</strong> apenas respostas T-dependentes geram centros germinativos completos — e com eles, maturação de afinidade, troca de isotipo e memória imunológica duradoura. Respostas T-independentes são rápidas e protetoras em infecções agudas, mas não geram memória robusta nem anticorpos de alta afinidade.
+  </div>
+</div>
+<div class="content-card">
+  <h3>Comparação T-dependente × T-independente</h3>
+  <table class="compare-table">
+    <thead><tr><th>Característica</th><th class="h1">T-Dependente (TD)</th><th class="h2">T-Independente (TI)</th></tr></thead>
+    <tbody>
+      <tr><td>Tipo de antígeno</td><td class="d1">Proteínas</td><td class="d2">Polissacarídeos, lipídios, LPS</td></tr>
+      <tr><td>Células B envolvidas</td><td class="d1">B foliculares</td><td class="d2">B zona marginal, B-1</td></tr>
+      <tr><td>Centro germinativo</td><td class="d1">Sim (extenso)</td><td class="d2">Não (ou muito limitado)</td></tr>
+      <tr><td>Isotipos produzidos</td><td class="d1">IgG, IgA, IgE (após troca)</td><td class="d2">Principalmente IgM</td></tr>
+      <tr><td>Maturação de afinidade</td><td class="d1">Sim (AID + CG)</td><td class="d2">Não (ou mínima)</td></tr>
+      <tr><td>Memória imunológica</td><td class="d1">Robusta e duradoura</td><td class="d2">Limitada ou ausente</td></tr>
+      <tr><td>Plasmócitos gerados</td><td class="d1">Vida longa (medula óssea)</td><td class="d2">Principalmente vida curta</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="content-card">
+  <h3>Relevância clínica: bactérias encapsuladas e vacinas conjugadas</h3>
+  <div class="clinical-box">
+    <div class="clin-title">📋 Caso Clínico — Paciente Asplênico</div>
+    <p>Pacientes submetidos à esplenectomia ficam extremamente vulneráveis a infecções por bactérias encapsuladas (<em>S. pneumoniae</em>, <em>H. influenzae</em> tipo b, <em>N. meningitidis</em>). O baço concentra as células B da zona marginal — principais respondedoras a antígenos TI-2. Sem essas células, a produção rápida de IgM anti-cápsula fica comprometida. Esses pacientes devem ser vacinados com vacinas conjugadas e receber profilaxia antibiótica.</p>
+  </div>
+  <div class="highlight green">
+    <strong>Base das vacinas conjugadas:</strong> vacinas como Hib e as pneumocócicas conjugadas ligam o polissacarídeo a uma proteína carreadora, convertendo a resposta TI em TD. Isso gera IgG de alta afinidade e memória imunológica — eficazes também em crianças menores de 2 anos, cujas células B da zona marginal são imaturas.
+  </div>
+</div>
+<div class="quiz-section">
+  <div class="quiz-title">Atividade do módulo</div>
+  <div class="question-card" id="q1m5">
+    <div class="q-type">Múltipla escolha</div>
+    <div class="q-text">Por que crianças menores de 2 anos respondem mal a vacinas polissacarídeas puras?</div>
+    <div class="mc-options">
+      <button class="mc-opt" onclick="selectOpt(this,'q1m5','a')">a) Porque crianças nessa faixa etária não possuem linfócitos B</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m5','b')">b) Porque as células B da zona marginal, principais respondedoras a antígenos TI-2, são imaturas nos primeiros anos de vida</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m5','c')">c) Porque os anticorpos maternos bloqueiam completamente qualquer resposta imune</button>
+      <button class="mc-opt" onclick="selectOpt(this,'q1m5','d')">d) Porque polissacarídeos são destruídos no sistema digestório antes de estimular células B</button>
+    </div>
+    <button class="check-btn" onclick="checkMC('q1m5','b','As células B da zona marginal são funcionalmente imaturas nos primeiros 2 anos de vida. Como são as principais respondedoras a antígenos TI-2 (polissacarídeos), crianças pequenas não montam respostas protetoras a vacinas polissacarídeas puras. As vacinas conjugadas resolvem isso ao transformar a resposta em T-dependente.')">Verificar</button>
+    <div class="feedback" id="q1m5-fb"></div>
+  </div>
+  <div class="question-card" id="q2m5">
+    <div class="q-type">Verdadeiro ou Falso</div>
+    <div class="q-text">Antígenos T-independentes geram respostas de anticorpos mais rápidas que os T-dependentes, mas não produzem memória imunológica duradoura nem anticorpos de alta afinidade.</div>
+    <div class="tf-wrap">
+      <button class="tf-btn" onclick="selectTF(this,'q2m5','V')">Verdadeiro</button>
+      <button class="tf-btn" onclick="selectTF(this,'q2m5','F')">Falso</button>
+    </div>
+    <button class="check-btn" onclick="checkTF('q2m5','V','VERDADEIRO. Antígenos T-independentes ativam células B rapidamente (sem necessidade de cooperação com células T), gerando principalmente IgM em poucos dias. Porém, a ausência de ajuda Tfh impede a formação de centros germinativos completos — e sem CG não há hipermutação somática, maturação de afinidade nem geração eficiente de células de memória de longa duração.')">Verificar</button>
+    <div class="feedback" id="q2m5-fb"></div>
+  </div>
+</div>
+<div class="mod-complete" id="complete4" style="display:none">
+  <div class="mod-complete-icon">✅</div>
+  <div><p>Todos os módulos concluídos!</p><small>Você está pronto para o quiz final.</small></div>
+  <button class="next-mod-btn" onclick="goPage(5)">Ir para o Quiz Final →</button>
+</div>
+<div class="page-footer">ICB/UFMG · Material de apoio ao ensino · Baseado em Abbas, Lichtman &amp; Pillai</div>
+</div>
+
+<!-- ════════ QUIZ FINAL ════════ -->
+<div class="page" id="page5">
+<div class="final-header">
+  <h2>Quiz Final — Ativação de Linfócitos B</h2>
+  <p>15 questões cobrindo todos os módulos. Responda e envie para ver seu resultado com feedback detalhado.</p>
+</div>
+<div id="quiz-final-questions">
+<div class="question-card" id="fq1"><div class="q-type">Módulo 1 · Múltipla escolha</div><div class="q-text">1. Qual das seguintes características diferencia a resposta imune secundária da primária?</div><div class="mc-options"><button class="mc-opt" onclick="selectOpt(this,'fq1','a')">a) É mais lenta e produz menos anticorpos</button><button class="mc-opt" onclick="selectOpt(this,'fq1','b')">b) É mais rápida, de maior magnitude e com predomínio de IgG de alta afinidade</button><button class="mc-opt" onclick="selectOpt(this,'fq1','c')">c) É mediada exclusivamente por células T, sem participação de células B</button><button class="mc-opt" onclick="selectOpt(this,'fq1','d')">d) Produz apenas IgM, pois células de memória não sofrem troca de isotipo</button></div></div>
+<div class="question-card" id="fq2"><div class="q-type">Módulo 1 · Verdadeiro ou Falso</div><div class="q-text">2. Os plasmócitos de vida longa produzem anticorpos continuamente sem necessitar de reestimulação antigênica.</div><div class="tf-wrap"><button class="tf-btn" onclick="selectTF(this,'fq2','V')">Verdadeiro</button><button class="tf-btn" onclick="selectTF(this,'fq2','F')">Falso</button></div></div>
+<div class="question-card" id="fq3"><div class="q-type">Módulo 2 · Múltipla escolha</div><div class="q-text">3. O complexo CR2–CD19–CD81 amplifica a sinalização do BCR quando o antígeno está opsonizado com qual molécula do complemento?</div><div class="mc-options"><button class="mc-opt" onclick="selectOpt(this,'fq3','a')">a) C1q</button><button class="mc-opt" onclick="selectOpt(this,'fq3','b')">b) C3d</button><button class="mc-opt" onclick="selectOpt(this,'fq3','c')">c) C5a</button><button class="mc-opt" onclick="selectOpt(this,'fq3','d')">d) C9</button></div></div>
+<div class="question-card" id="fq4"><div class="q-type">Módulo 2 · Múltipla escolha</div><div class="q-text">4. Qual molécula é responsável pela transdução do sinal interno após a ligação do antígeno ao BCR?</div><div class="mc-options"><button class="mc-opt" onclick="selectOpt(this,'fq4','a')">a) IgM de membrana</button><button class="mc-opt" onclick="selectOpt(this,'fq4','b')">b) CR2 (CD21)</button><button class="mc-opt" onclick="selectOpt(this,'fq4','c')">c) Igα/Igβ (CD79a/CD79b)</button><button class="mc-opt" onclick="selectOpt(this,'fq4','d')">d) MHCII</button></div></div>
+<div class="question-card" id="fq5"><div class="q-type">Módulo 2 · Verdadeiro ou Falso</div><div class="q-text">5. A expressão de CCR7 após ativação do BCR direciona a célula B para a zona de células T do órgão linfoide.</div><div class="tf-wrap"><button class="tf-btn" onclick="selectTF(this,'fq5','V')">Verdadeiro</button><button class="tf-btn" onclick="selectTF(this,'fq5','F')">Falso</button></div></div>
+<div class="question-card" id="fq6"><div class="q-type">Módulo 3 · Múltipla escolha</div><div class="q-text">6. Na resposta T-dependente, qual é o papel funcional da célula B como célula apresentadora de antígeno?</div><div class="mc-options"><button class="mc-opt" onclick="selectOpt(this,'fq6','a')">a) Apresentar antígenos em MHCI para células T CD8+</button><button class="mc-opt" onclick="selectOpt(this,'fq6','b')">b) Capturar e processar o antígeno via BCR, apresentando peptídeos em MHCII para células T CD4+ específicas</button><button class="mc-opt" onclick="selectOpt(this,'fq6','c')">c) Secretar IFN-γ para ativar macrófagos</button><button class="mc-opt" onclick="selectOpt(this,'fq6','d')">d) Apresentar antígenos nativos diretamente para células NK</button></div></div>
+<div class="question-card" id="fq7"><div class="q-type">Módulo 3 · Múltipla escolha</div><div class="q-text">7. A Síndrome de Hiper-IgM ligada ao X é causada por mutações no gene que codifica:</div><div class="mc-options"><button class="mc-opt" onclick="selectOpt(this,'fq7','a')">a) CD40 (expresso na célula B)</button><button class="mc-opt" onclick="selectOpt(this,'fq7','b')">b) CD40L / CD154 (expresso na célula T ativada)</button><button class="mc-opt" onclick="selectOpt(this,'fq7','c')">c) AID (Activation-Induced Cytidine Deaminase)</button><button class="mc-opt" onclick="selectOpt(this,'fq7','d')">d) BCL-6</button></div></div>
+<div class="question-card" id="fq8"><div class="q-type">Módulo 3 · Verdadeiro ou Falso</div><div class="q-text">8. Sem o sinal CD40–CD40L, células B podem ser ativadas pelo BCR mas não progridem para o centro germinativo nem realizam troca de isotipo em respostas T-dependentes.</div><div class="tf-wrap"><button class="tf-btn" onclick="selectTF(this,'fq8','V')">Verdadeiro</button><button class="tf-btn" onclick="selectTF(this,'fq8','F')">Falso</button></div></div>
+<div class="question-card" id="fq9"><div class="q-type">Módulo 4 · Múltipla escolha</div><div class="q-text">9. O que ocorre com células B do centro germinativo cujos BCRs — após hipermutação somática — passam a ter baixa afinidade pelo antígeno?</div><div class="mc-options"><button class="mc-opt" onclick="selectOpt(this,'fq9','a')">a) Recebem sinais de sobrevivência e se diferenciam em plasmócitos</button><button class="mc-opt" onclick="selectOpt(this,'fq9','b')">b) Migram para a medula óssea e tornam-se células de memória</button><button class="mc-opt" onclick="selectOpt(this,'fq9','c')">c) Morrem por apoptose por não receberem sinais de sobrevivência adequados</button><button class="mc-opt" onclick="selectOpt(this,'fq9','d')">d) Voltam à zona escura e param de sofrer hipermutação</button></div></div>
+<div class="question-card" id="fq10"><div class="q-type">Módulo 4 · Múltipla escolha</div><div class="q-text">10. Qual fator transcricional é o "mestre regulador" da diferenciação em plasmócito e reprime o programa de centro germinativo (incluindo BCL-6)?</div><div class="mc-options"><button class="mc-opt" onclick="selectOpt(this,'fq10','a')">a) Pax5</button><button class="mc-opt" onclick="selectOpt(this,'fq10','b')">b) BCL-6</button><button class="mc-opt" onclick="selectOpt(this,'fq10','c')">c) Blimp-1 (PRDM1)</button><button class="mc-opt" onclick="selectOpt(this,'fq10','d')">d) GATA-3</button></div></div>
+<div class="question-card" id="fq11"><div class="q-type">Módulo 4 · Verdadeiro ou Falso</div><div class="q-text">11. A produção de IgA secretória nas mucosas é induzida principalmente por TGF-β e IL-10, produzidos em ambientes mucosos.</div><div class="tf-wrap"><button class="tf-btn" onclick="selectTF(this,'fq11','V')">Verdadeiro</button><button class="tf-btn" onclick="selectTF(this,'fq11','F')">Falso</button></div></div>
+<div class="question-card" id="fq12"><div class="q-type">Módulo 5 · Múltipla escolha</div><div class="q-text">12. Qual é a principal vantagem das vacinas conjugadas em relação às vacinas polissacarídeas puras?</div><div class="mc-options"><button class="mc-opt" onclick="selectOpt(this,'fq12','a')">a) São mais baratas de produzir</button><button class="mc-opt" onclick="selectOpt(this,'fq12','b')">b) Convertem a resposta de T-independente para T-dependente, gerando IgG de alta afinidade e memória imunológica eficaz também em crianças pequenas</button><button class="mc-opt" onclick="selectOpt(this,'fq12','c')">c) Estimulam exclusivamente células T CD8+ citotóxicas</button><button class="mc-opt" onclick="selectOpt(this,'fq12','d')">d) Eliminam a necessidade de reforços vacinais</button></div></div>
+<div class="question-card" id="fq13"><div class="q-type">Módulo 5 · Verdadeiro ou Falso</div><div class="q-text">13. Antígenos T-independentes tipo 2 ativam células B principalmente por ligação cruzada intensa e repetitiva do BCR, sem atividade mitogênica intrínseca.</div><div class="tf-wrap"><button class="tf-btn" onclick="selectTF(this,'fq13','V')">Verdadeiro</button><button class="tf-btn" onclick="selectTF(this,'fq13','F')">Falso</button></div></div>
+<div class="question-card" id="fq14"><div class="q-type">Integração · Múltipla escolha</div><div class="q-text">14. Em uma primeira infecção por <em>Streptococcus pneumoniae</em>, qual tipo de resposta humoral é ativado contra os polissacarídeos capsulares e qual o isotipo predominante?</div><div class="mc-options"><button class="mc-opt" onclick="selectOpt(this,'fq14','a')">a) Resposta T-dependente pelas células B foliculares, com predomínio de IgG</button><button class="mc-opt" onclick="selectOpt(this,'fq14','b')">b) Resposta T-independente pelas células B da zona marginal, com predomínio de IgM</button><button class="mc-opt" onclick="selectOpt(this,'fq14','c')">c) Resposta T-dependente pelas células Tfh, com produção de IgE</button><button class="mc-opt" onclick="selectOpt(this,'fq14','d')">d) Resposta exclusivamente por células T CD8+ citotóxicas</button></div></div>
+<div class="question-card" id="fq15"><div class="q-type">Integração · Múltipla escolha</div><div class="q-text">15. Em qual estrutura ocorre a hipermutação somática e a maturação de afinidade, e qual enzima é indispensável para esses processos?</div><div class="mc-options"><button class="mc-opt" onclick="selectOpt(this,'fq15','a')">a) Timo; enzima RAG1/RAG2</button><button class="mc-opt" onclick="selectOpt(this,'fq15','b')">b) Medula óssea; enzima Terminal Transferase (TdT)</button><button class="mc-opt" onclick="selectOpt(this,'fq15','c')">c) Centro germinativo dos órgãos linfoides secundários; enzima AID</button><button class="mc-opt" onclick="selectOpt(this,'fq15','d')">d) Linfonodos mesentéricos; enzima DNA polimerase β</button></div></div>
+<button class="quiz-submit-btn" onclick="submitFinalQuiz()">Enviar respostas e ver resultado</button>
+</div>
+<div id="quiz-final-result" style="display:none">
+  <div class="result-card">
+    <div class="result-score" id="final-score">0/15</div>
+    <div class="result-label">questões corretas</div>
+    <div class="result-badge" id="final-badge"></div>
+  </div>
+  <div class="ans-review" id="final-review"></div>
+  <button class="retry-btn" onclick="retryFinalQuiz()">Tentar novamente</button>
+</div>
+<div class="page-footer">ICB/UFMG · Material de apoio ao ensino · Baseado em Abbas, Lichtman &amp; Pillai</div>
+</div>
+
+<script>
+const totalPages=6;
+function goPage(i){document.querySelectorAll('.page').forEach((p,idx)=>p.classList.toggle('active',idx===i));document.querySelectorAll('.nav-tab').forEach((t,idx)=>t.classList.toggle('active',idx===i));document.getElementById('progressFill').style.width=((i+1)/totalPages*100)+'%';window.scrollTo(0,0);}
+function unlockNext(m){const el=document.getElementById('complete'+m);if(el)el.style.display='flex';}
+function toggleTerm(id){document.getElementById(id).classList.toggle('open');}
+function toggleExpand(row){row.classList.toggle('open');const n=row.nextElementSibling;if(n&&n.classList.contains('expand-detail'))n.classList.toggle('show');}
+const stepData={td:{current:0,steps:[
+{title:'1. Ativação inicial de células B e T',body:'Células B naive reconhecem o antígeno via BCR nos folículos linfoides. Simultaneamente, células T CD4+ reconhecem peptídeos do mesmo antígeno (processados por células dendríticas) nas zonas de células T. Ambas as populações se ativam de forma independente antes de se encontrarem.'},
+{title:'2. Migração mútua — o encontro T–B',body:'A ativação via BCR induz expressão de <span class="mol-tag c2">CCR7</span> nas células B, atraindo-as para a zona de células T. As células T ativadas upregulam <span class="mol-tag c1">CXCR5</span> e migram para a borda dos folículos. Esse reposicionamento recíproco facilita o encontro T–B.'},
+{title:'3. Interação cognata T–B',body:'A célula B apresenta peptídeos do antígeno em <span class="mol-tag c3">MHCII</span> para a célula T específica. A célula T ativada expressa <span class="mol-tag c2">CD40L</span>, que se liga ao <span class="mol-tag c1">CD40</span> da célula B — sinal 3 obrigatório. As citocinas T (IL-4, IL-21) amplificam a ativação da célula B.'},
+{title:'4. Foco extrafolicular — plasmócitos de vida curta',body:'Uma fração das células B migra para focos extrafoliculares, onde prolifera e se diferencia rapidamente em <span class="mol-tag c2">plasmócitos de vida curta</span>. Produzem principalmente <span class="mol-tag gray">IgM</span> (com alguma troca precoce para IgG). São importantes na fase inicial, antes dos centros germinativos se estabelecerem.'},
+{title:'5. Reação do Centro Germinativo',body:'Com ajuda das <span class="mol-tag c4">células Tfh</span> (CXCR5+, BCL-6+), células B formam centros germinativos. Nesse microambiente ocorrem hipermutação somática, maturação de afinidade, troca de isotipo e diferenciação final em <span class="mol-tag c1">plasmócitos de vida longa</span> e <span class="mol-tag c3">células B de memória</span>.'}
+]}};
+function renderStepper(id){const s=stepData[id];document.querySelectorAll('#stepper-'+id+' .step-dot').forEach((d,i)=>{d.classList.remove('active','done');if(i<s.current)d.classList.add('done');if(i===s.current)d.classList.add('active');});document.getElementById('panel-'+id+'-title').textContent=s.steps[s.current].title;document.getElementById('panel-'+id+'-body').innerHTML=s.steps[s.current].body;}
+function stepNav(id,dir){const s=stepData[id];s.current=Math.max(0,Math.min(s.steps.length-1,s.current+dir));renderStepper(id);}
+renderStepper('td');
+const mcSel={},tfSel={};
+function selectOpt(btn,qid,val){const c=document.getElementById(qid);if(c.classList.contains('correct')||c.classList.contains('wrong'))return;c.querySelectorAll('.mc-opt').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');mcSel[qid]=val;}
+function selectTF(btn,qid,val){const c=document.getElementById(qid);if(c.classList.contains('correct')||c.classList.contains('wrong'))return;c.querySelectorAll('.tf-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');tfSel[qid]=val;}
+function checkMC(qid,correct,exp){const sel=mcSel[qid],card=document.getElementById(qid),fb=document.getElementById(qid+'-fb');if(!sel){fb.className='feedback show err';fb.textContent='Selecione uma opção.';return;}card.querySelectorAll('.mc-opt').forEach(b=>{b.disabled=true;const m=b.getAttribute('onclick').match(/'([a-d])'\)$/);if(m&&m[1]===correct)b.classList.add('correct-ans');else if(b.classList.contains('selected'))b.classList.add('wrong-ans');});const ok=sel===correct;card.classList.add(ok?'correct':'wrong');fb.className='feedback show '+(ok?'ok':'err');fb.textContent=(ok?'✓ Correto! ':'✗ Incorreto. ')+exp;checkModComplete(qid);}
+function checkTF(qid,correct,exp){const sel=tfSel[qid],card=document.getElementById(qid),fb=document.getElementById(qid+'-fb');if(!sel){fb.className='feedback show err';fb.textContent='Selecione Verdadeiro ou Falso.';return;}card.querySelectorAll('.tf-btn').forEach(b=>{b.disabled=true;const m=b.getAttribute('onclick').match(/'([VF])'\)$/);if(m&&m[1]===correct)b.classList.add('correct-ans');else if(b.classList.contains('selected'))b.classList.add('wrong-ans');});const ok=sel===correct;card.classList.add(ok?'correct':'wrong');fb.className='feedback show '+(ok?'ok':'err');fb.textContent=(ok?'✓ Correto! ':'✗ Incorreto. ')+exp;checkModComplete(qid);}
+const modQs={0:['q1m1','q2m1'],1:['q1m2','q2m2'],2:['q1m3','q2m3'],3:['q1m4','q2m4'],4:['q1m5','q2m5']};
+function checkModComplete(qid){for(const[mod,qs]of Object.entries(modQs)){if(qs.includes(qid)){const allDone=qs.every(q=>{const c=document.getElementById(q);return c&&(c.classList.contains('correct')||c.classList.contains('wrong'));});if(allDone)unlockNext(parseInt(mod));break;}}}
+let draggedChip=null,draggedChipParent=null;
+function dragStart(e){draggedChip=e.target;draggedChipParent=e.target.parentElement;e.dataTransfer.effectAllowed='move';}
+function dragOver(e){e.preventDefault();e.currentTarget.classList.add('over');}
+function dragLeave(e){e.currentTarget.classList.remove('over');}
+function dropChip(e){e.preventDefault();const area=e.currentTarget;area.classList.remove('over');if(!draggedChip)return;const ex=area.querySelector('.drag-chip');if(ex)draggedChipParent.appendChild(ex);area.appendChild(draggedChip);draggedChip=null;}
+function checkDrag(bankId){const areas=document.querySelectorAll('[data-accept]');let c=0;areas.forEach(a=>{const chip=a.querySelector('.drag-chip');if(chip&&chip.dataset.id===a.dataset.accept)c++;});const fb=document.getElementById(bankId+'-fb');fb.className='feedback show '+(c===4?'ok':'err');fb.textContent=c===4?'✓ Perfeito! Você identificou corretamente todos os componentes do BCR.':'✗ '+c+'/4 corretos. Lembre: IgM/IgD reconhece o antígeno; Igα/Igβ transduz via ITAM; CR2 liga C3d; CD19 amplifica via PI3K.';}
+let orderDragged=null;
+function orderDragStart(e){orderDragged=e.currentTarget;e.currentTarget.style.opacity='.4';}
+function orderDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
+function orderDragLeave(e){e.currentTarget.classList.remove('drag-over');}
+function orderDrop(e){e.preventDefault();const t=e.currentTarget;t.classList.remove('drag-over');if(orderDragged&&orderDragged!==t){const list=t.parentElement,nodes=[...list.querySelectorAll('.order-item')],fi=nodes.indexOf(orderDragged),ti=nodes.indexOf(t);if(fi<ti)list.insertBefore(orderDragged,t.nextSibling);else list.insertBefore(orderDragged,t);}orderDragged.style.opacity='';orderDragged=null;}
+function checkOrder(listId){const items=document.querySelectorAll('#'+listId+' .order-item'),orders=[...items].map(i=>parseInt(i.dataset.order));let ok=true;for(let i=1;i<orders.length;i++){if(orders[i]<orders[i-1]){ok=false;break;}}const fb=document.getElementById(listId+'-fb');fb.className='feedback show '+(ok?'ok':'err');fb.textContent=ok?'✓ Sequência correta! Entrada no folículo → Hipermutação (zona escura) → Seleção de afinidade (zona clara) → Diferenciação.':'✗ Ordem incorreta. Sequência correta: (1) Entrada no folículo, (2) Hipermutação pela AID na zona escura, (3) Seleção de alta afinidade pelas CDFs na zona clara, (4) Diferenciação em plasmócito ou célula de memória.';}
+const fqA={
+  fq1:{t:'mc',c:'b',exp:'A resposta secundária é mais rápida (células de memória), de maior magnitude e dominada por IgG de alta afinidade, pois as células B de memória já sofreram troca de isotipo e maturação de afinidade no CG.'},
+  fq2:{t:'tf',c:'V',exp:'Plasmócitos de vida longa residentes na medula óssea secretam anticorpos constitutivamente sem reestimulação. Essa produção basal mantém títulos protetores por anos após vacinação ou infecção.'},
+  fq3:{t:'mc',c:'b',exp:'CR2 (CD21) liga C3d depositado sobre patógenos pelo complemento. O co-engajamento de CR2 com o BCR amplifica a sinalização em até 1.000×, reduzindo o limiar de ativação da célula B.'},
+  fq4:{t:'mc',c:'c',exp:'Igα (CD79a) e Igβ (CD79b) possuem ITAMs fosforilados por quinases como Lyn e Syk após reconhecimento do antígeno pela IgM/IgD de membrana, iniciando a cascata de sinalização.'},
+  fq5:{t:'tf',c:'V',exp:'CCR7 é upregulado nas células B após ativação do BCR. Seus ligantes (CCL19 e CCL21) são produzidos nas zonas de células T, direcionando a célula B para o encontro T–B.'},
+  fq6:{t:'mc',c:'b',exp:'A célula B internaliza o antígeno via BCR, processa em lisossomas e apresenta peptídeos em MHCII para células T CD4+ específicas — papel essencial para receber o sinal CD40L e as citocinas da célula T ativada.'},
+  fq7:{t:'mc',c:'b',exp:'A Síndrome de Hiper-IgM tipo 1 é causada por mutações no gene CD40LG (codifica CD40L, expresso na célula T ativada). Sem CD40L funcional, o sinal CD40–CD40L é abolido, impedindo troca de isotipo e formação do CG.'},
+  fq8:{t:'tf',c:'V',exp:'A sinalização CD40–CD40L é essencial para que células B entrem no centro germinativo em respostas T-dependentes. Sem esse sinal, a ativação via BCR é parcial e não gera CG completo nem troca de isotipo eficiente.'},
+  fq9:{t:'mc',c:'c',exp:'Na zona clara do CG, centrócitos competem pela ligação a antígenos nas CDFs. Células com BCR de baixa afinidade recebem poucos sinais de sobrevivência e morrem por apoptose — seleção que enriquece progressivamente a resposta.'},
+  fq10:{t:'mc',c:'c',exp:'Blimp-1 (PRDM1) é o fator transcricional mestre da diferenciação em plasmócito. Reprime BCL-6 e outros genes do programa de célula B enquanto ativa genes de secreção de imunoglobulinas.'},
+  fq11:{t:'tf',c:'V',exp:'Nas mucosas, TGF-β e IL-10 induzem a troca de isotipo para IgA. O componente secretório adicionado pelo epitélio transforma IgA dimérica em IgA secretória — principal imunidade humoral de mucosa.'},
+  fq12:{t:'mc',c:'b',exp:'Vacinas conjugadas ligam o polissacarídeo a uma proteína carreadora, convertendo a resposta TI em TD: geram CG, maturação de afinidade, troca para IgG e memória — eficazes também em crianças menores de 2 anos.'},
+  fq13:{t:'tf',c:'V',exp:'Antígenos TI-2 possuem epítopos altamente repetitivos que promovem ligação cruzada intensa do BCR. Diferentemente dos TI-1 (atividade mitogênica via TLRs), os TI-2 não ativam TLRs diretamente.'},
+  fq14:{t:'mc',c:'b',exp:'Os polissacarídeos capsulares de S. pneumoniae são antígenos TI-2, reconhecidos pelas células B da zona marginal, gerando resposta rápida com IgM — primeira linha de defesa antes que a resposta T-dependente se estabeleça.'},
+  fq15:{t:'mc',c:'c',exp:'A hipermutação somática e a maturação de afinidade ocorrem nos centros germinativos dos órgãos linfoides secundários. A enzima AID é indispensável: catalisa a deaminação de citosina nos genes V (hipermutação) e nos genes de troca de classe.'}
+};
+function submitFinalQuiz(){let score=0;const review=[];for(const[qid,data]of Object.entries(fqA)){const sel=data.t==='tf'?tfSel[qid]:mcSel[qid];const ok=sel===data.c;if(ok)score++;const qText=document.querySelector('#'+qid+' .q-text')?.textContent||qid;const yourAns=sel?(data.t==='tf'?sel:'Opção '+sel):'Não respondida';const corrAns=data.t==='tf'?data.c:'Opção '+data.c;review.push({ok,qText,yourAns,corrAns,exp:data.exp});}
+document.getElementById('final-score').textContent=score+'/15';const badge=document.getElementById('final-badge');if(score>=13){badge.textContent='🏆 Excelente domínio do conteúdo!';badge.className='result-badge great';}else if(score>=10){badge.textContent='👍 Bom desempenho — revise os erros';badge.className='result-badge good';}else if(score>=7){badge.textContent='📖 Revise os módulos com mais erros';badge.className='result-badge review';}else{badge.textContent='🔄 Recomenda-se refazer os módulos';badge.className='result-badge retry';}
+document.getElementById('final-review').innerHTML='<div style="font-size:.8rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:1rem">Revisão detalhada</div>'+review.map(r=>`<div class="ans-item ${r.ok?'ok':'err'}"><div class="ans-q">${r.qText}</div><div class="ans-your">Sua resposta: ${r.yourAns}</div>${!r.ok?'<div class="ans-correct">Resposta correta: '+r.corrAns+'</div>':''}<div class="ans-exp">${r.exp}</div></div>`).join('');
+document.getElementById('quiz-final-questions').style.display='none';document.getElementById('quiz-final-result').style.display='block';window.scrollTo(0,0);}
+function retryFinalQuiz(){Object.keys(mcSel).forEach(k=>{if(k.startsWith('fq'))delete mcSel[k];});Object.keys(tfSel).forEach(k=>{if(k.startsWith('fq'))delete tfSel[k];});document.querySelectorAll('#quiz-final-questions .mc-opt').forEach(b=>{b.classList.remove('selected','correct-ans','wrong-ans');b.disabled=false;});document.querySelectorAll('#quiz-final-questions .tf-btn').forEach(b=>{b.classList.remove('selected','correct-ans','wrong-ans');b.disabled=false;});document.querySelectorAll('#quiz-final-questions .question-card').forEach(c=>c.classList.remove('correct','wrong'));document.getElementById('quiz-final-questions').style.display='block';document.getElementById('quiz-final-result').style.display='none';}
+</script>
+</main>
+</div>
+</body>
+</html>
