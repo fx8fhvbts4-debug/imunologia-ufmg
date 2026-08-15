@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lista de exercícios — Módulo 1 | Imunologia ICB-UFMG</title>
+<style>
+html,body{margin:0;padding:0;background:#f7f4ee}
+</style>
+</head>
+<body>
+<div class="imuq" id="imuq-root">
+<style>
+.imuq *{box-sizing:border-box}
+.imuq{
+  --ink:#12232b; --ink2:#40606d; --ink3:#7d97a1;
+  --paper:#f7f4ee; --card:#ffffff; --line:#dfd8cc;
+  --deep:#0f4c5c; --deep-l:#e3eef1;
+  --amber:#c46a13; --amber-l:#fbeedd;
+  --ok:#1c6b45; --ok-l:#e3f2ea;
+  --no:#a32424; --no-l:#fbe8e8;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink); background:var(--paper);
+  max-width:860px; margin:0 auto; padding:18px 14px 34px;
+  line-height:1.55; font-size:17px; -webkit-text-size-adjust:100%;
+}
+.imuq .imuq-head{border-bottom:3px solid var(--deep); padding-bottom:12px; margin-bottom:16px}
+.imuq .imuq-eyebrow{font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); font-weight:700}
+.imuq h1{font-size:25px; line-height:1.2; margin:6px 0 4px; font-weight:800; color:var(--deep)}
+.imuq .imuq-sub{color:var(--ink2); font-size:14.5px; margin:0}
+
+.imuq .track{height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin-bottom:8px}
+.imuq .track i{display:block; height:100%; width:0; background:var(--deep); border-radius:99px; transition:width .25s}
+.imuq .meta{display:flex; justify-content:space-between; align-items:center; gap:10px;
+  font-size:12.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--ink2); margin-bottom:12px}
+.imuq .meta .blk{color:var(--amber)}
+
+.imuq .q{display:none; background:var(--card); border:1px solid var(--line); border-top:6px solid var(--deep);
+  border-radius:12px; padding:20px 18px 16px; box-shadow:0 2px 10px rgba(0,0,0,.05); min-height:300px}
+.imuq .q.on{display:block}
+.imuq .q.correct{border-top-color:var(--ok)}
+.imuq .q.wrong{border-top-color:var(--no)}
+.imuq .qnum{font-size:12px; letter-spacing:.12em; font-weight:700; color:var(--amber); text-transform:uppercase}
+.imuq .qtext{font-weight:600; font-size:19px; margin:6px 0 16px}
+.imuq label.opt{display:flex; gap:10px; align-items:flex-start; padding:12px 14px; margin:8px 0;
+  border:1.5px solid var(--line); border-radius:9px; cursor:pointer; background:#fff; transition:.12s}
+.imuq label.opt:hover{border-color:var(--deep); background:var(--deep-l)}
+.imuq label.opt input{margin-top:5px; flex:0 0 auto; width:18px; height:18px; accent-color:var(--deep)}
+.imuq label.opt .ltr{font-weight:700; color:var(--ink2); flex:0 0 auto}
+.imuq label.opt.mark-ok{border-color:var(--ok); background:var(--ok-l); border-width:2.5px}
+.imuq label.opt.mark-no{border-color:var(--no); background:var(--no-l); border-width:2.5px}
+.imuq .fb{display:none; margin-top:14px; padding:12px 14px; border-radius:9px;
+  font-size:15.5px; background:var(--deep-l); border-left:4px solid var(--deep); color:var(--ink)}
+.imuq .fb.show{display:block}
+
+.imuq .nav{display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:16px; flex-wrap:wrap}
+.imuq button{font:inherit; font-weight:700; padding:12px 20px; border-radius:9px;
+  border:2px solid var(--deep); cursor:pointer; transition:.12s}
+.imuq .btn-main{background:var(--deep); color:#fff; flex:1}
+.imuq .btn-main:hover{background:#0b3b47}
+.imuq .btn-alt{background:#fff; color:var(--deep); flex:1}
+.imuq .btn-alt:hover{background:var(--deep-l)}
+.imuq .btn-alt[disabled]{opacity:.35; cursor:not-allowed}
+.imuq .btn-gold{background:var(--amber); border-color:var(--amber); color:#fff; flex:1}
+.imuq .btn-gold:hover{background:#a4560c}
+.imuq .btn-ghost{background:transparent; border-color:var(--ink3); color:var(--ink2); padding:9px 16px; font-size:15px}
+.imuq .btn-ghost:hover{border-color:var(--deep); color:var(--deep)}
+.imuq .foot{text-align:center; margin-top:14px}
+
+.imuq .score{display:none; text-align:center; padding:26px 18px; margin-top:16px;
+  border:3px solid var(--deep); border-radius:12px; background:#fff}
+.imuq .score.show{display:block}
+.imuq .score .lbl{font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--amber); font-weight:700}
+.imuq .score .big{font-size:46px; font-weight:800; color:var(--deep); line-height:1.15; margin:4px 0}
+.imuq .score .det{color:var(--ink2); font-size:16px}
+.imuq .grid{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:16px}
+.imuq .grid b{display:flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:7px; font-size:13px; cursor:pointer;
+  border:2px solid var(--line); background:#fff; color:var(--ink2); font-weight:700}
+.imuq .grid b.g-ok{border-color:var(--ok); background:var(--ok-l); color:var(--ok)}
+.imuq .grid b.g-no{border-color:var(--no); background:var(--no-l); color:var(--no)}
+.imuq .grid b:hover{transform:translateY(-2px)}
+.imuq .warn{display:none; text-align:center; color:var(--no); font-weight:600; margin-top:10px; font-size:15px}
+.imuq .warn.show{display:block}
+@media (max-width:600px){
+  .imuq{font-size:16px; padding:14px 10px 28px}
+  .imuq h1{font-size:21px}
+  .imuq .qtext{font-size:17.5px}
+  .imuq .q{min-height:0; padding:16px 14px 14px}
+  .imuq .nav{flex-direction:column-reverse}
+  .imuq .nav button{width:100%}
+  .imuq .score .big{font-size:38px}
+}
+</style>
+
+<div class="imuq-head">
+  <div class="imuq-eyebrow">Disciplina de Imunologia &middot; ICB / UFMG</div>
+  <h1>Lista de exercícios &mdash; Módulo 1</h1>
+  <p class="imuq-sub">Conceitos básicos, células e órgãos do sistema imune, imunidade inata, inflamação e migração celular. Abbas, capítulos 1 a 3. Valor total: 10,0 pontos.</p>
+</div>
+
+<div class="track"><i id="imuq-bar"></i></div>
+<div class="meta">
+  <span id="imuq-pos">Questão 1 de 22</span>
+  <span class="blk" id="imuq-blk">Bloco 1</span>
+</div>
+
+<div class="q on" data-a="c" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 1</div>
+  <div class="qtext">Qual característica é exclusiva da imunidade adaptativa?</div>
+  <label class="opt"><input type="radio" name="q1" value="a"><span class="ltr">a)</span><span>Reconhecer moléculas microbianas</span></label>
+  <label class="opt"><input type="radio" name="q1" value="b"><span class="ltr">b)</span><span>Recrutar leucócitos para o tecido</span></label>
+  <label class="opt"><input type="radio" name="q1" value="c"><span class="ltr">c)</span><span>Gerar memória imunológica após o primeiro contato</span></label>
+  <label class="opt"><input type="radio" name="q1" value="d"><span class="ltr">d)</span><span>Depender de barreiras epiteliais</span></label>
+  <div class="fb"><b>Gabarito: c.</b> A memória é propriedade da imunidade adaptativa. As demais alternativas descrevem funções também presentes na imunidade inata.</div>
+</div>
+
+<div class="q" data-a="a" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 2</div>
+  <div class="qtext">As fases sequenciais de uma resposta imune adaptativa são:</div>
+  <label class="opt"><input type="radio" name="q2" value="a"><span class="ltr">a)</span><span>Reconhecimento do antígeno → ativação dos linfócitos → proliferação (expansão clonal) e diferenciação em células efetoras e de memória → eliminação do antígeno → contração da resposta</span></label>
+  <label class="opt"><input type="radio" name="q2" value="b"><span class="ltr">b)</span><span>Inflamação → fagocitose → apresentação de antígeno → memória</span></label>
+  <label class="opt"><input type="radio" name="q2" value="c"><span class="ltr">c)</span><span>Ativação → reconhecimento do antígeno → diferenciação → expansão clonal</span></label>
+  <label class="opt"><input type="radio" name="q2" value="d"><span class="ltr">d)</span><span>Reconhecimento do antígeno → produção imediata de anticorpos por linfócitos T → memória</span></label>
+  <div class="fb"><b>Gabarito: a.</b> O reconhecimento sempre precede a ativação, que por sua vez precede a expansão clonal e a diferenciação. Após a eliminação do antígeno, a resposta contrai e restam as células de memória.</div>
+</div>
+
+<div class="q" data-a="d" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 3</div>
+  <div class="qtext">Coloque em ordem os eventos da resposta imune a um patógeno que rompe o epitélio:</div>
+  <label class="opt"><input type="radio" name="q3" value="a"><span class="ltr">a)</span><span>Ativação da adaptativa → inflamação → barreira → migração de efetoras</span></label>
+  <label class="opt"><input type="radio" name="q3" value="b"><span class="ltr">b)</span><span>Reconhecimento inato → ativação da adaptativa → inflamação → barreira</span></label>
+  <label class="opt"><input type="radio" name="q3" value="c"><span class="ltr">c)</span><span>Inflamação → barreira → migração de efetoras → ativação da adaptativa</span></label>
+  <label class="opt"><input type="radio" name="q3" value="d"><span class="ltr">d)</span><span>Barreira rompida → reconhecimento inato e inflamação → migração de células dendríticas ao linfonodo → ativação da adaptativa → migração de células efetoras ao tecido</span></label>
+  <div class="fb"><b>Gabarito: d.</b> Essa é a sequência clássica: barreiras, reconhecimento inato com inflamação, maturação e migração de células dendríticas ao linfonodo, ativação da adaptativa e retorno das células efetoras ao sítio de infecção.</div>
+</div>
+
+<div class="q" data-a="b" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 4</div>
+  <div class="qtext">São exemplos de barreiras químicas da imunidade inata:</div>
+  <label class="opt"><input type="radio" name="q4" value="a"><span class="ltr">a)</span><span>Junções oclusivas e movimento ciliar</span></label>
+  <label class="opt"><input type="radio" name="q4" value="b"><span class="ltr">b)</span><span>Lisozima, defensinas e baixo pH gástrico</span></label>
+  <label class="opt"><input type="radio" name="q4" value="c"><span class="ltr">c)</span><span>Microbiota normal e fluxo de ar</span></label>
+  <label class="opt"><input type="radio" name="q4" value="d"><span class="ltr">d)</span><span>Selectinas e integrinas</span></label>
+  <div class="fb"><b>Gabarito: b.</b> Junções oclusivas e cílios são barreiras mecânicas; a microbiota é barreira microbiológica; selectinas e integrinas são moléculas de adesão da migração celular.</div>
+</div>
+
+<div class="q" data-a="d" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 5</div>
+  <div class="qtext">A célula considerada a mais potente apresentadora de antígenos, responsável por conectar a imunidade inata à adaptativa, é:</div>
+  <label class="opt"><input type="radio" name="q5" value="a"><span class="ltr">a)</span><span>O neutrófilo</span></label>
+  <label class="opt"><input type="radio" name="q5" value="b"><span class="ltr">b)</span><span>A célula NK</span></label>
+  <label class="opt"><input type="radio" name="q5" value="c"><span class="ltr">c)</span><span>O mastócito</span></label>
+  <label class="opt"><input type="radio" name="q5" value="d"><span class="ltr">d)</span><span>A célula dendrítica</span></label>
+  <div class="fb"><b>Gabarito: d.</b> Após ativação dos seus PRRs, a célula dendrítica sofre maturação funcional e migra aos órgãos linfoides secundários para apresentar antígenos a linfócitos T naive.</div>
+</div>
+
+<div class="q" data-a="a" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 6</div>
+  <div class="qtext">Linfonodos e baço são classificados como:</div>
+  <label class="opt"><input type="radio" name="q6" value="a"><span class="ltr">a)</span><span>Órgãos linfoides secundários, onde a resposta adaptativa é iniciada</span></label>
+  <label class="opt"><input type="radio" name="q6" value="b"><span class="ltr">b)</span><span>Órgãos linfoides primários, onde linfócitos se desenvolvem</span></label>
+  <label class="opt"><input type="radio" name="q6" value="c"><span class="ltr">c)</span><span>Tecidos efetores exclusivos da imunidade inata</span></label>
+  <label class="opt"><input type="radio" name="q6" value="d"><span class="ltr">d)</span><span>Barreiras físicas do sistema imune</span></label>
+  <div class="fb"><b>Gabarito: a.</b> Medula óssea e timo são os órgãos primários (desenvolvimento); linfonodos, baço e tecidos linfoides associados a mucosas são secundários, onde ocorre o encontro entre antígeno e linfócito naive.</div>
+</div>
+
+<div class="q" data-a="b" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 7</div>
+  <div class="qtext">Sobre os PAMPs, é correto afirmar que:</div>
+  <label class="opt"><input type="radio" name="q7" value="a"><span class="ltr">a)</span><span>São produzidos tanto por patógenos quanto por células do hospedeiro</span></label>
+  <label class="opt"><input type="radio" name="q7" value="b"><span class="ltr">b)</span><span>São compartilhados por classes inteiras de patógenos e essenciais à sua sobrevivência</span></label>
+  <label class="opt"><input type="radio" name="q7" value="c"><span class="ltr">c)</span><span>São estruturas acessórias, dispensáveis para o microrganismo</span></label>
+  <label class="opt"><input type="radio" name="q7" value="d"><span class="ltr">d)</span><span>São exclusivos de uma única espécie bacteriana</span></label>
+  <div class="fb"><b>Gabarito: b.</b> Justamente por serem essenciais à integridade e à patogenicidade, os PAMPs não podem ser descartados por mutação, e por serem compartilhados por classes de microrganismos permitem que poucos receptores cubram muitos patógenos.</div>
+</div>
+
+<div class="q" data-a="c" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 8</div>
+  <div class="qtext">Um paciente com queimadura extensa e sem infecção desenvolve inflamação intensa. Isso ocorre porque:</div>
+  <label class="opt"><input type="radio" name="q8" value="a"><span class="ltr">a)</span><span>PAMPs foram liberados pelo tecido queimado</span></label>
+  <label class="opt"><input type="radio" name="q8" value="b"><span class="ltr">b)</span><span>Não há inflamação sem microrganismo</span></label>
+  <label class="opt"><input type="radio" name="q8" value="c"><span class="ltr">c)</span><span>DAMPs liberados por células danificadas foram reconhecidos por receptores da imunidade inata</span></label>
+  <label class="opt"><input type="radio" name="q8" value="d"><span class="ltr">d)</span><span>A resposta depende exclusivamente de linfócitos T</span></label>
+  <div class="fb"><b>Gabarito: c.</b> É o conceito de injúria estéril: o dano tecidual libera padrões moleculares do próprio hospedeiro, suficientes para disparar inflamação mesmo na ausência de microrganismos.</div>
+</div>
+
+<div class="q" data-a="d" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 9</div>
+  <div class="qtext">Moléculas endógenas como HMGB1, proteínas de choque térmico (HSPs), ATP e DNA mitocondrial atuam na resposta inflamatória porque:</div>
+  <label class="opt"><input type="radio" name="q9" value="a"><span class="ltr">a)</span><span>São produzidas exclusivamente por bactérias intracelulares</span></label>
+  <label class="opt"><input type="radio" name="q9" value="b"><span class="ltr">b)</span><span>Bloqueiam a ativação de fatores de transcrição inflamatórios</span></label>
+  <label class="opt"><input type="radio" name="q9" value="c"><span class="ltr">c)</span><span>São citocinas anti-inflamatórias sintetizadas no fígado</span></label>
+  <label class="opt"><input type="radio" name="q9" value="d"><span class="ltr">d)</span><span>Funcionam como sinais de perigo derivados do próprio hospedeiro, reconhecidos pelos mesmos receptores da imunidade inata que detectam produtos microbianos</span></label>
+  <div class="fb"><b>Gabarito: d.</b> São DAMPs. Note que ATP e DNA mitocondrial estão normalmente confinados em compartimentos intracelulares: sua presença no meio extracelular ou no citosol sinaliza que algo deu errado.</div>
+</div>
+
+<div class="q" data-a="a" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 10</div>
+  <div class="qtext">Os PRRs estão distribuídos em diferentes compartimentos celulares (superfície, endossoma e citosol) porque:</div>
+  <label class="opt"><input type="radio" name="q10" value="a"><span class="ltr">a)</span><span>Isso permite detectar tanto patógenos extracelulares quanto os que se replicam em vacúolos ou no citoplasma</span></label>
+  <label class="opt"><input type="radio" name="q10" value="b"><span class="ltr">b)</span><span>Cada compartimento produz um tipo diferente de citocina</span></label>
+  <label class="opt"><input type="radio" name="q10" value="c"><span class="ltr">c)</span><span>Os receptores precisam ser reciclados entre os compartimentos</span></label>
+  <label class="opt"><input type="radio" name="q10" value="d"><span class="ltr">d)</span><span>Somente o citosol contém moléculas adaptadoras</span></label>
+  <div class="fb"><b>Gabarito: a.</b> A localização do receptor acompanha o nicho do patógeno: quem vive fora da célula é detectado na superfície, quem chega por endocitose no endossoma, e quem se replica no citosol por sensores citoplasmáticos.</div>
+</div>
+
+<div class="q" data-a="b" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 11</div>
+  <div class="qtext">A ativação de PRRs converge para fatores de transcrição distintos. A ativação de NF-κB resulta principalmente em:</div>
+  <label class="opt"><input type="radio" name="q11" value="a"><span class="ltr">a)</span><span>Produção de interferons tipo I e estado antiviral</span></label>
+  <label class="opt"><input type="radio" name="q11" value="b"><span class="ltr">b)</span><span>Transcrição de citocinas pró-inflamatórias, quimiocinas e moléculas microbicidas</span></label>
+  <label class="opt"><input type="radio" name="q11" value="c"><span class="ltr">c)</span><span>Inibição da síntese proteica da célula infectada</span></label>
+  <label class="opt"><input type="radio" name="q11" value="d"><span class="ltr">d)</span><span>Apresentação de antígeno via MHC</span></label>
+  <div class="fb"><b>Gabarito: b.</b> NF-κB comanda o programa inflamatório; os fatores reguladores de interferon (IRF) comandam o programa antiviral. Vale lembrar que essa dicotomia não é exclusiva dos TLRs: outros PRRs também convergem para esses fatores.</div>
+</div>
+
+<div class="q" data-a="c" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 12</div>
+  <div class="qtext">Sobre a inflamação, seu objetivo primordial é:</div>
+  <label class="opt"><input type="radio" name="q12" value="a"><span class="ltr">a)</span><span>Destruir o tecido infectado permanentemente</span></label>
+  <label class="opt"><input type="radio" name="q12" value="b"><span class="ltr">b)</span><span>Ativar exclusivamente linfócitos B</span></label>
+  <label class="opt"><input type="radio" name="q12" value="c"><span class="ltr">c)</span><span>Eliminar o estímulo danoso e restaurar a homeostasia</span></label>
+  <label class="opt"><input type="radio" name="q12" value="d"><span class="ltr">d)</span><span>Impedir qualquer migração celular para o tecido</span></label>
+  <div class="fb"><b>Gabarito: c.</b> A inflamação é uma resposta protetora: o dano tecidual que a acompanha é custo colateral, não a finalidade. Por isso ela precisa ser resolvida.</div>
+</div>
+
+<div class="q" data-a="d" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 13</div>
+  <div class="qtext">A diferença conceitual entre citocinas e quimiocinas é que as quimiocinas:</div>
+  <label class="opt"><input type="radio" name="q13" value="a"><span class="ltr">a)</span><span>Não se ligam a receptores celulares</span></label>
+  <label class="opt"><input type="radio" name="q13" value="b"><span class="ltr">b)</span><span>São produzidas exclusivamente por linfócitos</span></label>
+  <label class="opt"><input type="radio" name="q13" value="c"><span class="ltr">c)</span><span>Atuam apenas de forma endócrina</span></label>
+  <label class="opt"><input type="radio" name="q13" value="d"><span class="ltr">d)</span><span>São um subtipo de citocina especializado em estimular e direcionar a migração de leucócitos</span></label>
+  <div class="fb"><b>Gabarito: d.</b> Toda quimiocina é uma citocina, mas nem toda citocina é quimiocina. O nome vem de <i>chemotactic cytokine</i>.</div>
+</div>
+
+<div class="q" data-a="a" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 14</div>
+  <div class="qtext">TNF, IL-1 e IL-6 produzidos por macrófagos em um foco infeccioso têm efeitos locais e sistêmicos. Sobre eles, é correto afirmar:</div>
+  <label class="opt"><input type="radio" name="q14" value="a"><span class="ltr">a)</span><span>Localmente ativam o endotélio e aumentam a permeabilidade vascular, e sistemicamente induzem febre, síntese hepática de proteínas de fase aguda e produção de leucócitos na medula óssea</span></label>
+  <label class="opt"><input type="radio" name="q14" value="b"><span class="ltr">b)</span><span>O único efeito sistêmico descrito é a febre</span></label>
+  <label class="opt"><input type="radio" name="q14" value="c"><span class="ltr">c)</span><span>Atuam apenas no local da infecção, sem alcançar a circulação</span></label>
+  <label class="opt"><input type="radio" name="q14" value="d"><span class="ltr">d)</span><span>Em altas concentrações sistêmicas são sempre protetores, sem efeitos patológicos</span></label>
+  <div class="fb"><b>Gabarito: a.</b> Em concentrações elevadas, essas mesmas citocinas produzem efeitos patológicos (baixo débito cardíaco, trombose, aumento da permeabilidade vascular sistêmica), o que descarta a alternativa d.</div>
+</div>
+
+<div class="q" data-a="b" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 15</div>
+  <div class="qtext">Ordene corretamente as fases da migração de leucócitos do sangue para o tecido:</div>
+  <label class="opt"><input type="radio" name="q15" value="a"><span class="ltr">a)</span><span>Adesão estável → rolamento → diapedese</span></label>
+  <label class="opt"><input type="radio" name="q15" value="b"><span class="ltr">b)</span><span>Rolamento → ativação de integrinas por quimiocinas → adesão estável → migração através do endotélio</span></label>
+  <label class="opt"><input type="radio" name="q15" value="c"><span class="ltr">c)</span><span>Diapedese → rolamento → adesão estável</span></label>
+  <label class="opt"><input type="radio" name="q15" value="d"><span class="ltr">d)</span><span>Ativação de integrinas → rolamento → diapedese</span></label>
+  <div class="fb"><b>Gabarito: b.</b> A quimiocina apresentada na superfície endotelial é o sinal que converte a integrina do estado de baixa para o de alta afinidade, permitindo a parada estável do leucócito.</div>
+</div>
+
+<div class="q" data-a="c" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 16</div>
+  <div class="qtext">O rolamento e a adesão estável são mediados, respectivamente, por:</div>
+  <label class="opt"><input type="radio" name="q16" value="a"><span class="ltr">a)</span><span>Integrinas e selectinas</span></label>
+  <label class="opt"><input type="radio" name="q16" value="b"><span class="ltr">b)</span><span>Quimiocinas e citocinas</span></label>
+  <label class="opt"><input type="radio" name="q16" value="c"><span class="ltr">c)</span><span>Selectinas e integrinas</span></label>
+  <label class="opt"><input type="radio" name="q16" value="d"><span class="ltr">d)</span><span>Selectinas e quimiocinas</span></label>
+  <div class="fb"><b>Gabarito: c.</b> A interação selectina-ligante é de baixa afinidade e permite o rolamento; a interação integrina-ligante, após ativação, é forte e estabiliza a adesão.</div>
+</div>
+
+<div class="q" data-a="a" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 17</div>
+  <div class="qtext">Um paciente com infecção por bactéria gram-negativa apresenta febre, aumento de proteína C reativa e leucocitose. Esses achados sistêmicos são explicados por:</div>
+  <label class="opt"><input type="radio" name="q17" value="a"><span class="ltr">a)</span><span>Reconhecimento do LPS por PRRs em macrófagos, com secreção de TNF, IL-1 e IL-6, que agem sobre cérebro, fígado e medula óssea</span></label>
+  <label class="opt"><input type="radio" name="q17" value="b"><span class="ltr">b)</span><span>Ação direta do LPS sobre o fígado e a medula óssea</span></label>
+  <label class="opt"><input type="radio" name="q17" value="c"><span class="ltr">c)</span><span>Ativação de linfócitos T de memória nas primeiras horas</span></label>
+  <label class="opt"><input type="radio" name="q17" value="d"><span class="ltr">d)</span><span>Perda das barreiras epiteliais</span></label>
+  <div class="fb"><b>Gabarito: a.</b> O sinal é local (reconhecimento do PAMP), mas o efeito é sistêmico porque as citocinas alcançam a circulação e agem à distância sobre órgãos-alvo.</div>
+</div>
+
+<div class="q" data-a="d" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 18</div>
+  <div class="qtext">Em um foco infeccioso, neutrófilos chegam antes dos monócitos. Isso ocorre porque:</div>
+  <label class="opt"><input type="radio" name="q18" value="a"><span class="ltr">a)</span><span>Neutrófilos são maiores e migram mais rápido</span></label>
+  <label class="opt"><input type="radio" name="q18" value="b"><span class="ltr">b)</span><span>Monócitos não expressam receptores de quimiocina</span></label>
+  <label class="opt"><input type="radio" name="q18" value="c"><span class="ltr">c)</span><span>A adesão de monócitos independe de integrinas</span></label>
+  <label class="opt"><input type="radio" name="q18" value="d"><span class="ltr">d)</span><span>Macrófagos teciduais secretam CXCL8 imediatamente e CCL2 horas depois, e cada leucócito expressa o receptor correspondente</span></label>
+  <div class="fb"><b>Gabarito: d.</b> A cinética de secreção das quimiocinas, somada ao repertório de receptores de cada célula, define quem é recrutado e quando.</div>
+</div>
+
+<div class="q" data-a="b" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 19</div>
+  <div class="qtext">Um paciente com defeito na expressão de integrinas em leucócitos apresenta infecções bacterianas recorrentes com pouco pus no local. A explicação é:</div>
+  <label class="opt"><input type="radio" name="q19" value="a"><span class="ltr">a)</span><span>Os leucócitos não conseguem reconhecer PAMPs</span></label>
+  <label class="opt"><input type="radio" name="q19" value="b"><span class="ltr">b)</span><span>Os leucócitos rolam, mas não conseguem realizar adesão estável e migrar para o tecido</span></label>
+  <label class="opt"><input type="radio" name="q19" value="c"><span class="ltr">c)</span><span>O endotélio não produz selectinas</span></label>
+  <label class="opt"><input type="radio" name="q19" value="d"><span class="ltr">d)</span><span>Não há produção de quimiocinas no sítio infeccioso</span></label>
+  <div class="fb"><b>Gabarito: b.</b> O reconhecimento e a sinalização estão intactos; o que falha é a etapa de adesão firme. Sem neutrófilos chegando ao tecido, não se forma pus.</div>
+</div>
+
+<div class="q" data-a="c" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 20</div>
+  <div class="qtext">Comparando infecção viral e bacteriana, a diferença na qualidade do ambiente inflamatório se explica porque:</div>
+  <label class="opt"><input type="radio" name="q20" value="a"><span class="ltr">a)</span><span>Vírus não são reconhecidos pela imunidade inata</span></label>
+  <label class="opt"><input type="radio" name="q20" value="b"><span class="ltr">b)</span><span>Bactérias ativam apenas receptores citosólicos</span></label>
+  <label class="opt"><input type="radio" name="q20" value="c"><span class="ltr">c)</span><span>Diferentes PAMPs ativam PRRs distintos, que sinalizam por vias diferentes, favorecendo IFN tipo I nas infecções virais e TNF/IL-1/IL-6 nas bacterianas</span></label>
+  <label class="opt"><input type="radio" name="q20" value="d"><span class="ltr">d)</span><span>A resposta é idêntica nos dois casos</span></label>
+  <div class="fb"><b>Gabarito: c.</b> O tipo de microrganismo invasor determina a qualidade do ambiente inflamatório, porque a natureza do PAMP determina qual receptor é engajado e qual via de sinalização predomina.</div>
+</div>
+
+<div class="q" data-a="a" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 21</div>
+  <div class="qtext">Linfócitos T naive migram para linfonodos, enquanto neutrófilos migram para tecidos inflamados. Essa diferença de destino é determinada por:</div>
+  <label class="opt"><input type="radio" name="q21" value="a"><span class="ltr">a)</span><span>A combinação de moléculas de adesão e receptores de quimiocina expressos por cada célula e os ligantes presentes em cada endotélio</span></label>
+  <label class="opt"><input type="radio" name="q21" value="b"><span class="ltr">b)</span><span>O tamanho das células</span></label>
+  <label class="opt"><input type="radio" name="q21" value="c"><span class="ltr">c)</span><span>A velocidade do fluxo sanguíneo</span></label>
+  <label class="opt"><input type="radio" name="q21" value="d"><span class="ltr">d)</span><span>A presença de PAMPs no linfonodo</span></label>
+  <div class="fb"><b>Gabarito: a.</b> É o princípio do endereçamento celular: o par receptor-ligante funciona como um código de endereço, garantindo que cada célula chegue onde é necessária.</div>
+</div>
+
+<div class="q" data-a="d" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 22</div>
+  <div class="qtext">A produção de citocinas anti-inflamatórias durante uma infecção é importante porque:</div>
+  <label class="opt"><input type="radio" name="q22" value="a"><span class="ltr">a)</span><span>Aumenta a carga microbiana</span></label>
+  <label class="opt"><input type="radio" name="q22" value="b"><span class="ltr">b)</span><span>Substitui a fagocitose</span></label>
+  <label class="opt"><input type="radio" name="q22" value="c"><span class="ltr">c)</span><span>Impede a ativação da imunidade adaptativa</span></label>
+  <label class="opt"><input type="radio" name="q22" value="d"><span class="ltr">d)</span><span>Regula a intensidade da resposta, evitando imunopatologia, embora seu excesso precoce possa aumentar a suscetibilidade à infecção</span></label>
+  <div class="fb"><b>Gabarito: d.</b> Trata-se de um equilíbrio: pouca regulação leva a dano tecidual, e regulação excessiva ou precoce compromete o controle do patógeno.</div>
+</div>
+
+<div class="nav">
+  <button type="button" class="btn-alt" id="imuq-prev">← Anterior</button>
+  <button type="button" class="btn-main" id="imuq-next">Próxima →</button>
+</div>
+<div class="warn" id="imuq-warn"></div>
+<div class="foot"><button type="button" class="btn-ghost" id="imuq-limpar">Recomeçar a lista</button></div>
+
+<div class="score" id="imuq-score">
+  <div class="lbl">Sua nota</div>
+  <div class="big" id="imuq-nota">0,0</div>
+  <div class="det" id="imuq-det"></div>
+  <div class="grid" id="imuq-grid"></div>
+  <div class="det" style="margin-top:12px; font-size:14px">Clique em qualquer número acima para rever a questão e o comentário.</div>
+</div>
+
+<script>
+(function(){
+  var root = document.getElementById('imuq-root');
+  if(!root || root.dataset.ready) return;
+  root.dataset.ready = '1';
+
+  var qs = [].slice.call(root.querySelectorAll('.q'));
+  var total = qs.length, valor = 10/total, idx = 0, corrigido = false;
+
+  var bar   = document.getElementById('imuq-bar');
+  var pos   = document.getElementById('imuq-pos');
+  var blk   = document.getElementById('imuq-blk');
+  var prev  = document.getElementById('imuq-prev');
+  var next  = document.getElementById('imuq-next');
+  var warn  = document.getElementById('imuq-warn');
+  var painel= document.getElementById('imuq-score');
+  var grid  = document.getElementById('imuq-grid');
+
+  function render(){
+    qs.forEach(function(q,i){ q.classList.toggle('on', i===idx); });
+    pos.textContent = 'Questão ' + (idx+1) + ' de ' + total;
+    blk.innerHTML = qs[idx].getAttribute('data-b');
+    bar.style.width = (((idx+1)/total)*100) + '%';
+    prev.disabled = (idx === 0);
+    if(idx === total-1){
+      next.textContent = corrigido ? 'Ver resultado' : 'Corrigir e ver nota';
+      next.className = corrigido ? 'btn-main' : 'btn-gold';
+    } else {
+      next.textContent = 'Próxima →';
+      next.className = 'btn-main';
+    }
+  }
+
+  function irPara(i){
+    idx = Math.max(0, Math.min(total-1, i));
+    render();
+    qs[idx].scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  function corrigir(){
+    var acertos = 0, semResposta = 0;
+    grid.innerHTML = '';
+
+    qs.forEach(function(q, i){
+      var certa = q.getAttribute('data-a');
+      var esc = q.querySelector('input:checked');
+      if(!esc) semResposta++;
+
+      q.classList.remove('correct','wrong');
+      [].slice.call(q.querySelectorAll('label.opt')).forEach(function(l){
+        var inp = l.querySelector('input');
+        l.classList.remove('mark-ok','mark-no');
+        if(inp.value === certa) l.classList.add('mark-ok');
+        if(inp.checked && inp.value !== certa) l.classList.add('mark-no');
+        inp.disabled = true;
+      });
+
+      var ok = !!esc && esc.value === certa;
+      if(ok) acertos++;
+      q.classList.add(ok ? 'correct' : 'wrong');
+      q.querySelector('.fb').classList.add('show');
+
+      var b = document.createElement('b');
+      b.textContent = (i+1);
+      b.className = ok ? 'g-ok' : 'g-no';
+      b.addEventListener('click', function(){ irPara(i); });
+      grid.appendChild(b);
+    });
+
+    corrigido = true;
+    var nota = acertos * valor;
+    document.getElementById('imuq-nota').textContent =
+      nota.toFixed(1).replace('.', ',') + ' / 10,0';
+    document.getElementById('imuq-det').textContent =
+      acertos + ' de ' + total + ' questões corretas. Cada questão vale ' +
+      valor.toFixed(2).replace('.', ',') + ' ponto.';
+    painel.classList.add('show');
+
+    if(semResposta > 0){
+      warn.textContent = 'Atenção: ' + semResposta +
+        ' questão(ões) ficaram sem resposta e foram contadas como erro.';
+      warn.classList.add('show');
+    } else { warn.classList.remove('show'); }
+
+    render();
+    painel.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  prev.addEventListener('click', function(){ irPara(idx-1); });
+  next.addEventListener('click', function(){
+    if(idx < total-1){ irPara(idx+1); }
+    else if(!corrigido){ corrigir(); }
+    else { painel.scrollIntoView({behavior:'smooth', block:'center'}); }
+  });
+
+  document.getElementById('imuq-limpar').addEventListener('click', function(){
+    qs.forEach(function(q){
+      q.classList.remove('correct','wrong');
+      q.querySelector('.fb').classList.remove('show');
+      [].slice.call(q.querySelectorAll('label.opt')).forEach(function(l){
+        l.classList.remove('mark-ok','mark-no');
+        var inp = l.querySelector('input');
+        inp.disabled = false; inp.checked = false;
+      });
+    });
+    grid.innerHTML = '';
+    painel.classList.remove('show');
+    warn.classList.remove('show');
+    corrigido = false; idx = 0;
+    render();
+    root.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  render();
+})();
+</script>
+</div>
+
+</body>
+</html>
