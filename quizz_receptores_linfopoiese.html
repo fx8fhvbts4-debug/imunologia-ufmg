@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lista de exercícios — Receptores de Antígenos e Linfopoiese</title>
+<style>html,body{margin:0;padding:0;background:#f7f4ee}</style>
+</head>
+<body>
+<div class="imuq" id="imuq-root">
+<style>
+.imuq *{box-sizing:border-box}
+.imuq{
+  --ink:#12232b; --ink2:#40606d; --ink3:#7d97a1;
+  --paper:#f7f4ee; --card:#ffffff; --line:#dfd8cc;
+  --deep:#0f4c5c; --deep-l:#e3eef1;
+  --amber:#c46a13; --amber-l:#fbeedd;
+  --ok:#1c6b45; --ok-l:#e3f2ea;
+  --no:#a32424; --no-l:#fbe8e8;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink); background:var(--paper);
+  max-width:860px; margin:0 auto; padding:18px 14px 34px;
+  line-height:1.55; font-size:17px; -webkit-text-size-adjust:100%;
+}
+.imuq .imuq-head{border-bottom:3px solid var(--deep); padding-bottom:12px; margin-bottom:16px}
+.imuq .imuq-eyebrow{font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); font-weight:700}
+.imuq h1{font-size:25px; line-height:1.2; margin:6px 0 4px; font-weight:800; color:var(--deep)}
+.imuq .imuq-sub{color:var(--ink2); font-size:14.5px; margin:0}
+
+.imuq .track{height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin-bottom:8px}
+.imuq .track i{display:block; height:100%; width:0; background:var(--deep); border-radius:99px; transition:width .25s}
+.imuq .meta{display:flex; justify-content:space-between; align-items:center; gap:10px;
+  font-size:12.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--ink2); margin-bottom:12px}
+.imuq .meta .blk{color:var(--amber)}
+
+.imuq .q{display:none; background:var(--card); border:1px solid var(--line); border-top:6px solid var(--deep);
+  border-radius:12px; padding:20px 18px 16px; box-shadow:0 2px 10px rgba(0,0,0,.05); min-height:300px}
+.imuq .q.on{display:block}
+.imuq .q.correct{border-top-color:var(--ok)}
+.imuq .q.wrong{border-top-color:var(--no)}
+.imuq .qnum{font-size:12px; letter-spacing:.12em; font-weight:700; color:var(--amber); text-transform:uppercase}
+.imuq .qtext{font-weight:600; font-size:19px; margin:6px 0 16px}
+.imuq label.opt{display:flex; gap:10px; align-items:flex-start; padding:12px 14px; margin:8px 0;
+  border:1.5px solid var(--line); border-radius:9px; cursor:pointer; background:#fff; transition:.12s}
+.imuq label.opt:hover{border-color:var(--deep); background:var(--deep-l)}
+.imuq label.opt input{margin-top:5px; flex:0 0 auto; width:18px; height:18px; accent-color:var(--deep)}
+.imuq label.opt .ltr{font-weight:700; color:var(--ink2); flex:0 0 auto}
+.imuq label.opt.mark-ok{border-color:var(--ok); background:var(--ok-l); border-width:2.5px}
+.imuq label.opt.mark-no{border-color:var(--no); background:var(--no-l); border-width:2.5px}
+.imuq .fb{display:none; margin-top:14px; padding:12px 14px; border-radius:9px;
+  font-size:15.5px; background:var(--deep-l); border-left:4px solid var(--deep); color:var(--ink)}
+.imuq .fb.show{display:block}
+
+.imuq .nav{display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:16px; flex-wrap:wrap}
+.imuq button{font:inherit; font-weight:700; padding:12px 20px; border-radius:9px;
+  border:2px solid var(--deep); cursor:pointer; transition:.12s}
+.imuq .btn-main{background:var(--deep); color:#fff; flex:1}
+.imuq .btn-main:hover{background:#0b3b47}
+.imuq .btn-alt{background:#fff; color:var(--deep); flex:1}
+.imuq .btn-alt:hover{background:var(--deep-l)}
+.imuq .btn-alt[disabled]{opacity:.35; cursor:not-allowed}
+.imuq .btn-gold{background:var(--amber); border-color:var(--amber); color:#fff; flex:1}
+.imuq .btn-gold:hover{background:#a4560c}
+.imuq .btn-ghost{background:transparent; border-color:var(--ink3); color:var(--ink2); padding:9px 16px; font-size:15px}
+.imuq .btn-ghost:hover{border-color:var(--deep); color:var(--deep)}
+.imuq .foot{text-align:center; margin-top:14px}
+
+.imuq .score{display:none; text-align:center; padding:26px 18px; margin-top:16px;
+  border:3px solid var(--deep); border-radius:12px; background:#fff}
+.imuq .score.show{display:block}
+.imuq .score .lbl{font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--amber); font-weight:700}
+.imuq .score .big{font-size:46px; font-weight:800; color:var(--deep); line-height:1.15; margin:4px 0}
+.imuq .score .det{color:var(--ink2); font-size:16px}
+.imuq .grid{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:16px}
+.imuq .grid b{display:flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:7px; font-size:13px; cursor:pointer;
+  border:2px solid var(--line); background:#fff; color:var(--ink2); font-weight:700}
+.imuq .grid b.g-ok{border-color:var(--ok); background:var(--ok-l); color:var(--ok)}
+.imuq .grid b.g-no{border-color:var(--no); background:var(--no-l); color:var(--no)}
+.imuq .grid b:hover{transform:translateY(-2px)}
+.imuq .warn{display:none; text-align:center; color:var(--no); font-weight:600; margin-top:10px; font-size:15px}
+.imuq .warn.show{display:block}
+@media (max-width:600px){
+  .imuq{font-size:16px; padding:14px 10px 28px}
+  .imuq h1{font-size:21px}
+  .imuq .qtext{font-size:17.5px}
+  .imuq .q{min-height:0; padding:16px 14px 14px}
+  .imuq .nav{flex-direction:column-reverse}
+  .imuq .nav button{width:100%}
+  .imuq .score .big{font-size:38px}
+}
+</style>
+
+<div class="imuq-head">
+  <div class="imuq-eyebrow">Disciplina de Imunologia &middot; ICB / UFMG</div>
+  <h1>Lista de exercícios &mdash; Receptores de Antígenos e Linfopoiese</h1>
+  <p class="imuq-sub">Desenvolvimento de linfócitos T e B, recombinação V(D)J, transdução de sinais e ativação celular. Abbas, capítulos 7 e 8. Valor total: 10,0 pontos.</p>
+</div>
+
+<div class="track"><i id="imuq-bar"></i></div>
+<div class="meta">
+  <span id="imuq-pos">Questão 1 de 15</span>
+  <span class="blk" id="imuq-blk">Bloco 1 &middot; Aquecimento</span>
+</div>
+
+<!-- Questão 1 -->
+<div class="q on" data-a="c" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 1</div>
+  <div class="qtext">Sobre a capacidade de sinalização dos receptores de antígenos BCR e TCR, é correto afirmar que:</div>
+  <label class="opt"><input type="radio" name="q1" value="a"><span class="ltr">a)</span><span>O BCR e o TCR contêm motivos ITAM em suas próprias cadeias, o que dispensa a presença de qualquer outra molécula na membrana celular.</span></label>
+  <label class="opt"><input type="radio" name="q1" value="b"><span class="ltr">b)</span><span>As moléculas acessórias CD3 e Igα/Igβ reconhecem o antígeno diretamente, enquanto o BCR e o TCR apenas auxiliam na sinalização interna.</span></label>
+  <label class="opt"><input type="radio" name="q1" value="c"><span class="ltr">c)</span><span>O BCR e o TCR realizam apenas o reconhecimento do antígeno, dependendo das moléculas acessórias com motivos ITAM para transmitir os sinais.</span></label>
+  <label class="opt"><input type="radio" name="q1" value="d"><span class="ltr">d)</span><span>Apenas os linfócitos B dependem de moléculas acessórias de membrana, pois o TCR do linfócito T transmite sinais sem nenhuma ajuda externa.</span></label>
+  <div class="fb"><b>Gabarito: c.</b> Nem o BCR nem o TCR possuem motivos ITAM em suas cadeias próprias. O reconhecimento do antígeno é realizado pelo BCR ou TCR, enquanto a transmissão do sinal para o interior da célula depende estritamente das moléculas acessórias associadas (Igα e Igβ no linfócito B; CD3 e cadeia zeta no linfócito T).</div>
+</div>
+
+<!-- Questão 2 -->
+<div class="q" data-a="a" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 2</div>
+  <div class="qtext">A ativação de um linfócito T virgem nos linfonodos depende do modelo dos dois sinais. Esses dois sinais correspondem a:</div>
+  <label class="opt"><input type="radio" name="q2" value="a"><span class="ltr">a)</span><span>Reconhecimento do complexo peptídeo-MHC pelo TCR (sinal 1) e ligação da molécula CD28 do linfócito com as moléculas B7 da célula dendrítica (sinal 2).</span></label>
+  <label class="opt"><input type="radio" name="q2" value="b"><span class="ltr">b)</span><span>Ligação direta de antígenos solúveis ao receptor TCR (sinal 1) e produção imediata de anticorpos neutralizantes pelo próprio linfócito T ativado (sinal 2).</span></label>
+  <label class="opt"><input type="radio" name="q2" value="c"><span class="ltr">c)</span><span>Contato físico do linfócito com a cápsula do linfonodo (sinal 1) e liberação descontrolada de enzimas proteolíticas no tecido periférico vizinho (sinal 2).</span></label>
+  <label class="opt"><input type="radio" name="q2" value="d"><span class="ltr">d)</span><span>Reconhecimento do MHC por receptores PRR da célula T (sinal 1) e absorção de fragmentos virais intactos por fagocitose pelo linfócito T (sinal 2).</span></label>
+  <div class="fb"><b>Gabarito: a.</b> A ativação dos linfócitos T virgens exige dois sinais: o sinal 1 é o reconhecimento do antígeno apresentado no MHC pelo TCR; o sinal 2 é o estímulo coestimulatório fornecido pela ligação da molécula CD28 (no linfócito T) com as moléculas B7-1/B7-2 (na célula dendrítica madura).</div>
+</div>
+
+<!-- Questão 3 -->
+<div class="q" data-a="b" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 3</div>
+  <div class="qtext">No desenvolvimento dos linfócitos T no timo, a seleção positiva é o processo responsável por:</div>
+  <label class="opt"><input type="radio" name="q3" value="a"><span class="ltr">a)</span><span>Destruir por apoptose todas as células capazes de interagir com o MHC próprio, evitando o surgimento de respostas imunes protetoras.</span></label>
+  <label class="opt"><input type="radio" name="q3" value="b"><span class="ltr">b)</span><span>Selecionar para sobrevivência os timócitos com capacidade de reconhecer o MHC próprio, garantindo a chamada restrição ao MHC do indivíduo.</span></label>
+  <label class="opt"><input type="radio" name="q3" value="c"><span class="ltr">c)</span><span>Estimular os timócitos a produzirem imunoglobulinas de superfície funcionais antes de migrarem para os órgãos linfoides da periferia.</span></label>
+  <label class="opt"><input type="radio" name="q3" value="d"><span class="ltr">d)</span><span>Induzir a proliferação exclusiva de linfócitos auto-reativos que atacam as células epiteliais presentes na medula do órgão tímico.</span></label>
+  <div class="fb"><b>Gabarito: b.</b> A seleção positiva ocorre no timo e garante que apenas os timócitos capazes de reconhecer as moléculas de MHC do próprio indivíduo sobrevivam. Esse processo assegura que as células T maduras funcionem sempre com restrição ao MHC próprio.</div>
+</div>
+
+<!-- Questão 4 -->
+<div class="q" data-a="d" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 4</div>
+  <div class="qtext">Para que ocorra a ativação do linfócito B pelo antígeno, há a necessidade de ligação de vários complexos BCR ao mesmo tempo porque:</div>
+  <label class="opt"><input type="radio" name="q4" value="a"><span class="ltr">a)</span><span>Cada receptor BCR só consegue interagir com antígenos se estiver previamente ligado a moléculas de MHC presentes na membrana celular.</span></label>
+  <label class="opt"><input type="radio" name="q4" value="b"><span class="ltr">b)</span><span>A célula B precisa englobar partículas inteiras por fagocitose antes de emitir qualquer sinal químico para o seu citoplasma interno.</span></label>
+  <label class="opt"><input type="radio" name="q4" value="c"><span class="ltr">c)</span><span>Os anticorpos de membrana precisam ser destruídos e liberados na circulação para que a célula B inicie a sua resposta de defesa.</span></label>
+  <label class="opt"><input type="radio" name="q4" value="d"><span class="ltr">d)</span><span>O complexo BCR possui poucos motivos ITAM associados, sendo necessária a união de vários receptores para atingir o sinal mínimo de ativação.</span></label>
+  <div class="fb"><b>Gabarito: d.</b> Conforme ensinado nos slides, como o complexo BCR apresenta poucos motivos ITAM em suas moléculas acessórias (Igα e Igβ), é preciso que vários receptores BCR se liguem ao antígeno ao mesmo tempo para atingir o número mínimo de motivos ITAM ativados que resultam na ativação do linfócito B.</div>
+</div>
+
+<!-- Questão 5 -->
+<div class="q" data-a="a" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 5</div>
+  <div class="qtext">Sobre a grande diversidade de receptores de antígenos dos linfócitos T e B no organismo, é correto afirmar que:</div>
+  <label class="opt"><input type="radio" name="q5" value="a"><span class="ltr">a)</span><span>A especificidade dos receptores é gerada totalmente ao acaso durante a maturação, sem necessidade de contato prévio com nenhum antígeno estranho.</span></label>
+  <label class="opt"><input type="radio" name="q5" value="b"><span class="ltr">b)</span><span>O genoma humano possui um gene pré-formado individual para cada um dos milhões de receptores expressos pelos diferentes clones de linfócitos.</span></label>
+  <label class="opt"><input type="radio" name="q5" value="c"><span class="ltr">c)</span><span>A diversidade de receptores só começa a se formar após a entrada do patógeno no corpo e o seu contato direto com a medula óssea.</span></label>
+  <label class="opt"><input type="radio" name="q5" value="d"><span class="ltr">d)</span><span>Os linfócitos B e T herdam seus receptores prontos dos progenitores mieloides comuns sem passar por nenhuma etapa de rearranjo genético somático.</span></label>
+  <div class="fb"><b>Gabarito: a.</b> A diversidade dos receptores de antígenos é gerada ao acaso por recombinação gênica durante o processo de maturação dos linfócitos nos órgãos linfoides primários. Por isso, não é preciso haver contato prévio com nenhum antígeno estranho para que os linfócitos expressem seus receptores específicos.</div>
+</div>
+
+<!-- Questão 6 -->
+<div class="q" data-a="c" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 6</div>
+  <div class="qtext">Durante a recombinação dos genes dos receptores de antígenos, o mecanismo conhecido como "regra do 12/23" serve para:</div>
+  <label class="opt"><input type="radio" name="q6" value="a"><span class="ltr">a)</span><span>Determinar a quantidade exata de divisões celulares que o linfócito deve realizar após ser ativado nos órgãos linfoides da circulação periférica.</span></label>
+  <label class="opt"><input type="radio" name="q6" value="b"><span class="ltr">b)</span><span>Controlar o tempo de permanência das células apresentadoras de antígenos no interior dos linfonodos durante uma resposta inflamatória tecidual.</span></label>
+  <label class="opt"><input type="radio" name="q6" value="c"><span class="ltr">c)</span><span>Garantir a junção ordenada dos segmentos gênicos, permitindo a recombinação apenas entre regiões flanqueadas por espaçadores de 12 e de 23 nucleotídeos.</span></label>
+  <label class="opt"><input type="radio" name="q6" value="d"><span class="ltr">d)</span><span>Impedir a expressão da cadeia pesada de imunoglobulina nos precursores de linfócitos B que já completaram com sucesso a sua maturação medular.</span></label>
+  <div class="fb"><b>Gabarito: c.</b> A regra do 12/23 estabelece que a recombinação gênica só ocorre quando um dos segmentos de DNA é acompanhado por um espaçador de 12 nucleotídeos e o outro por um espaçador de 23 nucleotídeos. Isso assegura que os blocos corretos de DNA (como D com J e depois V com DJ) sejam unidos de forma ordenada.</div>
+</div>
+
+<!-- Questão 7 -->
+<div class="q" data-a="b" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 7</div>
+  <div class="qtext">A diversidade dos receptores de antígenos é gerada por dois mecanismos principais: a diversidade combinatória e a diversidade juncional. A diferença entre eles é que:</div>
+  <label class="opt"><input type="radio" name="q7" value="a"><span class="ltr">a)</span><span>A combinatória ocorre exclusivamente nos linfócitos T, enquanto a juncional acontece apenas nos linfócitos B durante a sua ativação periférica.</span></label>
+  <label class="opt"><input type="radio" name="q7" value="b"><span class="ltr">b)</span><span>A combinatória decorre do uso de diferentes segmentos V, D e J, enquanto a juncional resulta da adição ou remoção de nucleotídeos nas junções.</span></label>
+  <label class="opt"><input type="radio" name="q7" value="c"><span class="ltr">c)</span><span>A combinatória depende do contato com antígenos externos, enquanto a juncional é totalmente determinada por fatores genéticos herdados dos progenitores.</span></label>
+  <label class="opt"><input type="radio" name="q7" value="d"><span class="ltr">d)</span><span>A combinatória altera as porções constantes dos anticorpos, enquanto a juncional modifica apenas as regiões transmembranares dos receptores de células imunes.</span></label>
+  <div class="fb"><b>Gabarito: b.</b> A diversidade combinatória refere-se à variedade gerada pela combinação de diferentes blocos gênicos V, D e J (e união de duas cadeias). Já a diversidade juncional decorre de alterações que acontecem no ponto de união desses fragmentos, pela adição ou retirada de nucleotídeos, aumentando ainda mais a variabilidade dos receptores.</div>
+</div>
+
+<!-- Questão 8 -->
+<div class="q" data-a="d" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 8</div>
+  <div class="qtext">Os co-receptores CD4 e CD8 participam da ativação dos linfócitos T porque se ligam a regiões não-polimórficas do MHC e:</div>
+  <label class="opt"><input type="radio" name="q8" value="a"><span class="ltr">a)</span><span>Promovem a destruição imediata da molécula de MHC para que o linfócito T capture o peptídeo antigênico intacto para dentro do citoplasma.</span></label>
+  <label class="opt"><input type="radio" name="q8" value="b"><span class="ltr">b)</span><span>Inibem todas as vias de sinalização intracelular, impedindo que o linfócito T responda a patógenos presentes no tecido inflamado.</span></label>
+  <label class="opt"><input type="radio" name="q8" value="c"><span class="ltr">c)</span><span>Convertem os linfócitos T maduros em células apresentadoras de antígenos capazes de expressar altos níveis de imunoglobulinas de superfície.</span></label>
+  <label class="opt"><input type="radio" name="q8" value="d"><span class="ltr">d)</span><span>Disparam os primeiros sinais de fosforilação nas moléculas acessórias do complexo TCR, iniciando a cascata que leva à ativação celular.</span></label>
+  <div class="fb"><b>Gabarito: d.</b> Os co-receptores CD4 (que se liga ao MHC classe II) e CD8 (que se liga ao MHC classe I) aproximam a tirosina-quinase Lck do complexo TCR. Quando o TCR reconhece o antígeno, essa proximidade permite a fosforilação dos motivos ITAM das moléculas acessórias (CD3 e cadeia zeta), disparando os passos iniciais da ativação intracelular.</div>
+</div>
+
+<!-- Questão 9 -->
+<div class="q" data-a="a" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 9</div>
+  <div class="qtext">A sinalização intracelular desencadeada pelos receptores do sistema imune depende da ação de duas famílias de enzimas com funções opostas:</div>
+  <label class="opt"><input type="radio" name="q9" value="a"><span class="ltr">a)</span><span>As tirosina-quinases adicionam grupos fosfato em resíduos de tirosina ativando sinais, enquanto as tirosina-fosfatases removem fosfatos inibindo a via.</span></label>
+  <label class="opt"><input type="radio" name="q9" value="b"><span class="ltr">b)</span><span>As tirosina-quinases removem grupos fosfato para desativar a célula, enquanto as tirosina-fosfatases adicionam fosfatos para iniciar a resposta celular.</span></label>
+  <label class="opt"><input type="radio" name="q9" value="c"><span class="ltr">c)</span><span>Ambas as enzimas atuam apenas destruindo proteínas do citoesqueleto, sem interferir na passagem de sinais para os fatores de transcrição nucleares.</span></label>
+  <label class="opt"><input type="radio" name="q9" value="d"><span class="ltr">d)</span><span>As duas famílias atuam exclusivamente no núcleo celular, promovendo a clivagem do DNA antes da transcrição de qualquer gene de citocina.</span></label>
+  <div class="fb"><b>Gabarito: a.</b> Conforme ensinado nos slides, as proteínas tirosina-quinases adicionam grupos fosfato em resíduos de tirosina e ativam cascatas intracelulares de sinalização. Já as proteínas tirosina-fosfatases removem esses grupos fosfato, desativando ou inibindo as cascatas de sinalização celular.</div>
+</div>
+
+<!-- Questão 10 -->
+<div class="q" data-a="b" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 10</div>
+  <div class="qtext">Durante o desenvolvimento dos linfócitos T e B, a formação dos pré-receptores de antígenos é importante porque:</div>
+  <label class="opt"><input type="radio" name="q10" value="a"><span class="ltr">a)</span><span>Permite que os linfócitos reconheçam antígenos estranhos nos tecidos antes de terminarem sua formação na medula óssea ou no timo.</span></label>
+  <label class="opt"><input type="radio" name="q10" value="b"><span class="ltr">b)</span><span>Fornece sinais de sobrevivência e proliferação para que os linfócitos continuem seu processo de maturação em vez de morrerem por apoptose.</span></label>
+  <label class="opt"><input type="radio" name="q10" value="c"><span class="ltr">c)</span><span>Transforma diretamente as células em linfócitos maduros de memória sem necessidade de produzir as outras partes do receptor de antígeno.</span></label>
+  <label class="opt"><input type="radio" name="q10" value="d"><span class="ltr">d)</span><span>Faz com que a célula pare de se dividir e migre imediatamente para a circulação sanguínea sem passar por nenhum órgão linfoide.</span></label>
+  <div class="fb"><b>Gabarito: b.</b> Conforme ensinado nos slides, a expressão dos pré-receptores de antígenos (pré-BCR e pré-TCR) indica que a primeira cadeia foi produzida com sucesso. Esses pré-receptores enviam sinais essenciais para que os linfócitos sobrevivam, proliferem e continuem no processo de maturação. Se a célula for incapaz de formar um pré-receptor funcional, ela não recebe sinais de sobrevivência e morre por apoptose.</div>
+</div>
+
+<!-- Questão 11 -->
+<div class="q" data-a="c" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 11</div>
+  <div class="qtext">Determinadas doenças genéticas humanas causam a perda de função das enzimas RAG1 e RAG2. O efeito esperado desse defeito no sistema imune é:</div>
+  <label class="opt"><input type="radio" name="q11" value="a"><span class="ltr">a)</span><span>Produção excessiva de anticorpos no sangue periférico, gerando episódios graves e repetidos de alergias a múltiplos antígenos ambientais.</span></label>
+  <label class="opt"><input type="radio" name="q11" value="b"><span class="ltr">b)</span><span>Maturação normal de linfócitos T e B acompanhada de ausência completa de neutrófilos e macrófagos em todos os tecidos do corpo.</span></label>
+  <label class="opt"><input type="radio" name="q11" value="c"><span class="ltr">c)</span><span>Ausência de linfócitos T e B maduros circulantes, pois sem essas enzimas não há recombinação gênica e os linfócitos não se desenvolvem.</span></label>
+  <label class="opt"><input type="radio" name="q11" value="d"><span class="ltr">d)</span><span>Proliferação descontrolada de timócitos duplo-positivos no córtex do timo, resultando no desenvolvimento precoce de tumores tímicos benignos.</span></label>
+  <div class="fb"><b>Gabarito: c.</b> As enzimas RAG1 e RAG2 são essenciais para clivar o DNA durante a recombinação V(D)J. Pacientes ou animais com defeitos em RAG1 ou RAG2 não conseguem recombinar os genes dos receptores de antígenos. Com isso, os linfócitos T e B falham em seu desenvolvimento e morrem nos checkpoints, resultando em imunodeficiência combinada grave (SCID) sem linfócitos T e B circulantes.</div>
+</div>
+
+<!-- Questão 12 -->
+<div class="q" data-a="b" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 12</div>
+  <div class="qtext">Mutações genéticas que prejudicam o funcionamento de Igα e Igβ (em linfócitos B) ou de CD3 e ζ (em linfócitos T) têm como efeito esperado:</div>
+  <label class="opt"><input type="radio" name="q12" value="a"><span class="ltr">a)</span><span>Transformação imediata de todos os linfócitos em células de memória de vida longa antes mesmo do nascimento do paciente.</span></label>
+  <label class="opt"><input type="radio" name="q12" value="b"><span class="ltr">b)</span><span>Prejuízo na formação dos pré-receptores, fazendo com que as células não recebam sinais de sobrevivência e morram por apoptose.</span></label>
+  <label class="opt"><input type="radio" name="q12" value="c"><span class="ltr">c)</span><span>Aumento exagerado na diversidade dos receptores de antígenos, capacitando as células a combaterem qualquer tipo de infecção viral.</span></label>
+  <label class="opt"><input type="radio" name="q12" value="d"><span class="ltr">d)</span><span>Migração acelerada de células pré-B e pré-T para a corrente sanguínea sem passarem por nenhuma etapa de seleção celular.</span></label>
+  <div class="fb"><b>Gabarito: b.</b> Conforme abordado nas questões reflexivas dos slides, sem as moléculas acessórias funcionais (Igα e Igβ no desenvolvimento de B; CD3 e ζ no desenvolvimento de T), a formação e a sinalização dos pré-receptores (pré-BCR e pré-TCR) são prejudicadas. Como as células em formação não recebem os sinais necessários de sobrevivência para prosseguir na maturação, elas morrem por apoptose, gerando imunodeficiências.</div>
+</div>
+
+<!-- Questão 13 -->
+<div class="q" data-a="c" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 13</div>
+  <div class="qtext">Na medula óssea, quando um linfócito B imaturo expressa um BCR completo que reconhece antígenos próprios com alta afinidade, essa célula pode:</div>
+  <label class="opt"><input type="radio" name="q13" value="a"><span class="ltr">a)</span><span>Ativar imediatamente a proliferação celular e seguir para o baço para iniciar uma resposta imune protetora no organismo.</span></label>
+  <label class="opt"><input type="radio" name="q13" value="b"><span class="ltr">b)</span><span>Transformar-se em um linfócito T maduro funcional através da troca de suas cadeias pesadas pelas cadeias de um TCR.</span></label>
+  <label class="opt"><input type="radio" name="q13" value="c"><span class="ltr">c)</span><span>Ser eliminada por apoptose ou passar por edição do receptor, recombinando outros alelos de cadeia leve para não ser auto-reativa.</span></label>
+  <label class="opt"><input type="radio" name="q13" value="d"><span class="ltr">d)</span><span>Perder permanentemente todos os seus receptores de membrana e continuar atuando como uma célula fagocítica indiferenciada nos tecidos.</span></label>
+  <div class="fb"><b>Gabarito: c.</b> Na seleção negativa de células B, clones que reconhecem antígenos próprios com alta afinidade podem ser eliminados por apoptose ou passar pela edição do receptor. Nesse processo, a célula tenta recombinar o outro alelo de cadeia leve kappa ou os alelos de cadeia lambda (tendo quatro chances no total) para gerar um novo receptor que não seja auto-reativo.</div>
+</div>
+
+<!-- Questão 14 -->
+<div class="q" data-a="a" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 14</div>
+  <div class="qtext">A proteína AIRE é expressa em células epiteliais da medula tímica. A importância dessa molécula para o sistema imune consiste em:</div>
+  <label class="opt"><input type="radio" name="q14" value="a"><span class="ltr">a)</span><span>Promover a expressão de antígenos tecido-específicos no timo, permitindo a eliminação de linfócitos T auto-reativos na seleção negativa.</span></label>
+  <label class="opt"><input type="radio" name="q14" value="b"><span class="ltr">b)</span><span>Transportar os pré-receptores de antígenos do citoplasma para o núcleo celular com a finalidade de acelerar a proliferação.</span></label>
+  <label class="opt"><input type="radio" name="q14" value="c"><span class="ltr">c)</span><span>Inibir a ação das células dendríticas maduras durante a apresentação de antígenos microbianos nos linfonodos da circulação periférica.</span></label>
+  <label class="opt"><input type="radio" name="q14" value="d"><span class="ltr">d)</span><span>Substituir a função das enzimas RAG1 e RAG2 durante as etapas iniciais de recombinação somática da cadeia beta do TCR.</span></label>
+  <div class="fb"><b>Gabarito: a.</b> A proteína nuclear AIRE é expressa em células epiteliais da medula do timo e é fundamental para fazer com que essas células expressem antígenos típicos de tecidos específicos do corpo (como proteínas da tireoide ou do pâncreas). Isso permite testar e eliminar por seleção negativa (tolerância central) os linfócitos T que seriam auto-reativos contra esses órgãos periféricos.</div>
+</div>
+
+<!-- Questão 15 -->
+<div class="q" data-a="d" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 15</div>
+  <div class="qtext">Durante a formação da sinapse imunológica entre uma célula apresentadora de antígenos (APC) e um linfócito T, a sinapse tem como função principal:</div>
+  <label class="opt"><input type="radio" name="q15" value="a"><span class="ltr">a)</span><span>Bloquear a transferência de informações entre as células e induzir a degradação de todos os receptores TCR da membrana celular.</span></label>
+  <label class="opt"><input type="radio" name="q15" value="b"><span class="ltr">b)</span><span>Impedir que o linfócito T reconheça o MHC próprio, forçando a sua transformação imediata em uma célula dendrítica tecidual.</span></label>
+  <label class="opt"><input type="radio" name="q15" value="c"><span class="ltr">c)</span><span>Permitir a troca direta de segmentos de DNA entre as duas células para gerar novas mutações somáticas durante a infecção.</span></label>
+  <label class="opt"><input type="radio" name="q15" value="d"><span class="ltr">d)</span><span>Manter o contato entre as células por tempo suficiente para a ativação do linfócito T e facilitar a secreção direcionada de citocinas.</span></label>
+  <div class="fb"><b>Gabarito: d.</b> Conforme ensinado nos slides, a sinapse imunológica reúne o complexo TCR, co-receptores, moléculas de adesão e coestimulatórias. Suas principais funções são manter a APC e o linfócito T em contato por tempo suficiente para que ocorra a ativação celular e facilitar a secreção orientada de citocinas ou grânulos para as células-alvo.</div>
+</div>
+
+<div class="nav">
+  <button type="button" class="btn-alt" id="imuq-prev">← Anterior</button>
+  <button type="button" class="btn-main" id="imuq-next">Próxima →</button>
+</div>
+<div class="warn" id="imuq-warn"></div>
+<div class="foot"><button type="button" class="btn-ghost" id="imuq-limpar">Recomeçar a lista</button></div>
+
+<div class="score" id="imuq-score">
+  <div class="lbl">Sua nota</div>
+  <div class="big" id="imuq-nota">0,0</div>
+  <div class="det" id="imuq-det"></div>
+  <div class="grid" id="imuq-grid"></div>
+  <div class="det" style="margin-top:12px; font-size:14px">Clique em qualquer número acima para rever a questão e o comentário.</div>
+</div>
+
+<script>
+(function(){
+  var root = document.getElementById('imuq-root');
+  if(!root || root.dataset.ready) return;
+  root.dataset.ready = '1';
+
+  var qs = [].slice.call(root.querySelectorAll('.q'));
+  var total = qs.length, valor = 10/total, idx = 0, corrigido = false;
+
+  var bar   = document.getElementById('imuq-bar');
+  var pos   = document.getElementById('imuq-pos');
+  var blk   = document.getElementById('imuq-blk');
+  var prev  = document.getElementById('imuq-prev');
+  var next  = document.getElementById('imuq-next');
+  var warn  = document.getElementById('imuq-warn');
+  var painel= document.getElementById('imuq-score');
+  var grid  = document.getElementById('imuq-grid');
+
+  function render(){
+    qs.forEach(function(q,i){ q.classList.toggle('on', i===idx); });
+    pos.textContent = 'Questão ' + (idx+1) + ' de ' + total;
+    blk.innerHTML = qs[idx].getAttribute('data-b');
+    bar.style.width = (((idx+1)/total)*100) + '%';
+    prev.disabled = (idx === 0);
+    if(idx === total-1){
+      next.textContent = corrigido ? 'Ver resultado' : 'Corrigir e ver nota';
+      next.className = corrigido ? 'btn-main' : 'btn-gold';
+    } else {
+      next.textContent = 'Próxima →';
+      next.className = 'btn-main';
+    }
+  }
+
+  function irPara(i){
+    idx = Math.max(0, Math.min(total-1, i));
+    render();
+    qs[idx].scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  function corrigir(){
+    var acertos = 0, semResposta = 0;
+    grid.innerHTML = '';
+
+    qs.forEach(function(q, i){
+      var certa = q.getAttribute('data-a');
+      var esc = q.querySelector('input:checked');
+      if(!esc) semResposta++;
+
+      q.classList.remove('correct','wrong');
+      [].slice.call(q.querySelectorAll('label.opt')).forEach(function(l){
+        var inp = l.querySelector('input');
+        l.classList.remove('mark-ok','mark-no');
+        if(inp.value === certa) l.classList.add('mark-ok');
+        if(inp.checked && inp.value !== certa) l.classList.add('mark-no');
+        inp.disabled = true;
+      });
+
+      var ok = !!esc && esc.value === certa;
+      if(ok) acertos++;
+      q.classList.add(ok ? 'correct' : 'wrong');
+      q.querySelector('.fb').classList.add('show');
+
+      var b = document.createElement('b');
+      b.textContent = (i+1);
+      b.className = ok ? 'g-ok' : 'g-no';
+      b.addEventListener('click', function(){ irPara(i); });
+      grid.appendChild(b);
+    });
+
+    corrigido = true;
+    var nota = acertos * valor;
+    document.getElementById('imuq-nota').textContent =
+      nota.toFixed(1).replace('.', ',') + ' / 10,0';
+    document.getElementById('imuq-det').textContent =
+      acertos + ' de ' + total + ' questões corretas. Cada questão vale ' +
+      valor.toFixed(2).replace('.', ',') + ' ponto.';
+    painel.classList.add('show');
+
+    if(semResposta > 0){
+      warn.textContent = 'Atenção: ' + semResposta +
+        ' questão(ões) ficaram sem resposta e foram contadas como erro.';
+      warn.classList.add('show');
+    } else { warn.classList.remove('show'); }
+
+    render();
+    painel.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  prev.addEventListener('click', function(){ irPara(idx-1); });
+  next.addEventListener('click', function(){
+    if(idx < total-1){ irPara(idx+1); }
+    else if(!corrigido){ corrigir(); }
+    else { painel.scrollIntoView({behavior:'smooth', block:'center'}); }
+  });
+
+  document.getElementById('imuq-limpar').addEventListener('click', function(){
+    qs.forEach(function(q){
+      q.classList.remove('correct','wrong');
+      q.querySelector('.fb').classList.remove('show');
+      [].slice.call(q.querySelectorAll('label.opt')).forEach(function(l){
+        l.classList.remove('mark-ok','mark-no');
+        var inp = l.querySelector('input');
+        inp.disabled = false; inp.checked = false;
+      });
+    });
+    grid.innerHTML = '';
+    painel.classList.remove('show');
+    warn.classList.remove('show');
+    corrigido = false; idx = 0;
+    render();
+    root.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  render();
+})();
+</script>
+</div>
+</body>
+</html>
