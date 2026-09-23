@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lista de exercícios  MHC e apresentação de antígenos</title>
+<style>html,body{margin:0;padding:0;background:#f7f4ee}</style>
+</head>
+<body>
+<div class="imuq" id="imuq-root">
+<style>
+.imuq *{box-sizing:border-box}
+.imuq{
+  --ink:#12232b; --ink2:#40606d; --ink3:#7d97a1;
+  --paper:#f7f4ee; --card:#ffffff; --line:#dfd8cc;
+  --deep:#0f4c5c; --deep-l:#e3eef1;
+  --amber:#c46a13; --amber-l:#fbeedd;
+  --ok:#1c6b45; --ok-l:#e3f2ea;
+  --no:#a32424; --no-l:#fbe8e8;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink); background:var(--paper);
+  max-width:860px; margin:0 auto; padding:18px 14px 34px;
+  line-height:1.55; font-size:17px; -webkit-text-size-adjust:100%;
+}
+.imuq .imuq-head{border-bottom:3px solid var(--deep); padding-bottom:12px; margin-bottom:16px}
+.imuq .imuq-eyebrow{font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); font-weight:700}
+.imuq h1{font-size:25px; line-height:1.2; margin:6px 0 4px; font-weight:800; color:var(--deep)}
+.imuq .imuq-sub{color:var(--ink2); font-size:14.5px; margin:0}
+
+.imuq .track{height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin-bottom:8px}
+.imuq .track i{display:block; height:100%; width:0; background:var(--deep); border-radius:99px; transition:width .25s}
+.imuq .meta{display:flex; justify-content:space-between; align-items:center; gap:10px;
+  font-size:12.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--ink2); margin-bottom:12px}
+.imuq .meta .blk{color:var(--amber)}
+
+.imuq .q{display:none; background:var(--card); border:1px solid var(--line); border-top:6px solid var(--deep);
+  border-radius:12px; padding:20px 18px 16px; box-shadow:0 2px 10px rgba(0,0,0,.05); min-height:300px}
+.imuq .q.on{display:block}
+.imuq .q.correct{border-top-color:var(--ok)}
+.imuq .q.wrong{border-top-color:var(--no)}
+.imuq .qnum{font-size:12px; letter-spacing:.12em; font-weight:700; color:var(--amber); text-transform:uppercase}
+.imuq .qtext{font-weight:600; font-size:19px; margin:6px 0 16px}
+.imuq label.opt{display:flex; gap:10px; align-items:flex-start; padding:12px 14px; margin:8px 0;
+  border:1.5px solid var(--line); border-radius:9px; cursor:pointer; background:#fff; transition:.12s}
+.imuq label.opt:hover{border-color:var(--deep); background:var(--deep-l)}
+.imuq label.opt input{margin-top:5px; flex:0 0 auto; width:18px; height:18px; accent-color:var(--deep)}
+.imuq label.opt .ltr{font-weight:700; color:var(--ink2); flex:0 0 auto}
+.imuq label.opt.mark-ok{border-color:var(--ok); background:var(--ok-l); border-width:2.5px}
+.imuq label.opt.mark-no{border-color:var(--no); background:var(--no-l); border-width:2.5px}
+.imuq .fb{display:none; margin-top:14px; padding:12px 14px; border-radius:9px;
+  font-size:15.5px; background:var(--deep-l); border-left:4px solid var(--deep); color:var(--ink)}
+.imuq .fb.show{display:block}
+
+.imuq .nav{display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:16px; flex-wrap:wrap}
+.imuq button{font:inherit; font-weight:700; padding:12px 20px; border-radius:9px;
+  border:2px solid var(--deep); cursor:pointer; transition:.12s}
+.imuq .btn-main{background:var(--deep); color:#fff; flex:1}
+.imuq .btn-main:hover{background:#0b3b47}
+.imuq .btn-alt{background:#fff; color:var(--deep); flex:1}
+.imuq .btn-alt:hover{background:var(--deep-l)}
+.imuq .btn-alt[disabled]{opacity:.35; cursor:not-allowed}
+.imuq .btn-gold{background:var(--amber); border-color:var(--amber); color:#fff; flex:1}
+.imuq .btn-gold:hover{background:#a4560c}
+.imuq .btn-ghost{background:transparent; border-color:var(--ink3); color:var(--ink2); padding:9px 16px; font-size:15px}
+.imuq .btn-ghost:hover{border-color:var(--deep); color:var(--deep)}
+.imuq .foot{text-align:center; margin-top:14px}
+
+.imuq .score{display:none; text-align:center; padding:26px 18px; margin-top:16px;
+  border:3px solid var(--deep); border-radius:12px; background:#fff}
+.imuq .score.show{display:block}
+.imuq .score .lbl{font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--amber); font-weight:700}
+.imuq .score .big{font-size:46px; font-weight:800; color:var(--deep); line-height:1.15; margin:4px 0}
+.imuq .score .det{color:var(--ink2); font-size:16px}
+.imuq .grid{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:16px}
+.imuq .grid b{display:flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:7px; font-size:13px; cursor:pointer;
+  border:2px solid var(--line); background:#fff; color:var(--ink2); font-weight:700}
+.imuq .grid b.g-ok{border-color:var(--ok); background:var(--ok-l); color:var(--ok)}
+.imuq .grid b.g-no{border-color:var(--no); background:var(--no-l); color:var(--no)}
+.imuq .grid b:hover{transform:translateY(-2px)}
+.imuq .warn{display:none; text-align:center; color:var(--no); font-weight:600; margin-top:10px; font-size:15px}
+.imuq .warn.show{display:block}
+@media (max-width:600px){
+  .imuq{font-size:16px; padding:14px 10px 28px}
+  .imuq h1{font-size:21px}
+  .imuq .qtext{font-size:17.5px}
+  .imuq .q{min-height:0; padding:16px 14px 14px}
+  .imuq .nav{flex-direction:column-reverse}
+  .imuq .nav button{width:100%}
+  .imuq .score .big{font-size:38px}
+}
+</style>
+
+<div class="imuq-head">
+  <div class="imuq-eyebrow">Disciplina de Imunologia &middot; ICB / UFMG</div>
+  <h1>Lista de exercícios &mdash; MHC e apresentação de antígenos</h1>
+  <p class="imuq-sub">Complexo principal de histocompatibilidade, processamento e apresentação de antígenos a linfócitos T. Valor total: 10,0 pontos.</p>
+</div>
+
+<div class="track"><i id="imuq-bar"></i></div>
+<div class="meta">
+  <span id="imuq-pos">Questão 1 de 20</span>
+  <span class="blk" id="imuq-blk">Bloco 1</span>
+</div>
+
+<div class="q on" data-a="a" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 1</div>
+  <div class="qtext">A principal diferença entre o antígeno reconhecido pelo receptor de antígeno dos linfócitos B (BCR) e aquele reconhecido pelo receptor de antígeno dos linfócitos T (TCR) é que:</div>
+  <label class="opt"><input type="radio" name="q1" value="a"><span class="ltr">a)</span><span>O BCR reconhece macromoléculas de diversas naturezas químicas em sua forma nativa, enquanto o TCR reconhece apenas peptídeos associados ao MHC.</span></label>
+  <label class="opt"><input type="radio" name="q1" value="b"><span class="ltr">b)</span><span>O BCR reconhece apenas antígenos previamente processados e apresentados na superfície de células dendríticas maduras, de forma semelhante ao TCR.</span></label>
+  <label class="opt"><input type="radio" name="q1" value="c"><span class="ltr">c)</span><span>O TCR reconhece antígenos solúveis com a mesma afinidade que o BCR, dispensando a apresentação por moléculas de MHC.</span></label>
+  <label class="opt"><input type="radio" name="q1" value="d"><span class="ltr">d)</span><span>O BCR e o TCR reconhecem exclusivamente complexos peptídeo-MHC, diferindo apenas quanto à afinidade de ligação ao antígeno.</span></label>
+  <div class="fb"><b>Gabarito: a.</b> O BCR reconhece antígenos solúveis de diversas classes químicas, em forma nativa ou degradada, sem necessidade de apresentação; o TCR reconhece apenas peptídeos lineares associados a moléculas de MHC, nunca antígenos livres.</div>
+</div>
+
+<div class="q" data-a="a" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 2</div>
+  <div class="qtext">Sobre as rotas de entrada e captura de antígenos no organismo, é correto afirmar que:</div>
+  <label class="opt"><input type="radio" name="q2" value="a"><span class="ltr">a)</span><span>Antígenos solúveis ou associados a células dendríticas nos tecidos seguem pela linfa até os linfonodos, enquanto antígenos que caem diretamente no sangue são capturados no baço.</span></label>
+  <label class="opt"><input type="radio" name="q2" value="b"><span class="ltr">b)</span><span>Todos os antígenos, independentemente da via de entrada no organismo, acabam sendo capturados exclusivamente por células apresentadoras localizadas no baço.</span></label>
+  <label class="opt"><input type="radio" name="q2" value="c"><span class="ltr">c)</span><span>Somente antígenos particulados conseguem ser transportados pela linfa; antígenos solúveis nunca alcançam os linfonodos de drenagem do tecido.</span></label>
+  <label class="opt"><input type="radio" name="q2" value="d"><span class="ltr">d)</span><span>Antígenos que entram pela pele seguem sempre direto para a corrente sanguínea, sem qualquer passagem prévia pelos linfonodos de drenagem.</span></label>
+  <div class="fb"><b>Gabarito: a.</b> O linfonodo captura o antígeno do tecido (via linfa, solúvel ou associado a células dendríticas), enquanto antígenos que caem diretamente no sangue são capturados por APCs no baço.</div>
+</div>
+
+<div class="q" data-a="c" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 3</div>
+  <div class="qtext">Em comparação com outras células apresentadoras de antígenos, as células dendríticas maduras se destacam por:</div>
+  <label class="opt"><input type="radio" name="q3" value="a"><span class="ltr">a)</span><span>Produzirem anticorpos específicos contra o antígeno antes de qualquer contato com linfócitos T virgens.</span></label>
+  <label class="opt"><input type="radio" name="q3" value="b"><span class="ltr">b)</span><span>Migrarem para os tecidos periféricos após ativação, em vez de se dirigirem aos órgãos linfoides secundários.</span></label>
+  <label class="opt"><input type="radio" name="q3" value="c"><span class="ltr">c)</span><span>Apresentar os níveis mais altos de moléculas coestimuladoras, de MHC e de outros fatores essenciais à ativação eficiente de linfócitos T virgens.</span></label>
+  <label class="opt"><input type="radio" name="q3" value="d"><span class="ltr">d)</span><span>Serem as únicas capazes de capturar antígenos particulados por fagocitose nos tecidos periféricos do organismo.</span></label>
+  <div class="fb"><b>Gabarito: c.</b> Após a maturação, a célula dendrítica aumenta drasticamente a expressão de MHC e de moléculas coestimuladoras como B7, ICAM-1 e IL-12, o que a torna a APC mais eficiente para iniciar a ativação de linfócitos T virgens.</div>
+</div>
+
+<div class="q" data-a="a" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 4</div>
+  <div class="qtext">Em relação aos padrões de expressão das moléculas de MHC nas células do organismo, é correto afirmar que:</div>
+  <label class="opt"><input type="radio" name="q4" value="a"><span class="ltr">a)</span><span>O MHC de classe I é expresso em todas as células nucleadas e apresenta antígenos para células T CD8+, enquanto o de classe II se restringe a APCs.</span></label>
+  <label class="opt"><input type="radio" name="q4" value="b"><span class="ltr">b)</span><span>O MHC de classe II apresenta antígenos para células T CD8+, enquanto o MHC de classe I apresenta para células T CD4+.</span></label>
+  <label class="opt"><input type="radio" name="q4" value="c"><span class="ltr">c)</span><span>Ambas as classes de moléculas de MHC são expressas exclusivamente por células dendríticas maduras presentes nos órgãos linfoides secundários.</span></label>
+  <label class="opt"><input type="radio" name="q4" value="d"><span class="ltr">d)</span><span>O MHC de classe I é restrito às APCs profissionais, enquanto o de classe II é expresso em todas as células nucleadas do organismo.</span></label>
+  <div class="fb"><b>Gabarito: a.</b> Essa distribuição garante que qualquer célula nucleada infectada (classe I) possa ser vigiada por CTLs CD8+, enquanto apenas as APCs especializadas (classe II) ativam a resposta auxiliar CD4+.</div>
+</div>
+
+<div class="q" data-a="b" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 5</div>
+  <div class="qtext">Sobre as diferentes funções efetoras dos linfócitos T CD4+ e CD8+ e sua relação com a apresentação diferencial de antígenos, é correto afirmar que:</div>
+  <label class="opt"><input type="radio" name="q5" value="a"><span class="ltr">a)</span><span>Linfócitos T CD4+ eliminam diretamente células infectadas, enquanto linfócitos T CD8+ atuam apenas auxiliando macrófagos e linfócitos B.</span></label>
+  <label class="opt"><input type="radio" name="q5" value="b"><span class="ltr">b)</span><span>Linfócitos T CD8+ eliminam diretamente células que expressam antígenos citossólicos associados ao MHC de classe I, enquanto linfócitos T CD4+ auxiliam outras células reconhecendo antígenos associados à classe II.</span></label>
+  <label class="opt"><input type="radio" name="q5" value="c"><span class="ltr">c)</span><span>Tanto linfócitos T CD4+ quanto CD8+ reconhecem antígenos associados ao MHC de classe I, diferindo apenas na função efetora exercida.</span></label>
+  <label class="opt"><input type="radio" name="q5" value="d"><span class="ltr">d)</span><span>A função efetora de um linfócito T depende exclusivamente do tecido em que ele se encontra, não do correceptor CD4 ou CD8 que expressa.</span></label>
+  <div class="fb"><b>Gabarito: b.</b> A segregação entre as vias de MHC direciona cada subpopulação de células T à função mais eficaz: CD8+ mata diretamente células infectadas por patógenos citossólicos (vírus), enquanto CD4+ auxilia macrófagos e linfócitos B a eliminar patógenos extracelulares ou fagocitados.</div>
+</div>
+
+<div class="q" data-a="d" data-b="Bloco 1 &middot; Aquecimento">
+  <div class="qnum">Questão 6</div>
+  <div class="qtext">Sobre o polimorfismo dos genes do complexo principal de histocompatibilidade, é correto afirmar que:</div>
+  <label class="opt"><input type="radio" name="q6" value="a"><span class="ltr">a)</span><span>O polimorfismo do MHC resulta de recombinações somáticas geradas durante a maturação dos linfócitos, de forma semelhante ao TCR.</span></label>
+  <label class="opt"><input type="radio" name="q6" value="b"><span class="ltr">b)</span><span>O polimorfismo do MHC está distribuído igualmente por toda a molécula, incluindo as regiões transmembrana e citoplasmática.</span></label>
+  <label class="opt"><input type="radio" name="q6" value="c"><span class="ltr">c)</span><span>Os genes do MHC são pouco variáveis entre indivíduos, existindo poucos alelos diferentes descritos na população humana.</span></label>
+  <label class="opt"><input type="radio" name="q6" value="d"><span class="ltr">d)</span><span>Os genes do MHC estão entre os mais polimórficos do genoma, e esse polimorfismo se concentra nos resíduos que formam a fenda de ligação do peptídeo.</span></label>
+  <div class="fb"><b>Gabarito: d.</b> O MHC de classe I e classe II está entre os genes mais polimórficos de mamíferos, com milhares de alelos na espécie humana. Esse polimorfismo se concentra no fundo e nas paredes da fenda, determinando quais peptídeos cada alelo consegue ligar e apresentar.</div>
+</div>
+
+<div class="q" data-a="b" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 7</div>
+  <div class="qtext">Sobre a estrutura da molécula do MHC de classe I, é correto afirmar que:</div>
+  <label class="opt"><input type="radio" name="q7" value="a"><span class="ltr">a)</span><span>O domínio α3 é polimórfico e forma a fenda de ligação do peptídeo em conjunto com o domínio α1.</span></label>
+  <label class="opt"><input type="radio" name="q7" value="b"><span class="ltr">b)</span><span>Os domínios α1 e α2 são polimórficos e formam a fenda de ligação do peptídeo, enquanto o α3, não polimórfico, liga o CD8.</span></label>
+  <label class="opt"><input type="radio" name="q7" value="c"><span class="ltr">c)</span><span>O local de ligação ao CD8 está nos domínios α1 e α2, os mesmos que formam a fenda do peptídeo.</span></label>
+  <label class="opt"><input type="radio" name="q7" value="d"><span class="ltr">d)</span><span>A microglobulina β2 é polimórfica e codificada dentro do próprio MHC, junto às cadeias α da molécula.</span></label>
+  <div class="fb"><b>Gabarito: b.</b> Na classe I, α1 e α2 são polimórficos e formam a fenda; α3 é não polimórfico e liga CD8; a microglobulina β2, não codificada no MHC, contribui para a estabilidade da molécula.</div>
+</div>
+
+<div class="q" data-a="c" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 8</div>
+  <div class="qtext">Sobre a estrutura da molécula do MHC de classe II, é correto afirmar que:</div>
+  <label class="opt"><input type="radio" name="q8" value="a"><span class="ltr">a)</span><span>A molécula de classe II costuma ser encontrada na superfície celular sem nenhum peptídeo ligado à sua fenda.</span></label>
+  <label class="opt"><input type="radio" name="q8" value="b"><span class="ltr">b)</span><span>Os domínios α2 e β2 formam a fenda de ligação do peptídeo, enquanto α1 e β1 ligam o CD4.</span></label>
+  <label class="opt"><input type="radio" name="q8" value="c"><span class="ltr">c)</span><span>Os domínios α1 e β1 são polimórficos e formam a fenda de ligação, enquanto α2 e β2 ligam o correceptor CD4.</span></label>
+  <label class="opt"><input type="radio" name="q8" value="d"><span class="ltr">d)</span><span>Apenas a cadeia β é polimórfica; a cadeia α é idêntica entre todos os alelos de MHC de classe II.</span></label>
+  <div class="fb"><b>Gabarito: c.</b> Os domínios mais próximos da membrana (α2 e β2) são não polimórficos e ligam CD4, enquanto os domínios distais (α1 e β1) são polimórficos e formam a fenda. MHC nunca é encontrado vazio na superfície celular.</div>
+</div>
+
+<div class="q" data-a="d" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 9</div>
+  <div class="qtext">A diferença no tamanho dos peptídeos acomodados pelas moléculas de MHC de classe I e classe II é explicada porque:</div>
+  <label class="opt"><input type="radio" name="q9" value="a"><span class="ltr">a)</span><span>Ambas as classes de MHC acomodam peptídeos de tamanho idêntico, variando apenas a afinidade da ligação ao peptídeo.</span></label>
+  <label class="opt"><input type="radio" name="q9" value="b"><span class="ltr">b)</span><span>A fenda da classe II é fechada nas extremidades, o que a torna mais seletiva e restrita a peptídeos muito curtos.</span></label>
+  <label class="opt"><input type="radio" name="q9" value="c"><span class="ltr">c)</span><span>O tamanho do peptídeo acomodado depende apenas do tipo de célula que expressa a molécula, não da estrutura da fenda.</span></label>
+  <label class="opt"><input type="radio" name="q9" value="d"><span class="ltr">d)</span><span>A fenda da classe I é fechada nas extremidades e acomoda peptídeos curtos, enquanto a fenda da classe II é aberta e acomoda peptídeos mais longos.</span></label>
+  <div class="fb"><b>Gabarito: d.</b> As extremidades fechadas da fenda de classe I restringem o peptídeo a cerca de 8 a 11 aminoácidos; a fenda aberta da classe II acomoda peptídeos bem mais longos (até cerca de 30 aminoácidos).</div>
+</div>
+
+<div class="q" data-a="b" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 10</div>
+  <div class="qtext">Sobre as particularidades da ligação entre peptídeos e moléculas de MHC, é correto afirmar que:</div>
+  <label class="opt"><input type="radio" name="q10" value="a"><span class="ltr">a)</span><span>A interação entre peptídeo e MHC depende apenas da carga elétrica das moléculas, sem qualquer especificidade estrutural entre elas.</span></label>
+  <label class="opt"><input type="radio" name="q10" value="b"><span class="ltr">b)</span><span>Cada molécula de MHC liga um peptídeo por vez, mas pode ligar peptídeos diferentes ao longo do tempo, e o complexo demora dias para se dissociar.</span></label>
+  <label class="opt"><input type="radio" name="q10" value="c"><span class="ltr">c)</span><span>A dissociação entre peptídeo e MHC ocorre em poucos segundos, exigindo renovação constante do complexo peptídeo-MHC formado.</span></label>
+  <label class="opt"><input type="radio" name="q10" value="d"><span class="ltr">d)</span><span>Cada molécula de MHC permanece ligada permanentemente a um único tipo de peptídeo, sem jamais trocar de parceiro molecular.</span></label>
+  <div class="fb"><b>Gabarito: b.</b> A alta estabilidade do complexo peptídeo-MHC, que pode durar dias, garante tempo suficiente para que uma célula T específica encontre e reconheça aquele complexo na superfície da APC.</div>
+</div>
+
+<div class="q" data-a="d" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 11</div>
+  <div class="qtext">Na via de processamento de antígenos citossólicos pelo MHC de classe I, a sequência correta de eventos é:</div>
+  <label class="opt"><input type="radio" name="q11" value="a"><span class="ltr">a)</span><span>Transporte da proteína íntegra pelo TAP até o retículo endoplasmático, onde é degradada por catepsinas antes de se ligar ao MHC.</span></label>
+  <label class="opt"><input type="radio" name="q11" value="b"><span class="ltr">b)</span><span>Degradação da proteína em endossomas ácidos, remoção do fragmento CLIP e associação direta do peptídeo à classe I na superfície.</span></label>
+  <label class="opt"><input type="radio" name="q11" value="c"><span class="ltr">c)</span><span>Ligação do peptídeo à classe I ainda no citosol, seguida do transporte do complexo já montado pelo TAP até o Golgi.</span></label>
+  <label class="opt"><input type="radio" name="q11" value="d"><span class="ltr">d)</span><span>Degradação da proteína ubiquitinada pelo proteassoma no citosol, transporte dos peptídeos ao retículo endoplasmático pelo TAP e associação ao MHC de classe I.</span></label>
+  <div class="fb"><b>Gabarito: d.</b> O TAP transporta peptídeos, não proteínas inteiras: proteassoma no citosol, TAP para o RE, montagem com auxílio da tapasina e exportação via Golgi.</div>
+</div>
+
+<div class="q" data-a="b" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 12</div>
+  <div class="qtext">Na via de processamento de antígenos extracelulares pelo MHC de classe II, os papéis da cadeia invariante e do HLA-DM são, respectivamente:</div>
+  <label class="opt"><input type="radio" name="q12" value="a"><span class="ltr">a)</span><span>A cadeia invariante degrada o peptídeo antigênico já processado, enquanto o HLA-DM o transporta até a superfície da célula.</span></label>
+  <label class="opt"><input type="radio" name="q12" value="b"><span class="ltr">b)</span><span>A cadeia invariante ocupa a fenda da classe II e direciona a molécula aos endossomas; ali, o HLA-DM remove o fragmento CLIP remanescente.</span></label>
+  <label class="opt"><input type="radio" name="q12" value="c"><span class="ltr">c)</span><span>A cadeia invariante e o HLA-DM atuam exclusivamente na via de classe I, auxiliando o transporte de peptídeos pelo TAP.</span></label>
+  <label class="opt"><input type="radio" name="q12" value="d"><span class="ltr">d)</span><span>O HLA-DM ocupa a fenda da classe II ainda no retículo endoplasmático, sendo depois removido pela própria cadeia invariante.</span></label>
+  <div class="fb"><b>Gabarito: b.</b> A cadeia invariante impede que a classe II ligue peptídeos prematuramente no RE; nos endossomas, ela é degradada restando o CLIP, que o HLA-DM remove para permitir a ligação de peptídeos extracelulares processados.</div>
+</div>
+
+<div class="q" data-a="c" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 13</div>
+  <div class="qtext">O que determina se um antígeno será processado e apresentado pela via do MHC de classe I ou pela via da classe II é, principalmente:</div>
+  <label class="opt"><input type="radio" name="q13" value="a"><span class="ltr">a)</span><span>O tamanho da proteína original, sendo proteínas grandes sempre direcionadas à classe I e pequenas à classe II.</span></label>
+  <label class="opt"><input type="radio" name="q13" value="b"><span class="ltr">b)</span><span>A carga elétrica do antígeno, que direciona sua ligação preferencial a uma ou outra classe de moléculas de MHC.</span></label>
+  <label class="opt"><input type="radio" name="q13" value="c"><span class="ltr">c)</span><span>A localização subcelular da degradação da proteína: antígenos citossólicos geram peptídeos para a classe I, e antígenos vesiculares, para a classe II.</span></label>
+  <label class="opt"><input type="radio" name="q13" value="d"><span class="ltr">d)</span><span>O tipo de célula T que primeiro reconhece o antígeno, o que determina retroativamente qual via de processamento é usada.</span></label>
+  <div class="fb"><b>Gabarito: c.</b> A segregação entre as vias é determinada pelo compartimento celular de degradação do antígeno (citosol versus vesículas endocíticas), e não pelas células T que eventualmente reconhecerão o complexo resultante.</div>
+</div>
+
+<div class="q" data-a="d" data-b="Bloco 2 &middot; Aprofundamento">
+  <div class="qnum">Questão 14</div>
+  <div class="qtext">O conceito de imunodominância de epítopos estabelece que:</div>
+  <label class="opt"><input type="radio" name="q14" value="a"><span class="ltr">a)</span><span>Todos os peptídeos gerados pelo processamento de um antígeno provocam respostas de células T de magnitude igualmente forte.</span></label>
+  <label class="opt"><input type="radio" name="q14" value="b"><span class="ltr">b)</span><span>A imunodominância de um epítopo depende apenas da quantidade de antígeno disponível, não da sua estrutura molecular.</span></label>
+  <label class="opt"><input type="radio" name="q14" value="c"><span class="ltr">c)</span><span>Um epítopo só é considerado imunodominante quando reconhecido simultaneamente pelas moléculas de MHC de classe I e II.</span></label>
+  <label class="opt"><input type="radio" name="q14" value="d"><span class="ltr">d)</span><span>Dentre os peptídeos gerados pelo processamento de um antígeno, os que se ligam com maior eficiência ao MHC disponível provocam a resposta mais forte.</span></label>
+  <div class="fb"><b>Gabarito: d.</b> Como o processamento de uma proteína gera múltiplos peptídeos possíveis, mas só alguns têm estrutura compatível com a fenda do MHC disponível naquele indivíduo, apenas esses (imunodominantes) efetivamente ativam células T.</div>
+</div>
+
+<div class="q" data-a="a" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 15</div>
+  <div class="qtext">Um paciente com infecção viral desenvolve linfócitos T CD8+ efetores (CTLs) que promovem a morte das células infectadas. Isso ocorre porque:</div>
+  <label class="opt"><input type="radio" name="q15" value="a"><span class="ltr">a)</span><span>O antígeno viral é sintetizado no citosol da célula infectada, processado pela via do MHC de classe I e apresentado diretamente aos CTLs CD8+.</span></label>
+  <label class="opt"><input type="radio" name="q15" value="b"><span class="ltr">b)</span><span>O antígeno viral é capturado por macrófagos e apresentado aos CTLs CD8+ em associação com o MHC de classe II.</span></label>
+  <label class="opt"><input type="radio" name="q15" value="c"><span class="ltr">c)</span><span>O antígeno viral é sempre secretado para o meio extracelular antes de ser reconhecido pelos linfócitos T CD8+ efetores.</span></label>
+  <label class="opt"><input type="radio" name="q15" value="d"><span class="ltr">d)</span><span>Os linfócitos T CD8+ reconhecem partículas virais diretamente, sem qualquer processamento prévio ou apresentação por moléculas de MHC.</span></label>
+  <div class="fb"><b>Gabarito: a.</b> Antígenos citossólicos (como proteínas virais sintetizadas dentro da célula infectada) seguem a via de classe I, que apresenta o peptídeo diretamente na superfície da célula infectada para reconhecimento e morte por CTLs CD8+.</div>
+</div>
+
+<div class="q" data-a="b" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 16</div>
+  <div class="qtext">Um macrófago fagocita uma bactéria extracelular e depois é ativado por um linfócito T CD4+ auxiliar, passando a destruir com mais eficiência o microrganismo fagocitado. Esse processo depende de:</div>
+  <label class="opt"><input type="radio" name="q16" value="a"><span class="ltr">a)</span><span>Produção de anticorpos específicos pelo próprio macrófago contra o antígeno bacteriano que foi fagocitado.</span></label>
+  <label class="opt"><input type="radio" name="q16" value="b"><span class="ltr">b)</span><span>Apresentação do antígeno bacteriano processado em endossoma, associado ao MHC de classe II, para a célula T CD4+, que secreta citocinas ativadoras.</span></label>
+  <label class="opt"><input type="radio" name="q16" value="c"><span class="ltr">c)</span><span>Reconhecimento direto da bactéria intacta pelo TCR da célula T CD4+, sem qualquer processamento prévio pelo macrófago.</span></label>
+  <label class="opt"><input type="radio" name="q16" value="d"><span class="ltr">d)</span><span>Apresentação do antígeno bacteriano associado ao MHC de classe I diretamente para o linfócito T CD4+ auxiliar envolvido.</span></label>
+  <div class="fb"><b>Gabarito: b.</b> O antígeno extracelular fagocitado é processado em vesículas e apresentado via MHC de classe II à célula T CD4+ auxiliar, que, ao reconhecer o complexo, secreta citocinas que amplificam a capacidade microbicida do macrófago.</div>
+</div>
+
+<div class="q" data-a="a" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 17</div>
+  <div class="qtext">Um peptídeo derivado de uma proteína vacinal é altamente imunogênico em um grupo de indivíduos, mas não desencadeia resposta de células T detectável em outro grupo. A explicação mais provável para essa diferença é que:</div>
+  <label class="opt"><input type="radio" name="q17" value="a"><span class="ltr">a)</span><span>Os indivíduos que não respondem possuem alelos de MHC incapazes de ligar esse peptídeo com afinidade suficiente para apresentá-lo de forma estável.</span></label>
+  <label class="opt"><input type="radio" name="q17" value="b"><span class="ltr">b)</span><span>A proteína vacinal é degradada de forma idêntica em todos os indivíduos, mas apenas alguns possuem proteassomas funcionais para tanto.</span></label>
+  <label class="opt"><input type="radio" name="q17" value="c"><span class="ltr">c)</span><span>A diferença de resposta depende exclusivamente da dose de vacina administrada, e não de qualquer característica genética do indivíduo.</span></label>
+  <label class="opt"><input type="radio" name="q17" value="d"><span class="ltr">d)</span><span>Os indivíduos que não respondem simplesmente não possuem linfócitos T capazes de reconhecer qualquer peptídeo derivado dessa proteína vacinal.</span></label>
+  <div class="fb"><b>Gabarito: a.</b> Como as moléculas de MHC são altamente polimórficas, cada alelo liga um conjunto distinto de peptídeos. Um peptídeo que não se liga eficientemente ao MHC de um indivíduo não se torna imunodominante e não ativa resposta de células T, mesmo que a proteína seja processada normalmente — é a base molecular de diferenças individuais de responsividade a antígenos e vacinas.</div>
+</div>
+
+<div class="q" data-a="d" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 18</div>
+  <div class="qtext">Na apresentação cruzada, uma célula dendrítica captura uma célula infectada por vírus e consegue ativar diretamente um linfócito T CD8+ virgem específico para o antígeno viral. Isso ocorre porque:</div>
+  <label class="opt"><input type="radio" name="q18" value="a"><span class="ltr">a)</span><span>A célula dendrítica transfere fisicamente seu próprio MHC de classe I para a superfície do linfócito T CD8+.</span></label>
+  <label class="opt"><input type="radio" name="q18" value="b"><span class="ltr">b)</span><span>O antígeno viral é apresentado diretamente pela membrana da célula infectada capturada, sem qualquer processamento pela dendrítica.</span></label>
+  <label class="opt"><input type="radio" name="q18" value="c"><span class="ltr">c)</span><span>O antígeno viral é processado exclusivamente pela via de classe II e reconhecido por um correceptor CD8 atípico.</span></label>
+  <label class="opt"><input type="radio" name="q18" value="d"><span class="ltr">d)</span><span>O antígeno viral capturado é transportado das vesículas para o citosol da célula dendrítica, entrando na via de processamento da classe I.</span></label>
+  <div class="fb"><b>Gabarito: d.</b> Na apresentação cruzada, antígenos originalmente extracelulares (capturados por endocitose ou fagocitose de células infectadas) escapam para o citosol da célula dendrítica e entram na via clássica de classe I, ativando CTLs CD8+ virgens mesmo sem que a própria célula dendrítica tenha sido infectada.</div>
+</div>
+
+<div class="q" data-a="c" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 19</div>
+  <div class="qtext">Uma mesma célula dendrítica é capaz de apresentar antígenos simultaneamente a linfócitos T CD4+ e CD8+ em um linfonodo porque:</div>
+  <label class="opt"><input type="radio" name="q19" value="a"><span class="ltr">a)</span><span>Expressa apenas MHC de classe II, e a ativação de linfócitos CD8+ ocorre por mecanismo totalmente independente de MHC.</span></label>
+  <label class="opt"><input type="radio" name="q19" value="b"><span class="ltr">b)</span><span>Alterna ao longo do tempo entre expressar classe I e classe II, nunca apresentando as duas simultaneamente.</span></label>
+  <label class="opt"><input type="radio" name="q19" value="c"><span class="ltr">c)</span><span>Expressa tanto MHC de classe II, carregado com peptídeos extracelulares, quanto MHC de classe I, carregado com peptídeos citossólicos.</span></label>
+  <label class="opt"><input type="radio" name="q19" value="d"><span class="ltr">d)</span><span>Ativa linfócitos T CD8+ apenas por reconhecimento direto do antígeno solúvel, sem qualquer participação do MHC de classe I.</span></label>
+  <div class="fb"><b>Gabarito: c.</b> Como APC profissional que expressa MHC de classe I e classe II, a célula dendrítica apresenta antígenos citossólicos (inclusive por apresentação cruzada) para CD8+ e antígenos extracelulares processados para CD4+, coordenando as duas frentes da resposta adaptativa.</div>
+</div>
+
+<div class="q" data-a="c" data-b="Bloco 3 &middot; Integração">
+  <div class="qnum">Questão 20</div>
+  <div class="qtext">Muitos vírus que causam infecções sistêmicas não infectam diretamente as células dendríticas do hospedeiro. Ainda assim, é gerada uma resposta eficiente de linfócitos T CD8+ específicos contra antígenos desse vírus. Isso é possível porque:</div>
+  <label class="opt"><input type="radio" name="q20" value="a"><span class="ltr">a)</span><span>A resposta de linfócitos T CD8+ nesses casos depende exclusivamente de células teciduais infectadas apresentarem o antígeno diretamente aos linfócitos T virgens nos linfonodos.</span></label>
+  <label class="opt"><input type="radio" name="q20" value="b"><span class="ltr">b)</span><span>Linfócitos T CD8+ virgens são ativados diretamente pelo vírus circulante no sangue, sem qualquer participação de células apresentadoras de antígenos.</span></label>
+  <label class="opt"><input type="radio" name="q20" value="c"><span class="ltr">c)</span><span>Células dendríticas capturam células infectadas ou fragmentos virais por endocitose e os direcionam para a via de MHC de classe I, ativando diretamente linfócitos T CD8+ virgens por apresentação cruzada.</span></label>
+  <label class="opt"><input type="radio" name="q20" value="d"><span class="ltr">d)</span><span>Células dendríticas não infectadas produzem anticorpos específicos contra o vírus, que substituem a necessidade de ativação de linfócitos T CD8+.</span></label>
+  <div class="fb"><b>Gabarito: c.</b> A apresentação cruzada permite que células dendríticas não infectadas capturem antígenos de células infectadas ou tumorais e os processem pela via de classe I, sendo essencial para gerar respostas de CD8+ contra patógenos que não infectam diretamente as APCs profissionais, como ocorre com muitos vírus e com antígenos tumorais.</div>
+</div>
+
+<div class="nav">
+  <button type="button" class="btn-alt" id="imuq-prev">← Anterior</button>
+  <button type="button" class="btn-main" id="imuq-next">Próxima →</button>
+</div>
+<div class="warn" id="imuq-warn"></div>
+<div class="foot"><button type="button" class="btn-ghost" id="imuq-limpar">Recomeçar a lista</button></div>
+
+<div class="score" id="imuq-score">
+  <div class="lbl">Sua nota</div>
+  <div class="big" id="imuq-nota">0,0</div>
+  <div class="det" id="imuq-det"></div>
+  <div class="grid" id="imuq-grid"></div>
+  <div class="det" style="margin-top:12px; font-size:14px">Clique em qualquer número acima para rever a questão e o comentário.</div>
+</div>
+
+<script>
+(function(){
+  var root = document.getElementById('imuq-root');
+  if(!root || root.dataset.ready) return;
+  root.dataset.ready = '1';
+
+  var qs = [].slice.call(root.querySelectorAll('.q'));
+  var total = qs.length, valor = 10/total, idx = 0, corrigido = false;
+
+  var bar   = document.getElementById('imuq-bar');
+  var pos   = document.getElementById('imuq-pos');
+  var blk   = document.getElementById('imuq-blk');
+  var prev  = document.getElementById('imuq-prev');
+  var next  = document.getElementById('imuq-next');
+  var warn  = document.getElementById('imuq-warn');
+  var painel= document.getElementById('imuq-score');
+  var grid  = document.getElementById('imuq-grid');
+
+  function render(){
+    qs.forEach(function(q,i){ q.classList.toggle('on', i===idx); });
+    pos.textContent = 'Questão ' + (idx+1) + ' de ' + total;
+    blk.innerHTML = qs[idx].getAttribute('data-b');
+    bar.style.width = (((idx+1)/total)*100) + '%';
+    prev.disabled = (idx === 0);
+    if(idx === total-1){
+      next.textContent = corrigido ? 'Ver resultado' : 'Corrigir e ver nota';
+      next.className = corrigido ? 'btn-main' : 'btn-gold';
+    } else {
+      next.textContent = 'Próxima →';
+      next.className = 'btn-main';
+    }
+  }
+
+  function irPara(i){
+    idx = Math.max(0, Math.min(total-1, i));
+    render();
+    qs[idx].scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  function corrigir(){
+    var acertos = 0, semResposta = 0;
+    grid.innerHTML = '';
+
+    qs.forEach(function(q, i){
+      var certa = q.getAttribute('data-a');
+      var esc = q.querySelector('input:checked');
+      if(!esc) semResposta++;
+
+      q.classList.remove('correct','wrong');
+      [].slice.call(q.querySelectorAll('label.opt')).forEach(function(l){
+        var inp = l.querySelector('input');
+        l.classList.remove('mark-ok','mark-no');
+        if(inp.value === certa) l.classList.add('mark-ok');
+        if(inp.checked && inp.value !== certa) l.classList.add('mark-no');
+        inp.disabled = true;
+      });
+
+      var ok = !!esc && esc.value === certa;
+      if(ok) acertos++;
+      q.classList.add(ok ? 'correct' : 'wrong');
+      q.querySelector('.fb').classList.add('show');
+
+      var b = document.createElement('b');
+      b.textContent = (i+1);
+      b.className = ok ? 'g-ok' : 'g-no';
+      b.addEventListener('click', function(){ irPara(i); });
+      grid.appendChild(b);
+    });
+
+    corrigido = true;
+    var nota = acertos * valor;
+    document.getElementById('imuq-nota').textContent =
+      nota.toFixed(1).replace('.', ',') + ' / 10,0';
+    document.getElementById('imuq-det').textContent =
+      acertos + ' de ' + total + ' questões corretas. Cada questão vale ' +
+      valor.toFixed(2).replace('.', ',') + ' ponto.';
+    painel.classList.add('show');
+
+    if(semResposta > 0){
+      warn.textContent = 'Atenção: ' + semResposta +
+        ' questão(ões) ficaram sem resposta e foram contadas como erro.';
+      warn.classList.add('show');
+    } else { warn.classList.remove('show'); }
+
+    render();
+    painel.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  prev.addEventListener('click', function(){ irPara(idx-1); });
+  next.addEventListener('click', function(){
+    if(idx < total-1){ irPara(idx+1); }
+    else if(!corrigido){ corrigir(); }
+    else { painel.scrollIntoView({behavior:'smooth', block:'center'}); }
+  });
+
+  document.getElementById('imuq-limpar').addEventListener('click', function(){
+    qs.forEach(function(q){
+      q.classList.remove('correct','wrong');
+      q.querySelector('.fb').classList.remove('show');
+      [].slice.call(q.querySelectorAll('label.opt')).forEach(function(l){
+        l.classList.remove('mark-ok','mark-no');
+        var inp = l.querySelector('input');
+        inp.disabled = false; inp.checked = false;
+      });
+    });
+    grid.innerHTML = '';
+    painel.classList.remove('show');
+    warn.classList.remove('show');
+    corrigido = false; idx = 0;
+    render();
+    root.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  render();
+})();
+</script>
+</div>
+
+</body>
+</html>
